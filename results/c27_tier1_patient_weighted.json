@@ -1,0 +1,101 @@
+{
+ "n_rows": 401059,
+ "n_patients": 1042,
+ "n_boot": 1000,
+ "note": "Tier-1 AIPW re-averaged with every patient given equal total weight, so that patients contributing many tiles do not dominate. Nuisance models, cross-fitting, dichotomisation and trimming are identical to the tile-weighted analysis; only the averaging weights differ.",
+ "concepts": {
+  "C_color": {
+   "column": "tbp_lv_norm_color",
+   "n": 267374,
+   "tile": {
+    "ate": 0.001117320174449575,
+    "ci": [
+     0.0007339289338905531,
+     0.001485265153773823
+    ],
+    "rr": 2.4707939816012634,
+    "rr_ci": [
+     1.8169184706811998,
+     3.4708307418464828
+    ]
+   },
+   "patient": {
+    "ate": 0.002972317537766955,
+    "ci": [
+     0.0009819269795149715,
+     0.006463790610917841
+    ],
+    "rr": 2.731290906337164,
+    "rr_ci": [
+     1.530693295401215,
+     7.300953942245199
+    ],
+    "e_value": 4.905838930341904,
+    "significant": true
+   },
+   "ratio_patient_to_tile": 2.6602200566468843
+  },
+  "D_size": {
+   "column": "tbp_lv_areaMM2",
+   "n": 267600,
+   "tile": {
+    "ate": 0.0010970903535636315,
+    "ci": [
+     0.0007629260523503669,
+     0.0014348700568648934
+    ],
+    "rr": 2.367501878574849,
+    "rr_ci": [
+     1.8177192775486066,
+     3.1815190648392715
+    ]
+   },
+   "patient": {
+    "ate": 0.0037225734163864317,
+    "ci": [
+     0.0012063483920622985,
+     0.007768429729921162
+    ],
+    "rr": 3.5724751704538775,
+    "rr_ci": [
+     2.0925546491245823,
+     7.702551797304775
+    ],
+    "e_value": 6.603993547943215,
+    "significant": true
+   },
+   "ratio_patient_to_tile": 3.393132939592948
+  },
+  "contrast_LB": {
+   "column": "tbp_lv_deltaLBnorm",
+   "n": 267374,
+   "tile": {
+    "ate": 0.0008285942084077611,
+    "ci": [
+     0.00044493822433706225,
+     0.0011956754227628943
+    ],
+    "rr": 2.0745617741834947,
+    "rr_ci": [
+     1.5438127846950347,
+     2.8847837075384786
+    ]
+   },
+   "patient": {
+    "ate": 0.0022283154642712415,
+    "ci": [
+     0.0002926707223595369,
+     0.005476702391549595
+    ],
+    "rr": 2.317606548221023,
+    "rr_ci": [
+     1.1253135919130453,
+     5.603566912416599
+    ],
+    "e_value": 4.065088612259433,
+    "significant": true
+   },
+   "ratio_patient_to_tile": 2.689272314071813
+  }
+ }
+}

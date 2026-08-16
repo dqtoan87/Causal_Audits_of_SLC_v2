@@ -1,0 +1,27 @@
+##### C30 audit trên fold tách bệnh nhân 05:26:06 #####
+AUDIT eval: 183 ảnh / 100 bệnh nhân (83 ác tính)
+================================================================================================
+backbone model subgroup     E|Δp| held-out                95% CI       vs 0.05
+b3       ERM   all                   0.118        [0.105, 0.132]    exceedance
+b3       ERM   malignant             0.140        [0.120, 0.167]    exceedance
+b3       ERM   benign                0.100        [0.086, 0.114]    exceedance
+b3       Slim  all                   0.243        [0.224, 0.261]    exceedance
+b3       Slim  malignant             0.279        [0.247, 0.309]    exceedance
+b3       Slim  benign                0.213        [0.196, 0.232]    exceedance
+b3       Inv   all                   0.081        [0.075, 0.087]    exceedance
+b3       Inv   malignant             0.083        [0.075, 0.091]    exceedance
+b3       Inv   benign                0.079        [0.071, 0.088]    exceedance
+------------------------------------------------------------------------------------------------
+r50      ERM   all                   0.311        [0.295, 0.326]    exceedance
+r50      ERM   malignant             0.317        [0.289, 0.338]    exceedance
+r50      ERM   benign                0.306        [0.289, 0.322]    exceedance
+r50      Slim  all                   0.041        [0.035, 0.048]   equivalence
+r50      Slim  malignant             0.041        [0.033, 0.052] indeterminate
+r50      Slim  benign                0.041        [0.034, 0.049]   equivalence
+r50      Inv   all                   0.123        [0.110, 0.137]    exceedance
+r50      Inv   malignant             0.119        [0.104, 0.137]    exceedance
+r50      Inv   benign                0.126        [0.108, 0.146]    exceedance
+------------------------------------------------------------------------------------------------
+  vượt dung sai 0.05: 15/18 ô
+================================================================================================
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/results/c30_disjoint_audit.json   (93s)

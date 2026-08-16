@@ -1,0 +1,53 @@
+[03:18:25] Load /mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv
+[03:19:02]   A_asymmetry     OR=0.848  strata=198  cases=271
+[03:31:55]       perm 50/200
+[03:54:44]       perm 100/200
+[04:25:40]       perm 150/200
+[05:01:49]       perm 200/200
+[05:01:49]       influence max Δlog OR = 0.0352 | perm p = 0.205 | null OR CI [0.764, 1.268]
+[05:02:21]   B_border        OR=1.094  strata=182  cases=254
+[05:27:53]       perm 50/200
+[05:39:15]       perm 100/200
+[05:49:34]       perm 150/200
+[05:59:53]       perm 200/200
+[05:59:53]       influence max Δlog OR = 0.0649 | perm p = 0.57 | null OR CI [0.776, 1.341]
+[06:00:10]   C_color         OR=2.937  strata=239  cases=349
+[06:15:06]       perm 50/200
+[06:29:47]       perm 100/200
+[06:44:32]       perm 150/200
+[06:59:11]       perm 200/200
+[06:59:11]       influence max Δlog OR = 0.0751 | perm p = 0.0 | null OR CI [0.803, 1.264]
+[06:59:27]   C_colorstd      OR=2.945  strata=238  cases=349
+[07:12:57]       perm 50/200
+[07:26:38]       perm 100/200
+[07:40:09]       perm 150/200
+[07:54:01]       perm 200/200
+[07:54:01]       influence max Δlog OR = 0.0623 | perm p = 0.0 | null OR CI [0.8, 1.22]
+[07:54:22]   D_size          OR=2.556  strata=248  cases=362
+[08:07:22]       perm 50/200
+[08:20:18]       perm 100/200
+[08:33:07]       perm 150/200
+[08:46:22]       perm 200/200
+[08:46:22]       influence max Δlog OR = 0.0540 | perm p = 0.0 | null OR CI [0.803, 1.221]
+[08:46:39]   contrast_LB     OR=2.915  strata=219  cases=299
+[09:00:30]       perm 50/200
+[09:14:14]       perm 100/200
+[09:28:07]       perm 150/200
+[09:42:12]       perm 200/200
+[09:42:12]       influence max Δlog OR = 0.0334 | perm p = 0.0 | null OR CI [0.774, 1.266]
+[09:42:29]   NEGCTRL_nevi    OR=0.462  strata=191  cases=267
+[09:54:42]       perm 50/200
+[10:06:35]       perm 100/200
+[10:18:53]       perm 150/200
+[10:31:14]       perm 200/200
+[10:31:14]       influence max Δlog OR = 0.0666 | perm p = 0.0 | null OR CI [0.755, 1.312]
+[10:31:14] saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/results/c43_within_patient_diagnostics.json  (25968.8s)
+
+concept               OR  strata  max Δlog OR   perm p            null OR CI
+A_asymmetry        0.848     198       0.0352    0.205        [0.764, 1.268]
+B_border           1.094     182       0.0649    0.570        [0.776, 1.341]
+C_color            2.937     239       0.0751    0.000        [0.803, 1.264]
+C_colorstd         2.945     238       0.0623    0.000        [0.800, 1.220]
+D_size             2.556     248       0.0540    0.000        [0.803, 1.221]
+contrast_LB        2.915     219       0.0334    0.000        [0.774, 1.266]
+NEGCTRL_nevi       0.462     191       0.0666    0.000        [0.755, 1.312]

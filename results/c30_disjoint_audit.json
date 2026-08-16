@@ -1,0 +1,226 @@
+{
+ "n_images": 183,
+ "n_patients": 100,
+ "n_malignant": 83,
+ "margin_p": 0.05,
+ "boot": 4000,
+ "change_frac": {
+  "hair_light": 0.010173696833739027,
+  "hair": 0.023561544227795522,
+  "hair_heavy": 0.040743250460898287,
+  "ruler": 0.010461753524351315,
+  "patch": 0.027283960953354836,
+  "vignette": 0.6759209790842129,
+  "jitter": 0.9560240852376802,
+  "identity": 0.0
+ },
+ "note": "Tier-2 artifact criterion measured on a patient-disjoint audit fold that was never used for training, checkpoint selection or calibration. Unlike the primary audit, these numbers are not post-selection.",
+ "models": {
+  "b3": {
+   "ERM": {
+    "all": {
+     "mean": 0.11822517216205597,
+     "ci": [
+      0.10462750494480133,
+      0.13219349086284637
+     ],
+     "verdict": "exceedance"
+    },
+    "malignant": {
+     "mean": 0.14031758904457092,
+     "ci": [
+      0.12039167433977127,
+      0.16660530865192413
+     ],
+     "verdict": "exceedance"
+    },
+    "benign": {
+     "mean": 0.09988845139741898,
+     "ci": [
+      0.08595099300146103,
+      0.11428557336330414
+     ],
+     "verdict": "exceedance"
+    },
+    "identity_max_abs_dlogit": 0.0,
+    "hair_dose_dp": [
+     -0.03981851786375046,
+     -0.12800586223602295,
+     -0.23065346479415894
+    ],
+    "p0_mean_malignant": 0.4634213149547577
+   },
+   "Slim": {
+    "all": {
+     "mean": 0.24305608868598938,
+     "ci": [
+      0.22444526851177216,
+      0.26137226819992065
+     ],
+     "verdict": "exceedance"
+    },
+    "malignant": {
+     "mean": 0.27885326743125916,
+     "ci": [
+      0.24661637842655182,
+      0.30929258465766907
+     ],
+     "verdict": "exceedance"
+    },
+    "benign": {
+     "mean": 0.21334439516067505,
+     "ci": [
+      0.19625307619571686,
+      0.2316286563873291
+     ],
+     "verdict": "exceedance"
+    },
+    "identity_max_abs_dlogit": 0.0,
+    "hair_dose_dp": [
+     -0.04717908054590225,
+     -0.254062294960022,
+     -0.6575791239738464
+    ],
+    "p0_mean_malignant": 0.8089626431465149
+   },
+   "Inv": {
+    "all": {
+     "mean": 0.08065571635961533,
+     "ci": [
+      0.07490885257720947,
+      0.08673493564128876
+     ],
+     "verdict": "exceedance"
+    },
+    "malignant": {
+     "mean": 0.08294683694839478,
+     "ci": [
+      0.07459865510463715,
+      0.09138453006744385
+     ],
+     "verdict": "exceedance"
+    },
+    "benign": {
+     "mean": 0.07875406742095947,
+     "ci": [
+      0.07088229060173035,
+      0.08753173798322678
+     ],
+     "verdict": "exceedance"
+    },
+    "identity_max_abs_dlogit": 0.0,
+    "hair_dose_dp": [
+     -0.03839303180575371,
+     -0.08215365558862686,
+     -0.08732680976390839
+    ],
+    "p0_mean_malignant": 0.616851270198822
+   }
+  },
+  "r50": {
+   "ERM": {
+    "all": {
+     "mean": 0.31055742502212524,
+     "ci": [
+      0.2948945164680481,
+      0.32582610845565796
+     ],
+     "verdict": "exceedance"
+    },
+    "malignant": {
+     "mean": 0.3165016770362854,
+     "ci": [
+      0.28892236948013306,
+      0.3377137780189514
+     ],
+     "verdict": "exceedance"
+    },
+    "benign": {
+     "mean": 0.3056236803531647,
+     "ci": [
+      0.2885158956050873,
+      0.3222314715385437
+     ],
+     "verdict": "exceedance"
+    },
+    "identity_max_abs_dlogit": 0.0,
+    "hair_dose_dp": [
+     -0.27545565366744995,
+     -0.3991717994213104,
+     -0.4377387762069702
+    ],
+    "p0_mean_malignant": 0.5135723352432251
+   },
+   "Slim": {
+    "all": {
+     "mean": 0.041192442178726196,
+     "ci": [
+      0.035483863204717636,
+      0.047779444605112076
+     ],
+     "verdict": "equivalence"
+    },
+    "malignant": {
+     "mean": 0.04095622897148132,
+     "ci": [
+      0.03265412151813507,
+      0.05176558718085289
+     ],
+     "verdict": "indeterminate"
+    },
+    "benign": {
+     "mean": 0.04138850048184395,
+     "ci": [
+      0.03426392748951912,
+      0.048937369138002396
+     ],
+     "verdict": "equivalence"
+    },
+    "identity_max_abs_dlogit": 0.0,
+    "hair_dose_dp": [
+     0.006301058456301689,
+     0.019911592826247215,
+     0.0217690821737051
+    ],
+    "p0_mean_malignant": 0.397664874792099
+   },
+   "Inv": {
+    "all": {
+     "mean": 0.12301301211118698,
+     "ci": [
+      0.11042816191911697,
+      0.13664619624614716
+     ],
+     "verdict": "exceedance"
+    },
+    "malignant": {
+     "mean": 0.11902559548616409,
+     "ci": [
+      0.10408144444227219,
+      0.13692151010036469
+     ],
+     "verdict": "exceedance"
+    },
+    "benign": {
+     "mean": 0.12632255256175995,
+     "ci": [
+      0.1081051453948021,
+      0.14560723304748535
+     ],
+     "verdict": "exceedance"
+    },
+    "identity_max_abs_dlogit": 0.0,
+    "hair_dose_dp": [
+     -0.07494790852069855,
+     -0.14376585185527802,
+     -0.1834007203578949
+    ],
+    "p0_mean_malignant": 0.5132455825805664
+   }
+  }
+ },
+ "summary": {
+  "cells": 18,
+  "exceedance": 15
+ }
+}

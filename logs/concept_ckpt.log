@@ -1,0 +1,24 @@
+### bắt đầu 14:14:25
+### [14:14:25] c12_matched_control
+### [14:18:47] c12_matched_control rc=0
+### [14:18:47] c44_cache_preds
+### [14:19:31] c44_cache_preds rc=0
+### [14:19:31] c19_saturation_mde
+### [14:20:15] c19_saturation_mde rc=0
+### [14:20:15] c13_fullpop
+### [14:21:30] c13_fullpop rc=0
+### [14:21:30] c34_ctrl_vs_ctrl
+### [14:22:20] c34_ctrl_vs_ctrl rc=0
+### [14:22:20] c38_shrinkage_sensitivity
+### [14:22:59] c38_shrinkage_sensitivity rc=0
+### [14:22:59] c25_screen_full_sample
+### [14:29:40] c25_screen_full_sample rc=0
+### [14:29:40] c26_hair_dose_prob
+### [14:29:52] c26_hair_dose_prob rc=0
+### [14:29:52] c32_absdp_patient_ci
+### [14:30:08] c32_absdp_patient_ci rc=0
+### [14:30:08] c45_partial_id
+### [14:30:15] c45_partial_id rc=0
+### [14:30:15] c20_numerical_repro
+### [14:31:16] c20_numerical_repro rc=0
+### HOÀN TẤT 14:31:16

@@ -1,0 +1,7 @@
+##### C44 cache dự đoán 14:18:51 #####
+  183 ảnh / 100 bệnh nhân / 83 ác tính
+  18 edit mỗi ảnh (20s)
+  [erm] p0 trung bình 0.462  (27s)
+  [slim] p0 trung bình 0.575  (33s)
+  [causal] p0 trung bình 0.417  (39s)
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/results/c19_preds.npz  (39s)

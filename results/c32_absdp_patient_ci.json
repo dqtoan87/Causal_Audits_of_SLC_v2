@@ -1,0 +1,125 @@
+{
+ "n_images": 183,
+ "n_patients": 89,
+ "n_malignant": 83,
+ "margin_p": 0.05,
+ "boot": 20000,
+ "note": "Mean absolute probability shift over the four held-out artifact edits. The four edits are averaged within an image first, then patients are the resampling unit, so neither edits of one image nor images of one patient are treated as independent.",
+ "cells": {
+  "ERM": {
+   "all": {
+    "mean": 0.3700009230585819,
+    "ci": [
+     0.32129954819003953,
+     0.416721171587278
+    ],
+    "n": 183,
+    "verdict": "exceedance"
+   },
+   "malignant": {
+    "mean": 0.5572316826439281,
+    "ci": [
+     0.5079140441570205,
+     0.6013810030892879
+    ],
+    "n": 83,
+    "verdict": "exceedance"
+   },
+   "benign": {
+    "mean": 0.21459939260274458,
+    "ci": [
+     0.1877820362744079,
+     0.24340037258988045
+    ],
+    "n": 100,
+    "verdict": "exceedance"
+   }
+  },
+  "Slim": {
+   "all": {
+    "mean": 0.5251315613392092,
+    "ci": [
+     0.47846703888257247,
+     0.5673618904569762
+    ],
+    "n": 183,
+    "verdict": "exceedance"
+   },
+   "malignant": {
+    "mean": 0.7183017384664157,
+    "ci": [
+     0.6763758181195164,
+     0.7653075780709011
+    ],
+    "n": 83,
+    "verdict": "exceedance"
+   },
+   "benign": {
+    "mean": 0.3648003143236281,
+    "ci": [
+     0.32858194425819837,
+     0.4028227408510738
+    ],
+    "n": 100,
+    "verdict": "exceedance"
+   }
+  },
+  "Inv": {
+   "all": {
+    "mean": 0.15576100911666935,
+    "ci": [
+     0.14259006967602803,
+     0.16898439275012098
+    ],
+    "n": 183,
+    "verdict": "exceedance"
+   },
+   "malignant": {
+    "mean": 0.1802424045202058,
+    "ci": [
+     0.15859599353264006,
+     0.2058080706454859
+    ],
+    "n": 83,
+    "verdict": "exceedance"
+   },
+   "benign": {
+    "mean": 0.1354414509317341,
+    "ci": [
+     0.12434527292593364,
+     0.1464811601890671
+    ],
+    "n": 100,
+    "verdict": "exceedance"
+   }
+  }
+ },
+ "summary": {
+  "n_cells": 9,
+  "exceedance": 9,
+  "min_lower_bound": 0.12434527292593364,
+  "max_mean": 0.7183017384664157,
+  "by_margin": {
+   "0.01": {
+    "exceedance": 9,
+    "equivalence": 0,
+    "indeterminate": 0
+   },
+   "0.025": {
+    "exceedance": 9,
+    "equivalence": 0,
+    "indeterminate": 0
+   },
+   "0.05": {
+    "exceedance": 9,
+    "equivalence": 0,
+    "indeterminate": 0
+   },
+   "0.1": {
+    "exceedance": 9,
+    "equivalence": 0,
+    "indeterminate": 0
+   }
+  }
+ }
+}

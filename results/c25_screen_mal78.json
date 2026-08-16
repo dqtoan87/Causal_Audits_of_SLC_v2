@@ -1,0 +1,610 @@
+{
+ "subset": "mal",
+ "n_images": 78,
+ "design": {
+  "contrast@2": {
+   "rotd": {
+    "max_abs_smd": 0.042878076099540294,
+    "proxy_shift": 0.6690658519660528,
+    "proxy_ratio": 0.9264748342138175,
+    "positivity": 1.0
+   },
+   "sgnd": {
+    "max_abs_smd": 1.3528490815625345,
+    "proxy_shift": 0.418674436328951,
+    "proxy_ratio": 0.5797505998065932,
+    "positivity": 1.0
+   },
+   "permd": {
+    "max_abs_smd": 2.169484242940834,
+    "proxy_shift": 0.4285902774855238,
+    "proxy_ratio": 0.5934813518164752,
+    "positivity": 1.0
+   },
+   "hybrid_m": {
+    "max_abs_smd": 0.8485314028620679,
+    "proxy_shift": 0.11228651157767273,
+    "proxy_ratio": 0.15548637984239938,
+    "positivity": 1.0
+   },
+   "texswap_m": {
+    "max_abs_smd": 2.5270883414105416,
+    "proxy_shift": 0.04136902874274676,
+    "proxy_ratio": 0.05728489046840133,
+    "positivity": 0.0
+   },
+   "globrot_m": {
+    "max_abs_smd": 2.018183790209075,
+    "proxy_shift": 0.011973575846409758,
+    "proxy_ratio": 0.016580156743393176,
+    "positivity": 1.0
+   },
+   "warp2_m": {
+    "max_abs_smd": 0.8865502923220595,
+    "proxy_shift": 0.22398684539363523,
+    "proxy_ratio": 0.31016106238623764,
+    "positivity": 0.6410256410256411
+   },
+   "pixperm_m": {
+    "max_abs_smd": 1.465227517177467,
+    "proxy_shift": 6.305863134330118e-07,
+    "proxy_ratio": 8.731911044011768e-07,
+    "positivity": 0.9102564102564102
+   },
+   "warp_m": {
+    "max_abs_smd": 1.0206211944914647,
+    "proxy_shift": 0.1712533771816076,
+    "proxy_ratio": 0.2371395039317243,
+    "positivity": 0.48717948717948717
+   },
+   "hue_m": {
+    "max_abs_smd": 1.9906865249492582,
+    "proxy_shift": 0.07243859512990868,
+    "proxy_ratio": 0.10030781755854602,
+    "positivity": 0.01282051282051282
+   },
+   "rotax_m": {
+    "max_abs_smd": 1.5120247397007265,
+    "proxy_shift": 0.114472546394128,
+    "proxy_ratio": 0.15851344547160412,
+    "positivity": 1.0
+   },
+   "flip_m": {
+    "max_abs_smd": 0.7572612370960734,
+    "proxy_shift": 0.20738242781668084,
+    "proxy_ratio": 0.28716844517730206,
+    "positivity": 0.3076923076923077
+   },
+   "jitter_m": {
+    "max_abs_smd": 0.8484132585171891,
+    "proxy_shift": 0.140695543278466,
+    "proxy_ratio": 0.1948251876112092,
+    "positivity": 0.0
+   },
+   "noise_m": {
+    "max_abs_smd": 1.2940244805594718,
+    "proxy_shift": 0.15691183432708658,
+    "proxy_ratio": 0.21728035479196686,
+    "positivity": 1.0
+   },
+   "invdose": {
+    "max_abs_smd": 0.3935141378323405,
+    "proxy_shift": 0.7932366689775677,
+    "proxy_ratio": 1.098417755477679,
+    "positivity": 1.0
+   },
+   "u:hue": {
+    "max_abs_smd": 2.0195735174907012,
+    "proxy_shift": 0.0623899971702523,
+    "proxy_ratio": 0.08639323336418438,
+    "positivity": 1.0
+   },
+   "u:flip": {
+    "max_abs_smd": 0.7572611931586709,
+    "proxy_shift": 0.20180855705345352,
+    "proxy_ratio": 0.2794501451383512,
+    "positivity": 1.0
+   },
+   "u:jitter": {
+    "max_abs_smd": 1.129779148075157,
+    "proxy_shift": 0.10198653775315393,
+    "proxy_ratio": 0.1412237082183185,
+    "positivity": 1.0
+   },
+   "u:noise": {
+    "max_abs_smd": 1.7763247515877136,
+    "proxy_shift": 0.05487791452989348,
+    "proxy_ratio": 0.07599103528700608,
+    "positivity": 1.0
+   },
+   "_concept_proxy_shift": 0.7221630067629465
+  },
+  "color_var@2": {
+   "rotd": {
+    "max_abs_smd": 0.05100557496513137,
+    "proxy_shift": 0.43214523568692387,
+    "proxy_ratio": 0.959210617162603,
+    "positivity": 1.0
+   },
+   "sgnd": {
+    "max_abs_smd": 1.4590657593585674,
+    "proxy_shift": 0.2846085231950096,
+    "proxy_ratio": 0.6317309428383981,
+    "positivity": 1.0
+   },
+   "permd": {
+    "max_abs_smd": 1.7729190572868587,
+    "proxy_shift": 0.20354602098046629,
+    "proxy_ratio": 0.45180066394880547,
+    "positivity": 1.0
+   },
+   "hybrid_m": {
+    "max_abs_smd": 0.9211986244859353,
+    "proxy_shift": 0.10766768364011495,
+    "proxy_ratio": 0.2389844356579298,
+    "positivity": 1.0
+   },
+   "texswap_m": {
+    "max_abs_smd": 2.5230435904839528,
+    "proxy_shift": 0.04136902874274676,
+    "proxy_ratio": 0.09182471149698318,
+    "positivity": 0.0
+   },
+   "globrot_m": {
+    "max_abs_smd": 2.1066188152675567,
+    "proxy_shift": 0.010602968808531713,
+    "proxy_ratio": 0.023534866092925617,
+    "positivity": 1.0
+   },
+   "warp2_m": {
+    "max_abs_smd": 0.7760350259745388,
+    "proxy_shift": 0.21608084884541945,
+    "proxy_ratio": 0.47962357851422116,
+    "positivity": 0.8717948717948718
+   },
+   "pixperm_m": {
+    "max_abs_smd": 1.5784830008342405,
+    "proxy_shift": 6.474793184795183e-07,
+    "proxy_ratio": 1.437176637367133e-06,
+    "positivity": 1.0
+   },
+   "warp_m": {
+    "max_abs_smd": 0.9818870871975045,
+    "proxy_shift": 0.16823107298618029,
+    "proxy_ratio": 0.3734138850067247,
+    "positivity": 0.6666666666666666
+   },
+   "hue_m": {
+    "max_abs_smd": 2.058737001709678,
+    "proxy_shift": 0.07241914477248643,
+    "proxy_ratio": 0.16074506164851032,
+    "positivity": 0.01282051282051282
+   },
+   "rotax_m": {
+    "max_abs_smd": 1.6472671150856792,
+    "proxy_shift": 0.10710185924531543,
+    "proxy_ratio": 0.23772850426699688,
+    "positivity": 1.0
+   },
+   "flip_m": {
+    "max_abs_smd": 0.4000243453931712,
+    "proxy_shift": 0.20748604604606863,
+    "proxy_ratio": 0.46054613552343726,
+    "positivity": 0.44871794871794873
+   },
+   "jitter_m": {
+    "max_abs_smd": 0.772017555003624,
+    "proxy_shift": 0.1406933586597873,
+    "proxy_ratio": 0.3122898327832186,
+    "positivity": 0.01282051282051282
+   },
+   "noise_m": {
+    "max_abs_smd": 1.404267011009604,
+    "proxy_shift": 0.1293735341626384,
+    "proxy_ratio": 0.28716379888208604,
+    "positivity": 1.0
+   },
+   "invdose": {
+    "max_abs_smd": 0.38450353668726256,
+    "proxy_shift": 0.5088196424998005,
+    "proxy_ratio": 1.1294008657318095,
+    "positivity": 1.0
+   },
+   "u:hue": {
+    "max_abs_smd": 2.0880885279515624,
+    "proxy_shift": 0.0623899971702523,
+    "proxy_ratio": 0.13848387705888482,
+    "positivity": 1.0
+   },
+   "u:flip": {
+    "max_abs_smd": 0.30180402186542993,
+    "proxy_shift": 0.20180855705345352,
+    "proxy_ratio": 0.4479441043755441,
+    "positivity": 1.0
+   },
+   "u:jitter": {
+    "max_abs_smd": 1.1995062412868036,
+    "proxy_shift": 0.10198653775315393,
+    "proxy_ratio": 0.22637428748920024,
+    "positivity": 1.0
+   },
+   "u:noise": {
+    "max_abs_smd": 1.762656919647612,
+    "proxy_shift": 0.05487791452989348,
+    "proxy_ratio": 0.1218096924779044,
+    "positivity": 1.0
+   },
+   "_concept_proxy_shift": 0.45052173939153517
+  },
+  "contrast@0": {
+   "rotd": {
+    "max_abs_smd": 0.03172911356961575,
+    "proxy_shift": 0.22516154867505483,
+    "proxy_ratio": 0.9355712413368223,
+    "positivity": 1.0
+   },
+   "sgnd": {
+    "max_abs_smd": 1.307986484510833,
+    "proxy_shift": 0.038588171333726703,
+    "proxy_ratio": 0.1603381375197138,
+    "positivity": 1.0
+   },
+   "permd": {
+    "max_abs_smd": 2.1849122115016257,
+    "proxy_shift": 0.09161423899614975,
+    "proxy_ratio": 0.3806673377675695,
+    "positivity": 1.0
+   },
+   "hybrid_m": {
+    "max_abs_smd": 0.8361031975056675,
+    "proxy_shift": 0.047478562495025224,
+    "proxy_ratio": 0.19727870016768895,
+    "positivity": 1.0
+   },
+   "texswap_m": {
+    "max_abs_smd": 1.0455779249669044,
+    "proxy_shift": 0.04146731298796444,
+    "proxy_ratio": 0.17230129085246654,
+    "positivity": 0.01282051282051282
+   },
+   "globrot_m": {
+    "max_abs_smd": 2.0062542198725106,
+    "proxy_shift": 0.0034723259888110357,
+    "proxy_ratio": 0.014427900122353156,
+    "positivity": 1.0
+   },
+   "warp2_m": {
+    "max_abs_smd": 1.214216182564343,
+    "proxy_shift": 0.07965734241677061,
+    "proxy_ratio": 0.33098510453932967,
+    "positivity": 1.0
+   },
+   "pixperm_m": {
+    "max_abs_smd": 1.46313172356487,
+    "proxy_shift": 6.094410367074771e-07,
+    "proxy_ratio": 2.532295192448118e-06,
+    "positivity": 0.9871794871794872
+   },
+   "warp_m": {
+    "max_abs_smd": 1.1981906636958617,
+    "proxy_shift": 0.08618956309601784,
+    "proxy_ratio": 0.3581272069343931,
+    "positivity": 1.0
+   },
+   "hue_m": {
+    "max_abs_smd": 1.8187819827265026,
+    "proxy_shift": 0.033942935127533214,
+    "proxy_ratio": 0.14103666517994448,
+    "positivity": 0.8205128205128205
+   },
+   "rotax_m": {
+    "max_abs_smd": 1.7209036141158736,
+    "proxy_shift": 0.024406253541972057,
+    "proxy_ratio": 0.10141069404171194,
+    "positivity": 1.0
+   },
+   "flip_m": {
+    "max_abs_smd": 0.7817947851398295,
+    "proxy_shift": 0.10603310001276106,
+    "proxy_ratio": 0.4405793066599236,
+    "positivity": 0.9615384615384616
+   },
+   "jitter_m": {
+    "max_abs_smd": 0.695279390542392,
+    "proxy_shift": 0.0918299807968696,
+    "proxy_ratio": 0.38156376890998894,
+    "positivity": 0.9358974358974359
+   },
+   "noise_m": {
+    "max_abs_smd": 1.129281684549956,
+    "proxy_shift": 0.017431627286654407,
+    "proxy_ratio": 0.07243034734421719,
+    "positivity": 1.0
+   },
+   "invdose": {
+    "max_abs_smd": 0.03591833663167149,
+    "proxy_shift": 0.27068254727526364,
+    "proxy_ratio": 1.1247160461131955,
+    "positivity": 1.0
+   },
+   "u:hue": {
+    "max_abs_smd": 1.7226086072874653,
+    "proxy_shift": 0.0623899971702523,
+    "proxy_ratio": 0.2592373673171511,
+    "positivity": 1.0
+   },
+   "u:flip": {
+    "max_abs_smd": 1.258496131680405,
+    "proxy_shift": 0.20180855705345352,
+    "proxy_ratio": 0.8385369675502231,
+    "positivity": 1.0
+   },
+   "u:jitter": {
+    "max_abs_smd": 1.1123612588361818,
+    "proxy_shift": 0.10198653775315393,
+    "proxy_ratio": 0.42376539105734895,
+    "positivity": 1.0
+   },
+   "u:noise": {
+    "max_abs_smd": 2.729557839368229,
+    "proxy_shift": 0.05487791452989348,
+    "proxy_ratio": 0.2280238296495452,
+    "positivity": 1.0
+   },
+   "_concept_proxy_shift": 0.24066745398600026
+  },
+  "color_var@0": {
+   "rotd": {
+    "max_abs_smd": 0.03281153916676528,
+    "proxy_shift": 0.13757371110293784,
+    "proxy_ratio": 0.9577278157265846,
+    "positivity": 1.0
+   },
+   "sgnd": {
+    "max_abs_smd": 1.435937189824275,
+    "proxy_shift": 0.031995921692637465,
+    "proxy_ratio": 0.22274156849574253,
+    "positivity": 1.0
+   },
+   "permd": {
+    "max_abs_smd": 1.8081149529843694,
+    "proxy_shift": 0.027496468198941477,
+    "proxy_ratio": 0.19141834742441108,
+    "positivity": 1.0
+   },
+   "hybrid_m": {
+    "max_abs_smd": 0.9316884004026474,
+    "proxy_shift": 0.04647658508373275,
+    "proxy_ratio": 0.32354959358019086,
+    "positivity": 1.0
+   },
+   "texswap_m": {
+    "max_abs_smd": 0.9767111498965051,
+    "proxy_shift": 0.04143338380098343,
+    "proxy_ratio": 0.28844103897281376,
+    "positivity": 0.038461538461538464
+   },
+   "globrot_m": {
+    "max_abs_smd": 2.0855924738028397,
+    "proxy_shift": 0.0024932405605665895,
+    "proxy_ratio": 0.017356846864192598,
+    "positivity": 1.0
+   },
+   "warp2_m": {
+    "max_abs_smd": 1.0847445613606699,
+    "proxy_shift": 0.07523000989260371,
+    "proxy_ratio": 0.5237183214285923,
+    "positivity": 1.0
+   },
+   "pixperm_m": {
+    "max_abs_smd": 1.644560457152879,
+    "proxy_shift": 4.869601001265298e-07,
+    "proxy_ratio": 3.3900025615447765e-06,
+    "positivity": 1.0
+   },
+   "warp_m": {
+    "max_abs_smd": 1.184113706215199,
+    "proxy_shift": 0.08243297785911557,
+    "proxy_ratio": 0.573862224082743,
+    "positivity": 1.0
+   },
+   "hue_m": {
+    "max_abs_smd": 1.9214949838059068,
+    "proxy_shift": 0.032142501153835476,
+    "proxy_ratio": 0.22376199039232503,
+    "positivity": 0.8717948717948718
+   },
+   "rotax_m": {
+    "max_abs_smd": 1.8226693344864187,
+    "proxy_shift": 0.023065293637274806,
+    "proxy_ratio": 0.160570454320235,
+    "positivity": 1.0
+   },
+   "flip_m": {
+    "max_abs_smd": 0.21114178804756986,
+    "proxy_shift": 0.09991105216078462,
+    "proxy_ratio": 0.6955369088015373,
+    "positivity": 0.9871794871794872
+   },
+   "jitter_m": {
+    "max_abs_smd": 0.6036806799894847,
+    "proxy_shift": 0.08993456654502009,
+    "proxy_ratio": 0.6260849931643657,
+    "positivity": 1.0
+   },
+   "noise_m": {
+    "max_abs_smd": 1.229882583964876,
+    "proxy_shift": 0.013266308424013653,
+    "proxy_ratio": 0.09235421860633708,
+    "positivity": 1.0
+   },
+   "invdose": {
+    "max_abs_smd": 0.0412988790210344,
+    "proxy_shift": 0.16509329684132407,
+    "proxy_ratio": 1.1493070973177044,
+    "positivity": 1.0
+   },
+   "u:hue": {
+    "max_abs_smd": 1.779027839590335,
+    "proxy_shift": 0.0623899971702523,
+    "proxy_ratio": 0.43433178645841974,
+    "positivity": 1.0
+   },
+   "u:flip": {
+    "max_abs_smd": 1.2984998578662779,
+    "proxy_shift": 0.20180855705345352,
+    "proxy_ratio": 1.404902629959006,
+    "positivity": 1.0
+   },
+   "u:jitter": {
+    "max_abs_smd": 1.1014310530676992,
+    "proxy_shift": 0.10198653775315393,
+    "proxy_ratio": 0.7099855288686702,
+    "positivity": 1.0
+   },
+   "u:noise": {
+    "max_abs_smd": 2.7243422133134647,
+    "proxy_shift": 0.05487791452989348,
+    "proxy_ratio": 0.38203596307014737,
+    "positivity": 1.0
+   },
+   "_concept_proxy_shift": 0.14364593869351797
+  }
+ },
+ "schemes": {
+  "strict": {
+   "tol": [
+    0.05,
+    0.05,
+    0.1,
+    0.95
+   ],
+   "per_target": {
+    "contrast@2": {
+     "balanced": 1,
+     "neutral": 3,
+     "valid": 0
+    },
+    "color_var@2": {
+     "balanced": 0,
+     "neutral": 3,
+     "valid": 0
+    },
+    "contrast@0": {
+     "balanced": 2,
+     "neutral": 3,
+     "valid": 0
+    },
+    "color_var@0": {
+     "balanced": 2,
+     "neutral": 3,
+     "valid": 0
+    }
+   },
+   "valid_total": 0,
+   "valid_max": 0
+  },
+  "main": {
+   "tol": [
+    0.1,
+    0.1,
+    0.15,
+    0.95
+   ],
+   "per_target": {
+    "contrast@2": {
+     "balanced": 1,
+     "neutral": 6,
+     "valid": 0
+    },
+    "color_var@2": {
+     "balanced": 1,
+     "neutral": 5,
+     "valid": 0
+    },
+    "contrast@0": {
+     "balanced": 2,
+     "neutral": 5,
+     "valid": 0
+    },
+    "color_var@0": {
+     "balanced": 2,
+     "neutral": 3,
+     "valid": 0
+    }
+   },
+   "valid_total": 0,
+   "valid_max": 0
+  },
+  "relaxed": {
+   "tol": [
+    0.2,
+    0.2,
+    0.3,
+    0.9
+   ],
+   "per_target": {
+    "contrast@2": {
+     "balanced": 1,
+     "neutral": 12,
+     "valid": 0
+    },
+    "color_var@2": {
+     "balanced": 1,
+     "neutral": 10,
+     "valid": 0
+    },
+    "contrast@0": {
+     "balanced": 2,
+     "neutral": 10,
+     "valid": 0
+    },
+    "color_var@0": {
+     "balanced": 2,
+     "neutral": 8,
+     "valid": 0
+    }
+   },
+   "valid_total": 0,
+   "valid_max": 0
+  },
+  "very relaxed": {
+   "tol": [
+    0.3,
+    0.3,
+    0.5,
+    0.85
+   ],
+   "per_target": {
+    "contrast@2": {
+     "balanced": 1,
+     "neutral": 15,
+     "valid": 0
+    },
+    "color_var@2": {
+     "balanced": 1,
+     "neutral": 16,
+     "valid": 0
+    },
+    "contrast@0": {
+     "balanced": 2,
+     "neutral": 16,
+     "valid": 0
+    },
+    "color_var@0": {
+     "balanced": 3,
+     "neutral": 11,
+     "valid": 0
+    }
+   },
+   "valid_total": 0,
+   "valid_max": 0
+  }
+ },
+ "spearman": {
+  "contrast@2": -0.6070175438596491,
+  "color_var@2": -0.7421052631578947,
+  "contrast@0": -0.5473684210526316,
+  "color_var@0": -0.6350877192982456
+ }
+}

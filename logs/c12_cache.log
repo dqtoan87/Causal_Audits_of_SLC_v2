@@ -1,0 +1,178 @@
+##### C12 matched-control 11:46:15 #####
+malignant 83  device=cuda
+   ... 10/83 images (27s)
+   ... 20/83 images (53s)
+   ... 30/83 images (77s)
+   ... 40/83 images (100s)
+   ... 50/83 images (123s)
+   ... 60/83 images (146s)
+   ... 70/83 images (170s)
+   ... 80/83 images (194s)
+built 88 edits/image in 201s
+[erm] p_full=0.850  (211s)
+[slim] p_full=0.884  (221s)
+[causal] p_full=0.900  (232s)
+  lưu phản hồi từng ảnh -> c12_preds.npz (88 edit)
+common set n=79
+
+======================================================================================================================
+A) FOOTPRINT & VALIDITY (thuộc tính THIẾT KẾ, không phụ thuộc model) — target = contrast@2
+control     altered-pixel  mean |Δ| pixe       LAB ΔE76  spatial suppo  lesion covera  high-freq (te    IoU  maxSMD  proxyΔ  ratio  overlap  VALID
+CONCEPT            0.4283         0.0507         3.5145         0.3403         0.7056         0.0070   1.00       —     78%   1.00        —  (ref)
+rotd               0.4281         0.0494         3.4346         0.3419         0.7005         0.0068   1.00    0.06     75%   0.96     100%      —
+sgnd               0.4283         0.0507         3.5026         0.3403         0.7056         0.0433   1.00    1.53     47%   0.60     100%      —
+permd              0.4282         0.0507         3.4839         0.4070         0.3607         0.0478   0.30    2.60     46%   0.59     100%      —
+hybrid_m           0.4272         0.0507         6.7164         0.3441         0.7052         0.0039   0.92    1.13     22%   0.28     100%      —
+texswap_m          0.0716         0.0066         0.4579         0.3881         0.5708         0.0037   0.15    2.81      4%   0.05       0%      —
+globrot_m          0.6248         0.0507         7.5929         0.3716         0.5712         0.0002   0.67    2.66      1%   0.01     100%      —
+warp2_m            0.4472         0.0457         3.0752         0.3568         0.6374         0.0128   0.61    1.08     31%   0.39      70%      —
+pixperm_m          0.2639         0.0495         3.4637         0.3753         0.5890         0.0500   0.38    1.77      0%   0.00      92%      —
+warp_m             0.4291         0.0427         2.8670         0.3530         0.6464         0.0153   0.62    1.24     26%   0.33      47%      —
+hue_m              0.2458         0.0206         3.3416         0.3392         0.6370         0.0005   0.50    2.58      8%   0.10       0%      —
+rotax_m            0.4232         0.0507         6.8378         0.3391         0.7117         0.0019   0.97    1.95     21%   0.27     100%      —
+flip_m             0.4133         0.0420         2.9339         0.3775         0.6187         0.0055   0.64    0.70     47%   0.61      45%      —
+jitter_m           0.3301         0.0280         1.8799         0.3697         0.6174         0.0059   0.57    0.90     15%   0.20       1%      —
+noise_m            0.6185         0.0507         7.1672         0.3802         0.5337         0.0417   0.61    1.45     20%   0.26     100%      —
+invdose            0.4239         0.0507         3.4591         0.3385         0.7117         0.0053   0.98    0.55     88%   1.13     100%      —
+u:hue              0.2197         0.0179         3.1175         0.3391         0.6372         0.0004   0.45    2.62      7%   0.09     100%      —
+u:flip             0.4271         0.0474         3.2859         0.3775         0.6187         0.0058   0.65    0.70     46%   0.59     100%      —
+u:jitter           0.2632         0.0213         1.3996         0.3709         0.6066         0.0056   0.48    1.20      9%   0.12     100%      —
+u:noise            0.4703         0.0278         3.9812         0.3801         0.5344         0.0207   0.69    2.06      7%   0.09     100%      —
+----------------------------------------------------------------------------------------------------------------------
+B) ΔCaCE = CaCE_concept − CaCE_control  (logit; [] = 95% CI; * = CI loại 0)
+  target contrast@2:
+    control     valid                       ERM                      Slim                       Inv
+    rotd            .       +0.81[+0.64,+1.00]*       +0.99[+0.76,+1.23]*       +3.18[+2.60,+3.82]*
+    sgnd            .       +5.22[+2.61,+7.86]*    +15.18[+13.79,+16.30]*    +18.31[+17.75,+18.83]*
+    permd           .       +3.11[+1.97,+4.23]*       +3.37[+2.66,+4.22]*       +7.34[+5.42,+9.30]*
+    hybrid_m        .       +0.75[+0.49,+1.00]*       +1.13[+0.88,+1.38]*       +3.91[+3.12,+4.66]*
+    texswap_m       .       +0.13[-0.08,+0.33]        +0.07[-0.16,+0.28]        -0.18[-0.65,+0.29] 
+    globrot_m       .       +0.71[+0.49,+0.93]*       +0.64[+0.25,+0.94]*       +3.62[+2.91,+4.27]*
+    warp2_m         .       +5.02[+2.72,+7.34]*    +14.01[+12.45,+15.48]*     +10.17[+8.51,+11.81]*
+    pixperm_m       .       +4.08[+2.24,+5.94]*     +10.97[+9.40,+12.50]*     +11.08[+9.20,+12.98]*
+    warp_m          .       +5.88[+3.35,+8.44]*    +14.96[+13.59,+16.14]*    +13.55[+12.07,+15.02]*
+    hue_m           .       +1.06[+0.81,+1.32]*       +1.32[+1.07,+1.56]*       +3.41[+2.67,+4.17]*
+    rotax_m         .       +0.65[+0.43,+0.87]*       +0.95[+0.70,+1.22]*       +3.80[+3.07,+4.47]*
+    flip_m          .       +0.59[+0.39,+0.78]*       +0.61[+0.40,+0.84]*       +2.48[+1.73,+3.26]*
+    jitter_m        .       +0.41[+0.22,+0.60]*       +0.31[+0.12,+0.52]*       +1.35[+0.75,+1.92]*
+    noise_m         .       +2.67[+2.41,+2.90]*       +3.57[+2.72,+4.56]*       +3.28[+2.55,+3.95]*
+    invdose         .       +0.95[+0.74,+1.18]*       +1.94[+1.58,+2.39]*       +3.82[+3.17,+4.46]*
+    u:hue           .       +1.03[+0.79,+1.29]*       +1.26[+1.00,+1.51]*       +3.72[+3.02,+4.46]*
+    u:flip          .       +0.59[+0.39,+0.79]*       +0.59[+0.37,+0.82]*       +2.58[+1.80,+3.37]*
+    u:jitter        .       +0.43[+0.23,+0.65]*       +0.39[+0.18,+0.61]*       +1.04[+0.49,+1.59]*
+    u:noise         .       +2.67[+2.41,+2.93]*       +2.42[+2.04,+2.87]*       +4.87[+4.16,+5.56]*
+    ----------------------------------------------------------------------------------------------------
+    spread ERM   unmatched SD=1.02 range=2.24  |  matched-VALID SD=n/a range=n/a (n=0)  sign-consistent=no
+    spread Slim  unmatched SD=0.92 range=2.03  |  matched-VALID SD=n/a range=n/a (n=0)  sign-consistent=no
+    spread Inv   unmatched SD=1.63 range=3.82  |  matched-VALID SD=n/a range=n/a (n=0)  sign-consistent=no
+  target color_var@2:
+    control     valid                       ERM                      Slim                       Inv
+    rotd            .       +0.71[+0.55,+0.88]*       +0.74[+0.54,+0.96]*       +2.58[+2.03,+3.17]*
+    sgnd            .       +5.12[+2.65,+7.70]*    +15.00[+13.68,+16.05]*    +17.07[+16.13,+17.92]*
+    permd           .       +2.51[+1.44,+3.65]*       +3.23[+2.54,+4.03]*       +5.80[+4.05,+7.75]*
+    hybrid_m        .       +0.64[+0.40,+0.87]*       +1.06[+0.79,+1.32]*       +3.53[+2.67,+4.36]*
+    texswap_m       .       +0.07[-0.11,+0.27]        +0.12[-0.09,+0.31]        -0.56[-0.98,-0.10]*
+    globrot_m       .       +0.64[+0.44,+0.84]*       +0.93[+0.55,+1.46]*       +2.97[+2.26,+3.68]*
+    warp2_m         .       +4.30[+2.04,+6.48]*    +13.43[+11.73,+14.94]*      +8.59[+6.97,+10.23]*
+    pixperm_m       .       +3.45[+1.60,+5.15]*     +10.91[+9.32,+12.51]*      +9.69[+7.97,+11.55]*
+    warp_m          .       +6.99[+4.52,+9.35]*    +13.97[+12.32,+15.46]*    +12.62[+11.07,+14.22]*
+    hue_m           .       +1.01[+0.77,+1.24]*       +1.37[+1.13,+1.59]*       +3.03[+2.25,+3.81]*
+    rotax_m         .       +0.50[+0.31,+0.69]*       +0.93[+0.67,+1.20]*       +3.29[+2.52,+4.04]*
+    flip_m          .       +0.53[+0.34,+0.73]*       +0.66[+0.45,+0.87]*       +2.13[+1.36,+2.96]*
+    jitter_m        .       +0.35[+0.17,+0.53]*       +0.36[+0.16,+0.55]*       +0.97[+0.37,+1.55]*
+    noise_m         .       +2.61[+2.33,+2.87]*       +3.20[+2.50,+3.96]*       +3.05[+2.26,+3.76]*
+    invdose         .       +0.90[+0.70,+1.12]*       +1.78[+1.56,+2.01]*       +3.15[+2.42,+3.87]*
+    u:hue           .       +0.98[+0.76,+1.21]*       +1.30[+1.07,+1.53]*       +3.34[+2.64,+4.07]*
+    u:flip          .       +0.53[+0.34,+0.72]*       +0.64[+0.42,+0.86]*       +2.20[+1.41,+3.05]*
+    u:jitter        .       +0.38[+0.18,+0.58]*       +0.44[+0.23,+0.64]*       +0.67[+0.07,+1.30]*
+    u:noise         .       +2.62[+2.34,+2.88]*       +2.47[+2.08,+2.92]*       +4.49[+3.75,+5.23]*
+    ----------------------------------------------------------------------------------------------------
+    spread ERM   unmatched SD=1.02 range=2.24  |  matched-VALID SD=n/a range=n/a (n=0)  sign-consistent=no
+    spread Slim  unmatched SD=0.92 range=2.03  |  matched-VALID SD=n/a range=n/a (n=0)  sign-consistent=no
+    spread Inv   unmatched SD=1.63 range=3.82  |  matched-VALID SD=n/a range=n/a (n=0)  sign-consistent=no
+----------------------------------------------------------------------------------------------------------------------
+C) FALSIFICATION — control-vs-control (hai control HỢP LỆ khác họ phải ≈ 0):
+  ERM   contrast@2   n_pairs= 0 all_null=NO
+  ERM   color_var@2  n_pairs= 1 all_null=NO  worst globrot_m-pixperm_m=+2.82[+1.01,+4.51]
+  Slim  contrast@2   n_pairs= 0 all_null=NO
+  Slim  color_var@2  n_pairs= 1 all_null=NO  worst globrot_m-pixperm_m=+9.98[+8.27,+11.65]
+  Inv   contrast@2   n_pairs= 0 all_null=NO
+  Inv   color_var@2  n_pairs= 1 all_null=NO  worst globrot_m-pixperm_m=+6.71[+4.78,+8.74]
+----------------------------------------------------------------------------------------------------------------------
+D) ALIGNMENT A = mean ΔCaCE (contrast@2, color_var@2) theo từng control:
+  control     valid           ERM          Slim           Inv
+  rotd            .      +0.76[Y]      +0.86[Y]      +2.88[Y]
+  sgnd            .      +5.17[Y]     +15.09[Y]     +17.69[Y]
+  permd           .      +2.81[Y]      +3.30[Y]      +6.57[Y]
+  hybrid_m        .      +0.69[Y]      +1.10[Y]      +3.72[Y]
+  texswap_m       .      +0.10[.]      +0.09[.]      -0.37[.]
+  globrot_m       .      +0.67[Y]      +0.78[Y]      +3.29[Y]
+  warp2_m         .      +4.66[Y]     +13.72[Y]      +9.38[Y]
+  pixperm_m       .      +3.77[Y]     +10.94[Y]     +10.38[Y]
+  warp_m          .      +6.43[Y]     +14.47[Y]     +13.09[Y]
+  hue_m           .      +1.04[Y]      +1.34[Y]      +3.22[Y]
+  rotax_m         .      +0.57[Y]      +0.94[Y]      +3.54[Y]
+  flip_m          .      +0.56[Y]      +0.64[Y]      +2.31[Y]
+  jitter_m        .      +0.38[Y]      +0.34[Y]      +1.16[Y]
+  noise_m         .      +2.64[Y]      +3.38[Y]      +3.16[Y]
+  invdose         .      +0.93[Y]      +1.86[Y]      +3.48[Y]
+  u:hue           .      +1.00[Y]      +1.28[Y]      +3.53[Y]
+  u:flip          .      +0.56[Y]      +0.62[Y]      +2.39[Y]
+  u:jitter        .      +0.40[Y]      +0.41[Y]      +0.85[Y]
+  u:noise         .      +2.64[Y]      +2.45[Y]      +4.68[Y]
+----------------------------------------------------------------------------------------------------------------------
+E) ΔCaCE HIỆU CHỈNH THEO ĝ(footprint) — control phản thực trung tính tại đúng dấu chân concept
+   (thang liều trung tính: globrot_m/w2s24/w2s2/pixperm_m × 5 mức; kiểm định A1 bằng leave-one-family-out)
+  ERM   LOFO R2(within-image): globrot=-412.46 (rmse 11.82, bias -7.18)  warp2=-0.29 (rmse 10.89, bias -2.05)  pixperm=-0.59 (rmse 8.06, bias -0.53)
+  Slim  LOFO R2(within-image): globrot=-177.64 (rmse 11.86, bias +0.61)  warp2=-2.70 (rmse 14.04, bias -4.22)  pixperm=-1.77 (rmse 9.62, bias -0.78)
+  Inv   LOFO R2(within-image): globrot=-236.09 (rmse 38.55, bias -25.71)  warp2=-1.66 (rmse 10.89, bias -6.46)  pixperm=-6.12 (rmse 11.06, bias +2.96)
+  target        overlap                     ERM                    Slim                     Inv
+  contrast@2        69%     +4.77[+4.12,+5.41]*  +11.64[+10.96,+12.37]*   +10.61[+9.83,+11.39]*
+  color_var@2       65%     +4.22[+3.58,+4.85]*  +10.58[+10.00,+11.19]*   +10.26[+9.40,+11.11]*
+  contrast@0        65%     +3.28[+2.66,+3.88]*    +9.93[+9.33,+10.53]*     +8.54[+7.85,+9.21]*
+  color_var@0       58%     +2.65[+2.04,+3.23]*     +8.94[+8.38,+9.48]*     +7.89[+7.22,+8.56]*
+  A_adj (mean 2 concept liều cao): ERM=+4.50[aligned]  Slim=+11.11[aligned]  Inv=+10.43[aligned]
+----------------------------------------------------------------------------------------------------------------------
+F) ƯỚC LƯỢNG CHÍNH — control được biện minh tốt nhất (globrot_m) vs hiệu chỉnh ĝ(M):
+  model target                 ΔCaCE(globrot_m)                 ΔCaCE_adj  agree
+  ERM   contrast@2   +0.71[+0.49,+0.93]        +4.77[+4.12,+5.41]     no
+  ERM   color_var@2  +0.64[+0.44,+0.84]        +4.22[+3.58,+4.85]     no
+  Slim  contrast@2   +0.64[+0.25,+0.94]     +11.64[+10.96,+12.37]     no
+  Slim  color_var@2  +0.93[+0.55,+1.46]     +10.58[+10.00,+11.19]     no
+  Inv   contrast@2   +3.62[+2.91,+4.27]      +10.61[+9.83,+11.39]     no
+  Inv   color_var@2  +2.97[+2.26,+3.68]      +10.26[+9.40,+11.11]     no
+----------------------------------------------------------------------------------------------------------------------
+G) BIÊN ΔCaCE trên TOÀN THƯ VIỆN control (min..max) — độ bất định do CHỌN CONTROL:
+  ERM   contrast@2    all controls [+0.13, +5.88]   neutral-only [+0.43, +2.67]
+  ERM   color_var@2   all controls [+0.07, +6.99]   neutral-only [+0.64, +3.45]
+  ERM   contrast@0    all controls [+0.13, +7.17]   neutral-only [+0.32, +3.57]
+  ERM   color_var@0   all controls [+0.14, +5.21]   neutral-only [+0.27, +3.64]
+  Slim  contrast@2    all controls [+0.07, +15.18]   neutral-only [+0.39, +2.42]
+  Slim  color_var@2   all controls [+0.12, +15.00]   neutral-only [+0.93, +10.91]
+  Slim  contrast@0    all controls [+0.22, +14.88]   neutral-only [+0.43, +13.45]
+  Slim  color_var@0   all controls [+0.19, +13.88]   neutral-only [+0.41, +12.12]
+  Inv   contrast@2    all controls [-0.18, +18.31]   neutral-only [+1.04, +4.87]
+  Inv   color_var@2   all controls [-0.56, +17.07]   neutral-only [+2.97, +9.69]
+  Inv   contrast@0    all controls [+0.57, +16.28]   neutral-only [+1.31, +13.06]
+  Inv   color_var@0   all controls [+0.36, +14.91]   neutral-only [+1.03, +13.07]
+----------------------------------------------------------------------------------------------------------------------
+H) THIẾT KẾ ĐỐI-LIỀU (symmetric dose) — control là CHÍNH can thiệp theo chiều NGƯỢC, không phải placebo
+   ΔCaCE_sym = CaCE(C↑) − CaCE(C↓): g(M) triệt tiêu vì hai edit là ảnh gương trong không gian pixel.
+   target         maxSMD   proxy ↑   proxy ↓                     ERM                    Slim                     Inv
+   contrast@2       0.55       86%      -36%     +0.95[+0.74,+1.18]*     +1.94[+1.58,+2.39]*     +3.82[+3.17,+4.46]*
+   color_var@2      0.52       66%      -66%     +0.90[+0.70,+1.12]*     +1.78[+1.56,+2.01]*     +3.15[+2.42,+3.87]*
+   contrast@0       0.05       25%      -22%     +0.20[+0.04,+0.36]*     +0.48[+0.31,+0.65]*     +0.57[+0.24,+0.91]*
+   color_var@0      0.05       22%      -23%     +0.24[+0.08,+0.42]*     +0.49[+0.35,+0.64]*     +0.36[+0.05,+0.66]*
+   A_sym (mean 2 concept liều cao): ERM=+0.93[aligned]  Slim=+1.86[aligned]  Inv=+3.48[aligned]
+======================================================================================================================
+QUY TẮC ĐỌC — một control chỉ HỢP LỆ VỀ NHÂN QUẢ khi đạt CẢ BA:
+  (A1) balance: |SMD| <= 0.10 (chấp nhận được 0.25) trên CẢ 6 hiệp biến dấu chân;
+  (A2) neutrality: dịch proxy concept <= 10% tuyệt đối VÀ <= 15% mức dịch của chính concept edit;
+  (A3) overlap: >= 95% ảnh hiệu chuẩn được tới đúng cường độ của concept edit.
+  Kiểm định (T): các control TRUNG TÍNH khác cơ chế phải cho CaCE bằng nhau (mục C) và ĝ(M)
+  phải khái quát được sang họ chưa thấy (LOFO R2 > 0, mục E). Nếu (T) HỎNG thì phản ứng chung
+  KHÔNG phải hàm của dấu chân đo được -> KHÔNG control nào định danh được ΔCaCE, và biên ở
+  mục G chính là độ bất định thực sự của mọi điểm số 'placebo-corrected'.
+  => control đạt cả 3 tiêu chí: {'contrast@2': [], 'color_var@2': [], 'contrast@0': [], 'color_var@0': []}
+  => LOFO đạt: {'erm': False, 'slim': False, 'causal': False}   control-vs-control ≈ 0: {'erm': {'contrast@2': False, 'color_var@2': False}, 'slim': {'contrast@2': False, 'color_var@2': False}, 'causal': {'contrast@2': False, 'color_var@2': False}}
+Saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/results/c12_matched_control.json + fig_matched_control.png   (249s)

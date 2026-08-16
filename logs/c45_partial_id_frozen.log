@@ -1,0 +1,23 @@
+83 ảnh / 44 bệnh nhân
+
+target         tập control         |C|  bọc α/β theo model
+contrast@2     A1+A3                 1  N/N  N/N  N/N
+contrast@2     A3                    9  N/Y  N/N  N/Y
+contrast@2     all                  15  Y/Y  Y/N  Y/Y
+
+color_var@2    A1+A3                 1  N/N  N/N  N/N
+color_var@2    A3                    9  N/Y  Y/N  N/Y
+color_var@2    all                  15  N/Y  Y/Y  Y/Y
+
+contrast@0     A1+A3                 2  N/N  N/N  Y/N
+contrast@0     A3                   13  Y/Y  Y/Y  Y/Y
+contrast@0     all                  15  Y/Y  Y/Y  Y/Y
+
+color_var@0    A1+A3                 2  N/N  N/N  Y/N
+color_var@0    A3                   13  N/Y  Y/Y  Y/Y
+color_var@0    all                  15  N/Y  Y/Y  Y/Y
+
+A1+A3  |C| [1, 2]  bọc  0/12  |SMD| biên n/a
+A3     |C| [9, 13]  bọc  5/12  |SMD| biên [0.74, 2.31]
+all    |C| [15, 15]  bọc  9/12  |SMD| biên [0.86, 2.42]
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/results/c45_bracketing.json
