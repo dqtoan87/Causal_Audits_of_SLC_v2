@@ -1,4 +1,4 @@
-# Causal_XAI_v3
+# Causal_Audits_of_SLC
 
 Analysis code for a causal audit of skin-lesion classifiers. Two tiers are computed: the effect of measured lesion proxies on malignancy, estimated both by confounder adjustment and by a within-patient design, and the effect of performed image edits on a classifier, judged against a tolerance with a three-way interval rule.
 
