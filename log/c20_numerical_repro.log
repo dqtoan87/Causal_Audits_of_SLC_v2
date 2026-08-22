@@ -1,0 +1,23 @@
+##### C20 numerical reproducibility 07:44:39 #####
+eval 178 images, 18 edits/image  (26s)
+  [ERM  ] bf16_per_image   n= 77  E|dlogit| = 11.441   (33s)
+  [ERM  ] fp32_per_image   n= 77  E|dlogit| = 11.162   (37s)
+  [ERM  ] bf16_chunk32     n= 77  E|dlogit| = 11.304   (40s)
+  [Slim ] bf16_per_image   n= 77  E|dlogit| = 16.376   (44s)
+  [Slim ] fp32_per_image   n= 77  E|dlogit| = 16.096   (48s)
+  [Slim ] bf16_chunk32     n= 77  E|dlogit| = 16.073   (51s)
+  [Inv  ] bf16_per_image   n= 78  E|dlogit| = 2.195   (55s)
+  [Inv  ] fp32_per_image   n= 78  E|dlogit| = 2.110   (58s)
+  [Inv  ] bf16_chunk32     n= 78  E|dlogit| = 2.206   (61s)
+============================================================================================
+HELD-OUT ARTIFACT AGGREGATE E|dlogit| — bài trích: bf16 9.36 / 15.39 / 10.92
+config                       ERM        Slim         Inv
+bf16_per_image             11.44       16.38        2.20
+fp32_per_image             11.16       16.10        2.11
+bf16_chunk32               11.30       16.07        2.21
+--------------------------------------------------------------------------------------------
+thay đổi so với bf16_per_image (bài: fp32 →9.48/15.05/10.87; batch →9.43/15.19/11.00)
+fp32_per_image            -2.44%      -1.71%      -3.92%
+bf16_chunk32              -1.20%      -1.85%      +0.50%
+============================================================================================
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c20_numerical_repro.json   (61s)

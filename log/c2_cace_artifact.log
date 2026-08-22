@@ -1,0 +1,32 @@
+##### PHASE C2 — CaCE artifact 07:33:01 (dev=cuda) #####
+eval: 178 ảnh (malignant thật=78)
+can thiệp: held-out=['hair_light', 'hair', 'hair_heavy', 'ruler'] | coupled=['patch', 'vignette', 'jitter'] | sanity=['identity']
+  %pixel đổi: hair_light=1.0% hair=2.4% hair_heavy=4.1% ruler=1.0% patch=2.7% vignette=67.3% jitter=93.8% identity=0.0%
+[erm] xong (11s, n_kept=77, p_mal=0.823)
+[slim] xong (12s, n_kept=77, p_mal=0.905)
+[causal] xong (11s, n_kept=78, p_mal=0.658)
+
+================================================================================================
+CaCE ARTIFACT (negative control): faithful = |CaCE|≈0 (CI logit chứa 0). ★ bằng chứng SẠCH = HELD-OUT (hair/ruler)
+================================================================================================
+artifact    coupling                         erm                  slim                causal
+                           CaCE_logit [CI] faith CaCE_logit [CI] faith CaCE_logit [CI] faith
+------------------------------------------------------------------------------------------------
+hair_light  held-out          -5.64[-7.3,-3.9] ✗ -13.42[-15.4,-11.1] ✗    -0.08[-0.2,+0.0] ✓
+hair        held-out       -13.66[-14.9,-12.4] ✗ -14.36[-16.2,-12.3] ✗    -1.24[-2.0,-0.6] ✗
+hair_heavy  held-out       -14.66[-15.6,-13.6] ✗ -14.04[-16.1,-11.7] ✗    -3.11[-4.2,-2.1] ✗
+ruler       held-out       -11.58[-13.2,-10.0] ✗ -14.65[-16.6,-12.4] ✗    -3.74[-5.1,-2.4] ✗
+patch       train-coupled     -0.40[-0.5,-0.3] ✗    -0.57[-0.8,-0.4] ✗    -0.14[-0.2,-0.1] ✗
+vignette    train-coupled     +0.12[-0.1,+0.4] ✓    +1.12[+0.8,+1.4] ✗    +0.24[+0.2,+0.3] ✗
+jitter      train-coupled     -0.22[-0.4,-0.0] ✗    -0.40[-0.7,-0.2] ✗    -0.03[-0.1,+0.0] ✓
+identity    n/a               +0.00[+0.0,+0.0] ✓    +0.00[+0.0,+0.0] ✓    +0.00[+0.0,+0.0] ✓
+------------------------------------------------------------------------------------------------
+HELD-OUT |Δlogit|            11.502[10.70,12.32]   16.057[15.46,16.65]      2.226[1.77,2.72]
+coupled |Δlogit|                0.602[0.53,0.69]      0.927[0.80,1.06]      0.237[0.21,0.27]
+pred_mal_prob (calib)                      0.823                 0.905                 0.658
+identity (sanity≈0)                      +0.0000               +0.0000               +0.0000
+hair dose monotonic                          YES                    no                   YES
+================================================================================================
+Đọc: CaCE_logit > 0 = artifact ĐẨY prediction về ác (shortcut). faith ✓ = CI chứa 0 (model bỏ qua artifact = nhân-quả-trung-thực). So sánh model CHỈ dùng dòng HELD-OUT; dòng coupled chỉ in-distribution (CAUSAL đã train né). identity phải ≈0.
+
+Đã lưu: /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/tier2_cace_artifact.json

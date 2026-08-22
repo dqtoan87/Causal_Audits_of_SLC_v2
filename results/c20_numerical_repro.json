@@ -1,0 +1,44 @@
+{
+ "n_images": 178,
+ "heldout_edits": [
+  "art:hair_light",
+  "art:hair",
+  "art:hair_heavy",
+  "art:ruler"
+ ],
+ "note": "Held-out artifact aggregate E|dlogit| on each model's thresholded malignant set (p_full >= 0.1), under three numerical configurations: the reference bf16 per-image batching used throughout, the same in fp32, and bf16 with a different batch composition (flat chunks of 32).",
+ "configs": {
+  "bf16_per_image": {
+   "erm": 11.441324158750234,
+   "slim": 16.375774800881395,
+   "causal": 2.1954694687920906
+  },
+  "fp32_per_image": {
+   "erm": 11.162261812066497,
+   "slim": 16.09580045227209,
+   "causal": 2.109506818839294
+  },
+  "bf16_chunk32": {
+   "erm": 11.303754731048274,
+   "slim": 16.07338970105003,
+   "causal": 2.2063384429364548
+  }
+ },
+ "n_kept": {
+  "erm": 77,
+  "slim": 77,
+  "causal": 78
+ },
+ "pct_change_vs_reference": {
+  "fp32_per_image": {
+   "erm": -2.4390738590367858,
+   "slim": -1.7096861187553407,
+   "causal": -3.9154564057814913
+  },
+  "bf16_chunk32": {
+   "erm": -1.2023907879294558,
+   "slim": -1.8465391928514443,
+   "causal": 0.49506378015559854
+  }
+ }
+}

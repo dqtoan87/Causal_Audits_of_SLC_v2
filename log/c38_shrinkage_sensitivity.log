@@ -1,0 +1,31 @@
+##### C38 hồi quy co: CI và độ nhạy biên cắt 10:18:36 #####
+  183 ảnh / 100 bệnh nhân
+
+model edit              α    CI lo    CI hi | α no-clip    R² nc   n bỏ đổi
+ERM   flip         -0.202   -0.253   -0.142 |   -0.202     0.20      0   0.0%
+ERM   jitter       -0.147   -0.238   -0.035 |   -0.147     0.12      0   0.0%
+ERM   hue          -0.281   -0.391   -0.204 |   -0.281     0.29      0   0.0%
+ERM   noise        -0.960   -0.977   -0.936 |   -0.960     0.98      0   0.0%
+Slim  flip         -0.028   -0.094   +0.049 |   -0.052     0.01      3  84.5%
+Slim  jitter       -0.115   -0.290   +0.042 |   -0.042     0.01      3  63.4%
+Slim  hue          -0.268   -0.375   -0.188 |   -0.352     0.36      4  31.2%
+Slim  noise        -0.989   -1.170   -0.773 |   -1.061     0.94      4   7.3%
+Inv   flip         -0.198   -0.255   -0.154 |   -0.198     0.23      0   0.0%
+Inv   jitter       -0.130   -0.172   -0.085 |   -0.130     0.14      0   0.0%
+Inv   hue          -0.254   -0.389   -0.120 |   -0.297     0.32      1  17.0%
+Inv   noise        -0.925   -0.948   -0.905 |   -0.925     0.97      0   0.0%
+
+phương trình trên nửa giữ lại: R² -0.22 tới 0.97 | hệ số hiệu chuẩn 0.32 tới 2.21
+dự báo sai số trừ placebo: cùng dấu 19/24 | |sai số| trung vị 0.12 logit
+
+chia bệnh nhân hai nửa (50/100 bệnh nhân): cùng dấu ở 12/12 ô, |chênh| lớn nhất 0.32
+
+dạng hàm (R² ngoài mẫu, fold theo bệnh nhân):
+  tuyến tính > hằng số ở 10/12 ô; spline > tuyến tính ở 5/12 ô
+  cải thiện trung vị spline so với tuyến tính: -0.0060
+
+thang xác suất: độ dốc -1.06 tới -0.10, tất cả âm=True
+phép sửa khái niệm (logit): độ dốc -0.23 tới +0.01, 12/18 khoảng loại trừ 0
+
+summary: {"n_cells": 12, "slope_ci_excludes_zero": 10, "max_dropped": 4, "max_rel_change": 0.8445017808496433}
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c38_shrinkage_sensitivity.json  (106s)

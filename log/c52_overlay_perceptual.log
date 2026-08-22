@@ -1,0 +1,10 @@
+[12:21:17] nhóm kiểm định: 183 ảnh
+[12:21:36] chồng lớp xong; % pixel đổi: hair_light=1.02 hair=2.36 hair_heavy=4.07 ruler=1.05 vignette=67.59 jitter=95.60
+[12:21:42]   hair_light   đặc trưng 1.0555  ΔE  0.22  pixel  1.02%
+[12:21:42]   hair         đặc trưng 1.1678  ΔE  0.76  pixel  2.36%
+[12:21:43]   hair_heavy   đặc trưng 1.2603  ΔE  1.68  pixel  4.07%
+[12:21:44]   ruler        đặc trưng 0.2777  ΔE  0.48  pixel  1.05%
+[12:21:44]   vignette     đặc trưng 0.8702  ΔE  9.65  pixel 67.59%
+[12:21:45]   jitter       đặc trưng 0.1521  ΔE  8.62  pixel 95.60%
+[12:21:46]   giữa 2 tổn thương đặc trưng 0.9499  ΔE 17.56
+[12:21:46] saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c52_overlay_perceptual.json

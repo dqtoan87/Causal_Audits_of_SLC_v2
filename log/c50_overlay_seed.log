@@ -1,0 +1,28 @@
+[11:57:01] nhóm kiểm định: 183 ảnh, 100 bệnh nhân, 83 ác
+[11:58:00]   seed 42: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.36% hair_heavy=4.07% ruler=1.05%
+[11:59:24]   seed 1: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.36% hair_heavy=4.02% ruler=1.04%
+[12:02:17]   seed 2: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.36% hair_heavy=4.03% ruler=1.04%
+[12:05:03]   seed 3: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.36% hair_heavy=4.03% ruler=1.03%
+[12:07:22]   seed 7: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.36% hair_heavy=4.04% ruler=1.04%
+[12:09:29]   seed 11: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.37% hair_heavy=4.04% ruler=1.05%
+[12:10:08]   seed 99: chồng lớp xong, pixel đổi hair_light=1.02% hair=2.36% hair_heavy=4.09% ruler=1.05%
+[12:10:33]   b3   ERM   all        biên độ 0.3633–0.3840 (5.6% của seed 42) | cận dưới nhỏ nhất 0.2992 | phán quyết ['exceedance']
+[12:10:33]   b3   ERM   malignant  biên độ 0.5435–0.5766 (6.0% của seed 42) | cận dưới nhỏ nhất 0.4577 | phán quyết ['exceedance']
+[12:10:33]   b3   ERM   benign     biên độ 0.2105–0.2285 (8.0% của seed 42) | cận dưới nhỏ nhất 0.1799 | phán quyết ['exceedance']
+[12:10:57]   b3   Slim  all        biên độ 0.5409–0.5662 (4.6% của seed 42) | cận dưới nhỏ nhất 0.4845 | phán quyết ['exceedance']
+[12:10:57]   b3   Slim  malignant  biên độ 0.7414–0.7692 (3.6% của seed 42) | cận dưới nhỏ nhất 0.6848 | phán quyết ['exceedance']
+[12:10:57]   b3   Slim  benign     biên độ 0.3696–0.4021 (8.8% của seed 42) | cận dưới nhỏ nhất 0.3280 | phán quyết ['exceedance']
+[12:11:21]   b3   Inv   all        biên độ 0.1589–0.1677 (5.6% của seed 42) | cận dưới nhỏ nhất 0.1436 | phán quyết ['exceedance']
+[12:11:21]   b3   Inv   malignant  biên độ 0.1813–0.2012 (11.0% của seed 42) | cận dưới nhỏ nhất 0.1556 | phán quyết ['exceedance']
+[12:11:21]   b3   Inv   benign     biên độ 0.1400–0.1511 (7.9% của seed 42) | cận dưới nhỏ nhất 0.1267 | phán quyết ['exceedance']
+[12:11:43]   r50  ERM   all        biên độ 0.2085–0.2153 (3.2% của seed 42) | cận dưới nhỏ nhất 0.1758 | phán quyết ['exceedance']
+[12:11:43]   r50  ERM   malignant  biên độ 0.1176–0.1283 (8.8% của seed 42) | cận dưới nhỏ nhất 0.0853 | phán quyết ['exceedance']
+[12:11:43]   r50  ERM   benign     biên độ 0.2765–0.2933 (5.7% của seed 42) | cận dưới nhỏ nhất 0.2508 | phán quyết ['exceedance']
+[12:12:05]   r50  Slim  all        biên độ 0.1427–0.1492 (4.5% của seed 42) | cận dưới nhỏ nhất 0.1303 | phán quyết ['exceedance']
+[12:12:05]   r50  Slim  malignant  biên độ 0.1225–0.1376 (12.3% của seed 42) | cận dưới nhỏ nhất 0.1045 | phán quyết ['exceedance']
+[12:12:05]   r50  Slim  benign     biên độ 0.1586–0.1659 (4.6% của seed 42) | cận dưới nhỏ nhất 0.1393 | phán quyết ['exceedance']
+[12:12:28]   r50  Inv   all        biên độ 0.1028–0.1067 (3.7% của seed 42) | cận dưới nhỏ nhất 0.0960 | phán quyết ['exceedance']
+[12:12:28]   r50  Inv   malignant  biên độ 0.0854–0.0910 (6.5% của seed 42) | cận dưới nhỏ nhất 0.0772 | phán quyết ['exceedance']
+[12:12:28]   r50  Inv   benign     biên độ 0.1157–0.1228 (5.8% của seed 42) | cận dưới nhỏ nhất 0.1067 | phán quyết ['exceedance']
+[12:12:28] saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c50_overlay_seed.json
+[12:12:28]   18/18 ô có phán quyết bất biến qua 7 hiện thực | cận dưới nhỏ nhất 0.0772

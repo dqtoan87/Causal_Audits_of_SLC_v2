@@ -1,0 +1,33 @@
+##### C55 identification graph #####
+183 images; rebuilding the edit library
+   ... 20/183 images (53s)
+   ... 40/183 images (104s)
+   ... 60/183 images (154s)
+   ... 80/183 images (206s)
+   ... 100/183 images (257s)
+   ... 120/183 images (308s)
+   ... 140/183 images (359s)
+   ... 160/183 images (412s)
+   ... 180/183 images (464s)
+library holds 88 distinct performed edits over 183 images
+  contrast@2     bottleneck   2.13x, total mismatch   6.39 tolerance units, length-two  12.71x
+  color_var@2    bottleneck   1.17x, total mismatch   6.07 tolerance units, length-two  11.94x
+  contrast@0     bottleneck   1.29x, total mismatch   5.43 tolerance units, length-two  13.27x
+  color_var@0    bottleneck   1.46x, total mismatch   6.98 tolerance units, length-two   9.65x
+   ... bootstrap 100/400 (536s)
+   ... bootstrap 200/400 (543s)
+   ... bootstrap 300/400 (549s)
+   ... bootstrap 400/400 (555s)
+  contrast@2     bottleneck 95% CI [1.20, 2.36], P(<=1) = 0.010
+  color_var@2    bottleneck 95% CI [0.87, 1.95], P(<=1) = 0.105
+  contrast@0     bottleneck 95% CI [1.11, 1.94], P(<=1) = 0.005
+  color_var@0    bottleneck 95% CI [1.25, 2.08], P(<=1) = 0.000
+
+  binding pair Slim/contrast@0 pixperm_m-noise_m: 9.64 logits over 7.24 scored units -> L_g >= 1.33
+  second largest floor 1.16, median 0.17, conservative floor 0.83
+  contrast@2     route total  6.39 =  0.71 footprint +  5.69 concept; footprint-only half-width  0.94 logits; break-even kappa*L_h 0.230
+  color_var@2    route total  6.07 =  3.41 footprint +  2.66 concept; footprint-only half-width  4.54 logits; break-even kappa*L_h 0.000
+  contrast@0     route total  5.43 =  0.72 footprint +  4.72 concept; footprint-only half-width  0.95 logits; break-even kappa*L_h 0.275
+  color_var@0    route total  6.98 =  0.47 footprint +  6.52 concept; footprint-only half-width  0.62 logits; break-even kappa*L_h 0.250
+
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c55_identification_graph.json  (555.3s)

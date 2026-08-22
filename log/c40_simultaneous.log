@@ -1,0 +1,44 @@
+##### C40 dải đồng thời 10:22:24 #####
+
+--- primary_9 | hệ số tới hạn đồng thời z* = 2.664 (biên 1.96) ---
+ô                  E|dp|             95% biên          95% đồng thời vượt 0.05?
+ERM/all            0.371  [0.302, 0.442]      [0.275, 0.467]   biên có / đồng thời có
+ERM/mal            0.550  [0.453, 0.626]      [0.429, 0.670]   biên có / đồng thời có
+ERM/ben            0.222  [0.190, 0.255]      [0.178, 0.266]   biên có / đồng thời có
+Slim/all           0.544  [0.481, 0.603]      [0.460, 0.627]   biên có / đồng thời có
+Slim/mal           0.762  [0.705, 0.808]      [0.691, 0.832]   biên có / đồng thời có
+Slim/ben           0.363  [0.322, 0.405]      [0.307, 0.419]   biên có / đồng thời có
+Inv/all            0.159  [0.144, 0.174]      [0.138, 0.180]   biên có / đồng thời có
+Inv/mal            0.181  [0.155, 0.203]      [0.148, 0.214]   biên có / đồng thời có
+Inv/ben            0.140  [0.127, 0.153]      [0.122, 0.158]   biên có / đồng thời có
+  => vượt ngưỡng: 9/9 theo khoảng biên, 9/9 theo dải đồng thời
+  [b3 ERM] xong (33s)
+  [b3 Slim] xong (35s)
+  [b3 Inv] xong (36s)
+  [r50 ERM] xong (37s)
+  [r50 Slim] xong (38s)
+  [r50 Inv] xong (40s)
+
+--- disjoint_18 | hệ số tới hạn đồng thời z* = 2.944 (biên 1.96) ---
+ô                  E|dp|             95% biên          95% đồng thời vượt 0.05?
+b3-ERM/all         0.373  [0.304, 0.446]      [0.264, 0.481]   biên có / đồng thời có
+b3-ERM/mal         0.553  [0.453, 0.632]      [0.415, 0.691]   biên có / đồng thời có
+b3-ERM/ben         0.224  [0.193, 0.256]      [0.176, 0.271]   biên có / đồng thời có
+b3-Slim/all        0.551  [0.490, 0.608]      [0.462, 0.640]   biên có / đồng thời có
+b3-Slim/mal        0.769  [0.720, 0.814]      [0.698, 0.840]   biên có / đồng thời có
+b3-Slim/ben        0.370  [0.327, 0.413]      [0.305, 0.434]   biên có / đồng thời có
+b3-Inv/all         0.159  [0.144, 0.174]      [0.136, 0.182]   biên có / đồng thời có
+b3-Inv/mal         0.181  [0.155, 0.203]      [0.145, 0.217]   biên có / đồng thời có
+b3-Inv/ben         0.140  [0.127, 0.153]      [0.121, 0.160]   biên có / đồng thời có
+r50-ERM/all        0.215  [0.183, 0.248]      [0.166, 0.264]   biên có / đồng thời có
+r50-ERM/mal        0.121  [0.091, 0.161]      [0.068, 0.175]   biên có / đồng thời có
+r50-ERM/ben        0.293  [0.272, 0.314]      [0.262, 0.325]   biên có / đồng thời có
+r50-Slim/all       0.143  [0.131, 0.157]      [0.124, 0.163]   biên có / đồng thời có
+r50-Slim/mal       0.122  [0.104, 0.141]      [0.095, 0.150]   biên có / đồng thời có
+r50-Slim/ben       0.160  [0.142, 0.180]      [0.132, 0.189]   biên có / đồng thời có
+r50-Inv/all        0.106  [0.099, 0.114]      [0.095, 0.117]   biên có / đồng thời có
+r50-Inv/mal        0.085  [0.077, 0.093]      [0.074, 0.097]   biên có / đồng thời có
+r50-Inv/ben        0.123  [0.113, 0.132]      [0.108, 0.137]   biên có / đồng thời có
+  => vượt ngưỡng: 18/18 theo khoảng biên, 18/18 theo dải đồng thời
+
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c40_simultaneous.json  (44s)

@@ -1,0 +1,794 @@
+{
+ "n_images": 178,
+ "n_patients": 90,
+ "boot": 2000,
+ "note": "Every Tier-2 inferential quantity recomputed under image-level and patient-clustered bootstrap. Point estimates are identical by construction; only the intervals and the significance labels can differ.",
+ "quantities": {
+  "all": {
+   "erm": {
+    "A_raw": {
+     "mean": 0.45356763055051447,
+     "ci_image": [
+      0.30580845177231175,
+      0.598330800555769
+     ],
+     "ci_patient": [
+      0.3069076433341854,
+      0.5888855229005426
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "A_corr_flip": {
+     "mean": 0.7194122156694297,
+     "ci_image": [
+      0.5225082930773155,
+      0.9221841408933494
+     ],
+     "ci_patient": [
+      0.5069621846342672,
+      0.9240812727333787
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "A_corr_jitter": {
+     "mean": 0.6324629839310454,
+     "ci_image": [
+      0.4197639480916702,
+      0.8602420787648457
+     ],
+     "ci_patient": [
+      0.3859514717327103,
+      0.8858164118185454
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@0": {
+     "mean": 0.2617415776045966,
+     "ci_image": [
+      0.1404221290791866,
+      0.3772501187677152
+     ],
+     "ci_patient": [
+      0.1462197729199541,
+      0.3725921025964949
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@2": {
+     "mean": 0.02627901151203975,
+     "ci_image": [
+      -0.23022636571424648,
+      0.28491600475709816
+     ],
+     "ci_patient": [
+      -0.2621401359895644,
+      0.30782468374674354
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_color_var@0": {
+     "mean": 0.265652402375631,
+     "ci_image": [
+      0.15886152530956435,
+      0.37289281402720187
+     ],
+     "ci_patient": [
+      0.16220358116326308,
+      0.3655313056179277
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@2": {
+     "mean": 0.060251683752311325,
+     "ci_image": [
+      -0.19403044772419017,
+      0.316853640457992
+     ],
+     "ci_patient": [
+      -0.20353789961407054,
+      0.3220090966215856
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    }
+   },
+   "slim": {
+    "A_raw": {
+     "mean": 0.10008742208987302,
+     "ci_image": [
+      -0.1884810181669454,
+      0.3879499456505471
+     ],
+     "ci_patient": [
+      -0.19245082839782313,
+      0.4094398606060506
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_flip": {
+     "mean": -0.007821739115247162,
+     "ci_image": [
+      -0.4172644198450037,
+      0.4340877478884296
+     ],
+     "ci_patient": [
+      -0.3962088682937722,
+      0.42133897371082324
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_jitter": {
+     "mean": 0.09685609728031055,
+     "ci_image": [
+      -0.2455166161122889,
+      0.4602742017235705
+     ],
+     "ci_patient": [
+      -0.24943177520262327,
+      0.4740820487601367
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_contrast@0": {
+     "mean": 0.45440992438399896,
+     "ci_image": [
+      0.27622815901014297,
+      0.6333172758895957
+     ],
+     "ci_patient": [
+      0.27776308393171173,
+      0.6568813601907696
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@2": {
+     "mean": 1.1655928221313105,
+     "ci_image": [
+      0.8184329751667195,
+      1.4861127049869205
+     ],
+     "ci_patient": [
+      0.8151937603834474,
+      1.5412972225022585
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@0": {
+     "mean": 0.22090463990288264,
+     "ci_image": [
+      0.04068497967498918,
+      0.3927183178173353
+     ],
+     "ci_patient": [
+      0.046190496941115065,
+      0.41231699710273967
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@2": {
+     "mean": 0.8529650991398293,
+     "ci_image": [
+      0.39338738419079533,
+      1.3346214420569456
+     ],
+     "ci_patient": [
+      0.38171811147602464,
+      1.3700691212561484
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    }
+   },
+   "causal": {
+    "A_raw": {
+     "mean": -0.023579447111028773,
+     "ci_image": [
+      -0.08699372298743971,
+      0.043889781831981944
+     ],
+     "ci_patient": [
+      -0.10320725523146283,
+      0.05763881319007241
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_flip": {
+     "mean": 0.03320106512749675,
+     "ci_image": [
+      -0.20171607821793683,
+      0.24529982060551916
+     ],
+     "ci_patient": [
+      -0.19640307807996535,
+      0.2524707991935605
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_jitter": {
+     "mean": -0.17411934603971532,
+     "ci_image": [
+      -0.3716100939825693,
+      -0.04042772013682081
+     ],
+     "ci_patient": [
+      -0.372351030284813,
+      -0.04103809900747603
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@0": {
+     "mean": 0.08497389597136318,
+     "ci_image": [
+      -0.045247752453591604,
+      0.2835066693152087
+     ],
+     "ci_patient": [
+      -0.05166116006458914,
+      0.29880807514350094
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_contrast@2": {
+     "mean": 0.046744977352279046,
+     "ci_image": [
+      -0.12836887640148303,
+      0.27887544429251837
+     ],
+     "ci_patient": [
+      -0.14029449216242684,
+      0.2815867226829954
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_color_var@0": {
+     "mean": 0.0526014179999345,
+     "ci_image": [
+      -0.07348620151425071,
+      0.24636781380969222
+     ],
+     "ci_patient": [
+      -0.07901754937498831,
+      0.26496638113763127
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_color_var@2": {
+     "mean": 0.07163602268272791,
+     "ci_image": [
+      -0.15394571279716732,
+      0.36229272693044834
+     ],
+     "ci_patient": [
+      -0.16715431783399026,
+      0.3715180630273927
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    }
+   }
+  },
+  "malignant": {
+   "erm": {
+    "A_raw": {
+     "mean": 0.11529836921777721,
+     "ci_image": [
+      -0.12458280262854354,
+      0.3458970399080158
+     ],
+     "ci_patient": [
+      -0.1481668809884478,
+      0.3399017453244621
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_flip": {
+     "mean": 0.8597812987629831,
+     "ci_image": [
+      0.5210141035391325,
+      1.2100898003684042
+     ],
+     "ci_patient": [
+      0.5309420683126812,
+      1.1857106649133582
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "A_corr_jitter": {
+     "mean": 0.4003494134613433,
+     "ci_image": [
+      0.09396761446530631,
+      0.7186818947482101
+     ],
+     "ci_patient": [
+      0.07418146195771648,
+      0.7328714339624616
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@0": {
+     "mean": 0.19908545155088458,
+     "ci_image": [
+      0.004030669511089076,
+      0.3831473805456802
+     ],
+     "ci_patient": [
+      0.059828974564215744,
+      0.3482122875912117
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@2": {
+     "mean": 0.7582612673677053,
+     "ci_image": [
+      0.3945914855146633,
+      1.1364617588634607
+     ],
+     "ci_patient": [
+      0.37940101994219855,
+      1.177941504729959
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@0": {
+     "mean": 0.3197271170144931,
+     "ci_image": [
+      0.14794244997661427,
+      0.4953590001530358
+     ],
+     "ci_patient": [
+      0.17264190731577933,
+      0.47593662143965054
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@2": {
+     "mean": 0.8341238981225444,
+     "ci_image": [
+      0.5011710661338817,
+      1.1916217025559657
+     ],
+     "ci_patient": [
+      0.5034624977893383,
+      1.2196561931306384
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    }
+   },
+   "slim": {
+    "A_raw": {
+     "mean": -0.192480783978077,
+     "ci_image": [
+      -0.568152648120061,
+      0.29475145880264436
+     ],
+     "ci_patient": [
+      -0.594281247416423,
+      0.33328432887102466
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_flip": {
+     "mean": -0.3017608381812825,
+     "ci_image": [
+      -0.9728620078440408,
+      0.374707024885665
+     ],
+     "ci_patient": [
+      -0.8297242230202968,
+      0.29112210297661706
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_jitter": {
+     "mean": -0.1950494416838444,
+     "ci_image": [
+      -0.7839722155648378,
+      0.5313368746574837
+     ],
+     "ci_patient": [
+      -0.7921851627350591,
+      0.6237891603109336
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_contrast@0": {
+     "mean": 0.40624009603988154,
+     "ci_image": [
+      0.0840786634603589,
+      0.729635747242691
+     ],
+     "ci_patient": [
+      0.14105041912121627,
+      0.6795798263490039
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@2": {
+     "mean": 2.153874921748084,
+     "ci_image": [
+      1.6193750154424347,
+      2.7292071125207373
+     ],
+     "ci_patient": [
+      1.6182709018948473,
+      2.761809240167666
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@0": {
+     "mean": 0.05008608611734474,
+     "ci_image": [
+      -0.27456775848104015,
+      0.3610072309635315
+     ],
+     "ci_patient": [
+      -0.24230006355982384,
+      0.3342059484727562
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_color_var@2": {
+     "mean": 1.726375733277337,
+     "ci_image": [
+      0.8835385972554349,
+      2.6136593500847547
+     ],
+     "ci_patient": [
+      0.8799387310397542,
+      2.6861603058400223
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    }
+   },
+   "causal": {
+    "A_raw": {
+     "mean": -0.21116814623839467,
+     "ci_image": [
+      -0.3005965085531942,
+      -0.11843665510705545
+     ],
+     "ci_patient": [
+      -0.30015335104931634,
+      -0.12652420985291563
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "A_corr_flip": {
+     "mean": 0.05076812783492741,
+     "ci_image": [
+      -0.06884592300656377,
+      0.17213003191389573
+     ],
+     "ci_patient": [
+      -0.06906716932647257,
+      0.18014105954583312
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "A_corr_jitter": {
+     "mean": -0.18139081143048877,
+     "ci_image": [
+      -0.29626608867170695,
+      -0.06915140995168963
+     ],
+     "ci_patient": [
+      -0.292008399584375,
+      -0.07152845149321659
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_contrast@0": {
+     "mean": -0.004806516085156705,
+     "ci_image": [
+      -0.09498179398113542,
+      0.0857735323330166
+     ],
+     "ci_patient": [
+      -0.09633020453309386,
+      0.09652628232430707
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_contrast@2": {
+     "mean": 0.5765019386343868,
+     "ci_image": [
+      0.26761067902462576,
+      1.047690828807025
+     ],
+     "ci_patient": [
+      0.2563786550371545,
+      1.0565775323077875
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    },
+    "sym_color_var@0": {
+     "mean": -0.017571103206846114,
+     "ci_image": [
+      -0.10858523367449378,
+      0.06954361232050178
+     ],
+     "ci_patient": [
+      -0.10803724920871408,
+      0.07624483162221564
+     ],
+     "sig_image": false,
+     "sig_patient": false
+    },
+    "sym_color_var@2": {
+     "mean": 0.6753157617698796,
+     "ci_image": [
+      0.2186960668127842,
+      1.2949962692044892
+     ],
+     "ci_patient": [
+      0.2183070198198774,
+      1.3364369765221744
+     ],
+     "sig_image": true,
+     "sig_patient": true
+    }
+   }
+  }
+ },
+ "symmetry": {
+  "erm": {
+   "contrast@0": {
+    "alpha_up": 0.047777204745672416,
+    "alpha_dn": 0.030448568956306973,
+    "dcace_sym": 0.2617415776045966,
+    "diff_point": -0.017328635789365443,
+    "ci_image": [
+     -0.0581452427582455,
+     0.02481148563108737
+    ],
+    "reject_image": false,
+    "resid_upper_image": 0.4891387464013623,
+    "ci_patient": [
+     -0.047878301091693505,
+     0.015437383903225972
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 0.4027695313473758
+   },
+   "contrast@2": {
+    "alpha_up": 0.193842001726913,
+    "alpha_dn": 0.512606386280314,
+    "dcace_sym": 0.02627901151203975,
+    "diff_point": 0.31876438455340095,
+    "ci_image": [
+     0.23777851361557442,
+     0.40409058296372574
+    ],
+    "reject_image": true,
+    "resid_upper_image": 33.85792185835301,
+    "ci_patient": [
+     0.23514615686578966,
+     0.41988169878898046
+    ],
+    "reject_patient": true,
+    "resid_upper_patient": 35.181027093190096
+   },
+   "color_var@0": {
+    "alpha_up": 0.017591750564522883,
+    "alpha_dn": 0.04383069861507796,
+    "dcace_sym": 0.265652402375631,
+    "diff_point": 0.02623894805055508,
+    "ci_image": [
+     -0.012221313669961141,
+     0.06643730199049061
+    ],
+    "reject_image": false,
+    "resid_upper_image": 0.5506667241853952,
+    "ci_patient": [
+     -0.0057938407254701715,
+     0.06176661206267885
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 0.5119536301075839
+   },
+   "color_var@2": {
+    "alpha_up": 0.14392594266474085,
+    "alpha_dn": 0.5092480558788374,
+    "dcace_sym": 0.060251683752311325,
+    "diff_point": 0.3653221132140965,
+    "ci_image": [
+     0.29633819671675754,
+     0.43769927970922806
+    ],
+    "reject_image": true,
+    "resid_upper_image": 15.99547855367528,
+    "ci_patient": [
+     0.2836903467106858,
+     0.460917297258435
+    ],
+    "reject_patient": true,
+    "resid_upper_patient": 16.843968187960062
+   }
+  },
+  "slim": {
+   "contrast@0": {
+    "alpha_up": 0.03988345845360032,
+    "alpha_dn": 0.03392023235958919,
+    "dcace_sym": 0.45440992438399896,
+    "diff_point": -0.005963226094011127,
+    "ci_image": [
+     -0.05727506613713733,
+     0.04726133251368657
+    ],
+    "reject_image": false,
+    "resid_upper_image": 0.36344428160534,
+    "ci_patient": [
+     -0.06047541914747227,
+     0.05282922014655745
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 0.38375242054209247
+   },
+   "contrast@2": {
+    "alpha_up": 0.3768653050416305,
+    "alpha_dn": 0.5804048549036204,
+    "dcace_sym": 1.1655928221313105,
+    "diff_point": 0.20353954986198985,
+    "ci_image": [
+     -0.030980651895109998,
+     0.4008053311218884
+    ],
+    "reject_image": false,
+    "resid_upper_image": 0.9915318604245839,
+    "ci_patient": [
+     -0.03657279833220678,
+     0.41295937361804425
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 1.0215991260823554
+   },
+   "color_var@0": {
+    "alpha_up": 0.04838185576165151,
+    "alpha_dn": 0.011295110126140498,
+    "dcace_sym": 0.22090463990288264,
+    "diff_point": -0.03708674563551101,
+    "ci_image": [
+     -0.090354928191457,
+     0.013620313418529468
+    ],
+    "reject_image": false,
+    "resid_upper_image": 1.1794161103506082,
+    "ci_patient": [
+     -0.09721939947698859,
+     0.01954300664141733
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 1.269019059356776
+   },
+   "color_var@2": {
+    "alpha_up": 0.15507422662936013,
+    "alpha_dn": 0.5968337929632858,
+    "dcace_sym": 0.8529650991398293,
+    "diff_point": 0.44175956633392566,
+    "ci_image": [
+     0.27102877906713424,
+     0.6257356119830783
+    ],
+    "reject_image": true,
+    "resid_upper_image": 2.1153374561275333,
+    "ci_patient": [
+     0.24939614685271486,
+     0.6380079108808595
+    ],
+    "reject_patient": true,
+    "resid_upper_patient": 2.1568247121412942
+   }
+  },
+  "causal": {
+   "contrast@0": {
+    "alpha_up": 0.4200119972678091,
+    "alpha_dn": 0.02295945458500662,
+    "dcace_sym": 0.08497389597136318,
+    "diff_point": -0.39705254268280243,
+    "ci_image": [
+     -0.707017182152421,
+     0.014699083014436553
+    ],
+    "reject_image": false,
+    "resid_upper_image": 10.509831218863802,
+    "ci_patient": [
+     -0.716595842780724,
+     0.01930223477198337
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 10.65221829098525
+   },
+   "contrast@2": {
+    "alpha_up": 0.10147452604813927,
+    "alpha_dn": 0.38029602452726785,
+    "dcace_sym": 0.046744977352279046,
+    "diff_point": 0.27882149847912857,
+    "ci_image": [
+     0.12908293944074092,
+     0.6048193453001761
+    ],
+    "reject_image": true,
+    "resid_upper_image": 16.343385472699154,
+    "ci_patient": [
+     0.12447193524544341,
+     0.6393226368064071
+    ],
+    "reject_patient": true,
+    "resid_upper_patient": 17.275730969821723
+   },
+   "color_var@0": {
+    "alpha_up": 0.41728288741553626,
+    "alpha_dn": 0.029999251081862063,
+    "dcace_sym": 0.0526014179999345,
+    "diff_point": -0.3872836363336742,
+    "ci_image": [
+     -0.6989014797690004,
+     0.029131514152868184
+    ],
+    "reject_image": false,
+    "resid_upper_image": 16.783008410703673,
+    "ci_patient": [
+     -0.7079809787458157,
+     0.03209988034926222
+    ],
+    "reject_patient": false,
+    "resid_upper_patient": 17.001038150379184
+   },
+   "color_var@2": {
+    "alpha_up": 0.10983083049012214,
+    "alpha_dn": 0.4976267059765839,
+    "dcace_sym": 0.07163602268272791,
+    "diff_point": 0.38779587548646177,
+    "ci_image": [
+     0.2531525053089245,
+     0.6920161329352331
+    ],
+    "reject_image": true,
+    "resid_upper_image": 12.20214152966823,
+    "ci_patient": [
+     0.24945176560029073,
+     0.7485430476032684
+    ],
+    "reject_patient": true,
+    "resid_upper_patient": 13.198865999210906
+   }
+  }
+ }
+}

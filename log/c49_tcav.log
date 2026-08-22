@@ -1,0 +1,16 @@
+[11:53:37] nhóm kiểm định: 183 ảnh, 100 bệnh nhân
+[11:53:40]   dựng 183 ảnh đã sửa cho khái niệm contrast
+[11:53:41]   dựng 183 ảnh đã sửa cho khái niệm color_var
+[11:53:46]   EfficientNet-B3 ERM    contrast   CAV acc=0.864  TCAV=0.800±0.410 [0.00,1.00]  null=0.450±0.510  p=2.22e-02  có ý nghĩa=True
+[11:53:49]   EfficientNet-B3 ERM    color_var  CAV acc=0.856  TCAV=0.850±0.366 [0.00,1.00]  null=0.450±0.510  p=7.38e-03  có ý nghĩa=True
+[11:53:55]   EfficientNet-B3 Slim   contrast   CAV acc=0.855  TCAV=0.874±0.144 [0.48,1.00]  null=0.519±0.449  p=2.66e-03  có ý nghĩa=True
+[11:53:59]   EfficientNet-B3 Slim   color_var  CAV acc=0.863  TCAV=0.839±0.210 [0.47,1.00]  null=0.531±0.446  p=9.52e-03  có ý nghĩa=True
+[11:54:03]   EfficientNet-B3 Inv    contrast   CAV acc=0.833  TCAV=0.768±0.074 [0.64,0.93]  null=0.488±0.366  p=3.06e-03  có ý nghĩa=True
+[11:54:06]   EfficientNet-B3 Inv    color_var  CAV acc=0.843  TCAV=0.754±0.074 [0.64,1.00]  null=0.496±0.410  p=1.19e-02  có ý nghĩa=True
+[11:54:12]   ResNet-50 ERM          contrast   CAV acc=0.937  TCAV=0.250±0.444 [0.00,1.00]  null=0.550±0.510  p=5.48e-02  có ý nghĩa=False
+[11:54:17]   ResNet-50 ERM          color_var  CAV acc=0.926  TCAV=0.150±0.366 [0.00,1.00]  null=0.400±0.503  p=8.09e-02  có ý nghĩa=False
+[11:54:26]   ResNet-50 Slim         contrast   CAV acc=0.935  TCAV=0.999±0.003 [0.99,1.00]  null=0.485±0.397  p=1.39e-05  có ý nghĩa=True
+[11:54:33]   ResNet-50 Slim         color_var  CAV acc=0.929  TCAV=0.958±0.115 [0.60,1.00]  null=0.593±0.431  p=1.41e-03  có ý nghĩa=True
+[11:54:39]   ResNet-50 Inv          contrast   CAV acc=0.867  TCAV=0.695±0.360 [0.00,1.00]  null=0.484±0.326  p=5.97e-02  có ý nghĩa=False
+[11:54:45]   ResNet-50 Inv          color_var  CAV acc=0.851  TCAV=0.846±0.225 [0.00,1.00]  null=0.621±0.378  p=2.97e-02  có ý nghĩa=True
+[11:54:45] saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c49_tcav.json  (9/12 ô có ý nghĩa)

@@ -1,0 +1,555 @@
+{
+ "n_common": 82,
+ "n_patients_common": 44,
+ "boot": 20000,
+ "neutral_sets": {
+  "contrast@2": [
+   "globrot_m"
+  ],
+  "color_var@2": [
+   "globrot_m",
+   "pixperm_m"
+  ],
+  "contrast@0": [
+   "globrot_m",
+   "pixperm_m",
+   "rotax_m",
+   "noise_m"
+  ],
+  "color_var@0": [
+   "globrot_m",
+   "pixperm_m",
+   "noise_m"
+  ]
+ },
+ "note": "Control-versus-control test of (T). For each model and each top-dose concept target, every pair of controls the (A2) screen classifies as concept-neutral. Two valid controls should give the same CaCE, so a non-zero difference falsifies the footprint-only model that placebo subtraction assumes.",
+ "pairs": [
+  {
+   "model": "ERM",
+   "target": "color_var@2",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 9.537504867809576,
+   "ci_image": [
+    8.149991640802927,
+    10.924180343547244
+   ],
+   "ci_patient": [
+    8.092941082309464,
+    11.284939119823608
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 9.832339396927415,
+   "ci_image": [
+    8.46205513536385,
+    11.204725534105444
+   ],
+   "ci_patient": [
+    8.572890950440708,
+    11.148096263178653
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "rotax_m",
+   "diff": -0.0006004895378903645,
+   "ci_image": [
+    -0.13200676647900808,
+    0.1300916124544129
+   ],
+   "ci_patient": [
+    -0.15123948936576742,
+    0.12147644777284111
+   ],
+   "excludes_zero_image": false,
+   "excludes_zero_patient": false
+  },
+  {
+   "model": "ERM",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "noise_m",
+   "diff": 1.962011680370424,
+   "ci_image": [
+    1.5187715772993682,
+    2.3877163268262294
+   ],
+   "ci_patient": [
+    1.4432612557878548,
+    2.403904220328591
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "contrast@0",
+   "a": "pixperm_m",
+   "b": "rotax_m",
+   "diff": -9.832939886465304,
+   "ci_image": [
+    -11.198788199314802,
+    -8.466812494896898
+   ],
+   "ci_patient": [
+    -11.171932259713929,
+    -8.592454359111024
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "contrast@0",
+   "a": "pixperm_m",
+   "b": "noise_m",
+   "diff": -7.870327716556991,
+   "ci_image": [
+    -9.286995103301072,
+    -6.441757918948807
+   ],
+   "ci_patient": [
+    -9.303120795339105,
+    -6.6304382879566415
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "contrast@0",
+   "a": "rotax_m",
+   "b": "noise_m",
+   "diff": 1.962612169908314,
+   "ci_image": [
+    1.5348867907938433,
+    2.381566226950324
+   ],
+   "ci_patient": [
+    1.4927916244715536,
+    2.398441901543888
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "color_var@0",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 10.517153127618679,
+   "ci_image": [
+    9.108233207877634,
+    11.884526839039129
+   ],
+   "ci_patient": [
+    8.971413039122776,
+    11.910074572943682
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "color_var@0",
+   "a": "globrot_m",
+   "b": "noise_m",
+   "diff": 1.8528903291174552,
+   "ci_image": [
+    1.4024724245730151,
+    2.2897654474304034
+   ],
+   "ci_patient": [
+    1.31263578664881,
+    2.3188799367020168
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "ERM",
+   "target": "color_var@0",
+   "a": "pixperm_m",
+   "b": "noise_m",
+   "diff": -8.664262798501223,
+   "ci_image": [
+    -10.050515650485346,
+    -7.244717207314764
+   ],
+   "ci_patient": [
+    -10.075089225591338,
+    -7.228826688624164
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "color_var@2",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 10.036902086400405,
+   "ci_image": [
+    8.029519128990247,
+    11.904627577015537
+   ],
+   "ci_patient": [
+    8.170231962567742,
+    12.254408650683853
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 12.905252956944269,
+   "ci_image": [
+    10.911766153065171,
+    14.682291258880639
+   ],
+   "ci_patient": [
+    10.958477914857369,
+    14.761831158187901
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "rotax_m",
+   "diff": 0.04590440287095744,
+   "ci_image": [
+    -0.18901290427439096,
+    0.29149851618198347
+   ],
+   "ci_patient": [
+    -0.16108044264987792,
+    0.299921982640849
+   ],
+   "excludes_zero_image": false,
+   "excludes_zero_patient": false
+  },
+  {
+   "model": "Slim",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "noise_m",
+   "diff": 3.2644489861843065,
+   "ci_image": [
+    2.4038844100086063,
+    4.194592370288219
+   ],
+   "ci_patient": [
+    2.4096702150323175,
+    4.02773799229343
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "contrast@0",
+   "a": "pixperm_m",
+   "b": "rotax_m",
+   "diff": -12.85934855407331,
+   "ci_image": [
+    -14.645621827017607,
+    -10.855856150797592
+   ],
+   "ci_patient": [
+    -14.675355521940329,
+    -10.924262844384446
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "contrast@0",
+   "a": "pixperm_m",
+   "b": "noise_m",
+   "diff": -9.640803970759961,
+   "ci_image": [
+    -11.40905323188025,
+    -7.678607755953946
+   ],
+   "ci_patient": [
+    -11.535467998406668,
+    -7.769951009068249
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "contrast@0",
+   "a": "rotax_m",
+   "b": "noise_m",
+   "diff": 3.218544583313349,
+   "ci_image": [
+    2.3766547644465432,
+    4.1388203759246105
+   ],
+   "ci_patient": [
+    2.3461152295502252,
+    3.9906371085200987
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "color_var@0",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 12.6872397228712,
+   "ci_image": [
+    10.734887140843925,
+    14.46126483369891
+   ],
+   "ci_patient": [
+    10.82328555361318,
+    14.239842160054925
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "color_var@0",
+   "a": "globrot_m",
+   "b": "noise_m",
+   "diff": 2.763445160919573,
+   "ci_image": [
+    2.096182454400128,
+    3.4814914874278187
+   ],
+   "ci_patient": [
+    2.0216547161148535,
+    3.364226301270766
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Slim",
+   "target": "color_var@0",
+   "a": "pixperm_m",
+   "b": "noise_m",
+   "diff": -9.923794561951626,
+   "ci_image": [
+    -11.745169601371376,
+    -7.951493655226944
+   ],
+   "ci_patient": [
+    -11.578366087247739,
+    -8.139137911342715
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "color_var@2",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 2.177749275207156,
+   "ci_image": [
+    1.3645515565203912,
+    3.106513104306124
+   ],
+   "ci_patient": [
+    1.066317604554719,
+    3.3991013233618044
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 1.79371239626553,
+   "ci_image": [
+    1.1304675984627954,
+    2.579769253985183
+   ],
+   "ci_patient": [
+    1.0442493342122656,
+    2.473985352321394
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "rotax_m",
+   "diff": 0.05182849852050223,
+   "ci_image": [
+    -0.0052483813973461715,
+    0.10778917522601235
+   ],
+   "ci_patient": [
+    -0.010973121859734097,
+    0.10492267894489131
+   ],
+   "excludes_zero_image": false,
+   "excludes_zero_patient": false
+  },
+  {
+   "model": "Inv",
+   "target": "contrast@0",
+   "a": "globrot_m",
+   "b": "noise_m",
+   "diff": 0.6115298597369252,
+   "ci_image": [
+    0.3696493827374425,
+    0.8465811249913602
+   ],
+   "ci_patient": [
+    0.3821194512425707,
+    0.8173585893488303
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "contrast@0",
+   "a": "pixperm_m",
+   "b": "rotax_m",
+   "diff": -1.7418838977450277,
+   "ci_image": [
+    -2.5170233089045233,
+    -1.0883747735356049
+   ],
+   "ci_patient": [
+    -2.4079298722925824,
+    -1.009311036510832
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "contrast@0",
+   "a": "pixperm_m",
+   "b": "noise_m",
+   "diff": -1.1821825365286047,
+   "ci_image": [
+    -1.9473785241838635,
+    -0.5420351406672943
+   ],
+   "ci_patient": [
+    -1.8656787903050045,
+    -0.4421827142541121
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "contrast@0",
+   "a": "rotax_m",
+   "b": "noise_m",
+   "diff": 0.559701361216423,
+   "ci_image": [
+    0.3206723087467253,
+    0.7911119265572689
+   ],
+   "ci_patient": [
+    0.34965725373411843,
+    0.7536610639792249
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "color_var@0",
+   "a": "globrot_m",
+   "b": "pixperm_m",
+   "diff": 1.4284747321067788,
+   "ci_image": [
+    0.8932187881547867,
+    2.0788880146994457
+   ],
+   "ci_patient": [
+    0.7226009660182271,
+    2.0665724075709777
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "color_var@0",
+   "a": "globrot_m",
+   "b": "noise_m",
+   "diff": 0.5512621272809621,
+   "ci_image": [
+    0.3198773387615092,
+    0.7786702635857022
+   ],
+   "ci_patient": [
+    0.31889192779061803,
+    0.7596121291850544
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  },
+  {
+   "model": "Inv",
+   "target": "color_var@0",
+   "a": "pixperm_m",
+   "b": "noise_m",
+   "diff": -0.8772126048258165,
+   "ci_image": [
+    -1.4821222950954263,
+    -0.39332667442901836
+   ],
+   "ci_patient": [
+    -1.4811522848049,
+    -0.24147783605298295
+   ],
+   "excludes_zero_image": true,
+   "excludes_zero_patient": true
+  }
+ ],
+ "summary": {
+  "n_pairs_per_model": {
+   "contrast@2": 0,
+   "color_var@2": 1,
+   "contrast@0": 6,
+   "color_var@0": 3
+  },
+  "n_comparisons": 30,
+  "excluding_zero_image": 27,
+  "excluding_zero_patient": 27,
+  "max_abs_diff": 12.905252956944269,
+  "exceptions_patient": [
+   "ERM contrast@0 globrot_m-rotax_m",
+   "Slim contrast@0 globrot_m-rotax_m",
+   "Inv contrast@0 globrot_m-rotax_m"
+  ]
+ }
+}

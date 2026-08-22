@@ -1,0 +1,12 @@
+[03:49:17] bên bệnh: chênh lệch OR tối đa 2.752e-09, số tầng khớp True
+[03:49:17] bên mô hình: 17/18 ô cùng phán quyết; bất đồng ['r50|Inv|benign']
+[03:49:42] nhóm ảnh: 183 và 185, chung 14 ảnh
+[03:54:00]   chồng lớp here: xong 7 hiện thực
+[03:58:29]   chồng lớp other: xong 7 hiện thực
+[03:58:43]   ckpt here  × cohort here : 0.1228 -> exceedance
+[03:58:55]   ckpt here  × cohort other: 0.1235 -> exceedance
+[03:59:09]   ckpt other × cohort here : 0.0433 -> indeterminate
+[03:59:20]   ckpt other × cohort other: 0.0453 -> indeterminate
+[03:59:20]   hiệu ứng checkpoint 0.0796 so với hiệu ứng nhóm ảnh 0.0006
+[03:59:20]   quét seed trên checkpoint bên kia: 0.0429–0.0514, phán quyết ['indeterminate']
+[03:59:20] saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c51_independent_rebuild.json

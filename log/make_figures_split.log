@@ -1,0 +1,12 @@
+wrote p1_fig1_dag
+Traceback (most recent call last):
+  File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/make_figures_split.py", line 291, in <module>
+    print("wrote", fn())
+                   ^^^^
+  File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/make_figures_split.py", line 136, in p1_fig2_forest
+    ate = {c["concept"]: c for c in load("tier1_ate.json")["concepts"]}
+                                    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/make_figures_split.py", line 53, in load
+    return json.load(open(os.path.join(RES, n)))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/tier1_ate.json'

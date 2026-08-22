@@ -1,0 +1,103 @@
+=== run started 2026-08-21T07:32:52+00:00 ===
+tree      : /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear
+python    : /mnt/data2/Toan/Causal_ML_XAI/.venv/bin/python
+scripts   : 28
+torch     : 2.10.0+cu128 | cuda True
+
+c54_synthetic_scm          start 07:32:55
+c54_synthetic_scm            ok      0s
+c2_cace_artifact           start 07:32:55
+c2_cace_artifact             ok     96s
+c3_cace_concept            start 07:34:31
+c3_cace_concept              ok     52s
+c7_extra_controls          start 07:35:23
+c7_extra_controls            ok     42s
+c10_multiplacebo           start 07:36:05
+c10_multiplacebo             ok     38s
+c12_matched_control        start 07:36:43
+c12_matched_control          ok    346s
+c13_fullpop                start 07:42:29
+c13_fullpop                  ok     79s
+c19_saturation_mde         start 07:43:48
+c19_saturation_mde           ok     47s
+c20_numerical_repro        start 07:44:35
+c20_numerical_repro          ok     67s
+c21_patient_cluster        start 07:45:42
+c21_patient_cluster          ok     42s
+c25_screen_full_sample     start 07:46:24
+c25_screen_full_sample       ok    471s
+c26_hair_dose_prob         start 07:54:15
+c26_hair_dose_prob         FAIL rc=1     7s  (see log/c26_hair_dose_prob.log)
+      | Traceback (most recent call last):
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/c26_hair_dose_prob.py", line 88, in <module>
+      |     main()
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/c26_hair_dose_prob.py", line 52, in main
+      |     d = np.load(os.path.join(RES, "c19_preds.npz"), allow_pickle=True)
+      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/.venv/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 454, in load
+      |     fid = stack.enter_context(open(os.fspath(file), "rb"))
+      |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      | FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c19_preds.npz'
+c30_disjoint_audit         start 07:54:22
+c30_disjoint_audit           ok     87s
+c32_absdp_patient_ci       start 07:55:49
+c32_absdp_patient_ci       FAIL rc=1     8s  (see log/c32_absdp_patient_ci.log)
+      | Traceback (most recent call last):
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/c32_absdp_patient_ci.py", line 98, in <module>
+      |     main()
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/c32_absdp_patient_ci.py", line 56, in main
+      |     d = np.load(os.path.join(RES, "c19_preds.npz"), allow_pickle=True)
+      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/.venv/lib/python3.12/site-packages/numpy/lib/_npyio_impl.py", line 454, in load
+      |     fid = stack.enter_context(open(os.fspath(file), "rb"))
+      |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      | FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c19_preds.npz'
+c34_ctrl_vs_ctrl           start 07:55:57
+c34_ctrl_vs_ctrl             ok     50s
+c35_selection_isolation    start 07:56:47
+c35_selection_isolation      ok   8324s
+c38_shrinkage_sensitivity  start 10:15:31
+c38_shrinkage_sensitivity    ok    294s
+c40_simultaneous           start 10:20:25
+c40_simultaneous             ok    164s
+c42_positive_control       start 10:23:09
+c42_positive_control         ok    262s
+c45_partial_id             start 10:27:31
+c45_partial_id               ok    190s
+c46_padufes_artifact       start 10:30:41
+c46_padufes_artifact         ok   4784s
+c49_tcav                   start 11:50:26
+c49_tcav                     ok    262s
+c50_overlay_seed           start 11:54:49
+c50_overlay_seed             ok   1064s
+c51_independent_rebuild    start 12:12:34
+c51_independent_rebuild    FAIL rc=2   242s  (see log/c51_independent_rebuild.log)
+      | usage: c51_independent_rebuild.py [-h] --other OTHER
+      | c51_independent_rebuild.py: error: the following arguments are required: --other
+c52_overlay_perceptual     start 12:16:37
+c52_overlay_perceptual       ok    315s
+c55_identification_graph   start 12:21:52
+c55_identification_graph     ok    821s
+make_figures_split         start 12:35:34
+make_figures_split         FAIL rc=1    45s  (see log/make_figures_split.log)
+      | wrote p1_fig1_dag
+      | Traceback (most recent call last):
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/make_figures_split.py", line 291, in <module>
+      |     print("wrote", fn())
+      |                    ^^^^
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/make_figures_split.py", line 136, in p1_fig2_forest
+      |     ate = {c["concept"]: c for c in load("tier1_ate.json")["concepts"]}
+      |                                     ^^^^^^^^^^^^^^^^^^^^^^
+      |   File "/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/code/make_figures_split.py", line 53, in load
+      |     return json.load(open(os.path.join(RES, n)))
+      |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+      | FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/tier1_ate.json'
+make_fig_shrinkage         start 12:36:19
+make_fig_shrinkage           ok      3s
+
+=== run finished 2026-08-21T12:36:22+00:00 ===
+ok=24 fail=4
+failed: c26_hair_dose_prob c32_absdp_patient_ci c51_independent_rebuild make_figures_split
+results written: 29 files
+verification: see log/verify_paper2.log
+=== all done 2026-08-21T12:36:25+00:00 ===

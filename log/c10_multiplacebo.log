@@ -1,0 +1,26 @@
+##### C10 multi-placebo 07:36:09 #####
+placebo proxy-change (lower=more neutral): hue=5.1% flip=21.9% jitter=9.8% noise=4.7%
+[erm] p_full=0.823
+[slim] p_full=0.905
+[causal] p_full=0.658
+
+================================================================================================
+#1c PLACEBO CaCE (logit) per model — HỘI TỤ hay PHÂN KỲ?
+model                hue            flip          jitter           noise
+erm                -0.98           -0.76           -0.29           -3.09
+slim               -2.12            0.11           -0.02           -4.90
+causal             -0.56           -0.26           -0.02           -1.09
+------------------------------------------------------------------------------------------------
+#1c CORRECTED alignment A_corr under EACH placebo (aligned nếu >0 & CI>0):
+model                hue            flip          jitter           noise
+erm             +1.11[Y]        +0.90[Y]        +0.43[Y]        +3.23[Y]
+slim            +1.73[Y]        -0.50[.]        -0.37[.]        +4.51[Y]
+causal          +0.35[Y]        +0.06[.]        -0.19[A]        +0.89[Y]
+------------------------------------------------------------------------------------------------
+#3 A_corr (hue) BY DOSE (dose0=cleanest):
+  erm      d0=+1.02[Y] d1=+1.04[Y] d2=+1.11[Y]
+  slim     d0=+2.03[Y] d1=+1.88[Y] d2=+1.73[Y]
+  causal   d0=+0.50[Y] d1=+0.45[Y] d2=+0.35[Y]
+================================================================================================
+KẾT LUẬN: nếu placebo_cace HỘI TỤ & A_corr>0[Y] với MỌI placebo & MỌI dose -> correction VALID, retraction giữ. Nếu PHÂN KỲ (vd flip≈0, hue lớn) -> correction không valid -> concept tier INCONCLUSIVE, phải hạ cấp.
+Saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c10_multiplacebo.json
