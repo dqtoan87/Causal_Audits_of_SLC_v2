@@ -43,6 +43,7 @@ SCRIPTS=(
   c38_shrinkage_sensitivity
   c40_simultaneous
   c56_simultaneous36
+  c57_stratified_band
   c42_positive_control
   c45_partial_id
   c46_padufes_artifact

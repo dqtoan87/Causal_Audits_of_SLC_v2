@@ -206,6 +206,29 @@ if d:
     check("nine cached-prediction cells: bound 0.122",
           min(v["ci_simultaneous"][0] for v in p9["cells"].values()), 0.122, 5e-4,
           text="0.122", where="supp")
+d = load("c57_stratified_band")
+if d:
+    check("stratified band: critical value 3.10", d["crit_36"], 3.10, 5e-3, text="critical value of 3.10")
+    check("stratified band: frontier 0.065", d["frontier_36"], 0.065, 5e-4, text="frontier of 0.065")
+    check("stratified band: frontier 0.0651 (supp)", d["frontier_36"], 0.0651, 5e-5, text="0.0651", where="supp")
+    check("stratified band: strata 44 and 56", tuple(d["n_patients_strata"]), (44, 56), 0, text="the 44 patients", where="supp")
+    check("stratified band: all 18 still exceed", d["magnitude_exceed_36"], 18)
+d = load("c58_rebuild_trace")
+if d:
+    mix = lambda k: d[k]["mixture"]["magnitude"]
+    check("trace: bright ruler moves the cell by 0.0003",
+          round(mix("L2_L3_this_pipeline") - mix("L4_this_pipeline_bright_ruler"), 4), 0.0003, 5e-5, text="0.0003", where="supp")
+    check("trace: single blend moves the cell by 0.0007",
+          round(mix("L2_L3_this_pipeline") - mix("L5_this_pipeline_single_blend_hair"), 4), 0.0007, 5e-5, text="0.0007", where="supp")
+    check("trace: reimplementation inference on same edits gives 0.047",
+          mix("L6_reimplementation_inference_on_this_pipeline_edits"), 0.047, 5e-4, text="give 0.047", where="supp")
+    check("trace: inference codes agree to 0.003", d["L6_unedited"]["reimpl_inference_vs_this_pipeline_mean_abs"],
+          0.003, 5e-4, text="to 0.003 on average", where="supp")
+    r7 = d["L7_reimplementation_rerun_vs_its_cache"]
+    check("trace: rerun vs cache mean 0.016", r7["mean_abs"], 0.016, 5e-4, text="by 0.016 on average", where="supp")
+    check("trace: rerun vs cache max 0.72", r7["max_abs"], 0.72, 5e-3, text="up to 0.72", where="supp")
+    check("trace: 4.9% of images above 0.05", 100 * r7["share_over_0.05"], 4.9, 0.05, text="4.9% of images", where="supp")
+    check("trace: 1.04 blends per touched pixel", d["blends_per_touched_pixel_heavy_hair"], 1.04, 5e-3, text="1.04 times", where="supp")
 d = load("c56_simultaneous36")
 if d:
     check("36-component critical value 3.11 (headline band)", d["crit_36"], 3.11, 5e-3, text="1.96 to 3.11")

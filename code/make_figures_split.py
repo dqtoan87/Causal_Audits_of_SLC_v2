@@ -290,7 +290,7 @@ def p3_fig1_dag():
     a2.text(0.95, 0.46, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
     _rung(a2, 0.46, 0.19, 0.36, "C1  working form\ngranted; probed by\ndiagnostic (T)", "assumed", ASSC)
     _rung(a2, 0.46, 0.52, 0.67, "C2  identification\nfrom the library\nnot satisfied", "tested", BADC)
-    _rung(a2, 0.46, 0.77, 0.90, "C3  intervention\nvalidity\nassumed", "assumed", ASSC)
+    _rung(a2, 0.46, 0.77, 0.90, "C3  a: assumed\nb: fixed level not\nmet by the edit", "tested", BADC)
     a2.text(0.52, 0.27, "C0 gates C2: it selects\nthe branch of Statement 1", ha="center", va="center",
             fontsize=SM, color="0.30")
     fig.text(0.5, 0.190, "Green box: estimated from the audited images.   Amber dashed rung: "

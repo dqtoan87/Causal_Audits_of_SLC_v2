@@ -61,8 +61,9 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c8_backbone2_train.py` | checkpoints | trains the ResNet-50 trio |
 | `c2_cace_artifact.py` | `tier2_cace_artifact.json` | artifact overlays and edit precomputation |
 | `c30_disjoint_audit.py` | `c30_disjoint_audit.json` | artifact criterion on the audit cohort |
-| `c40_simultaneous.py` | `c40_simultaneous.json` | max-statistic simultaneous bands over the 18 magnitude statistics |
-| `c56_simultaneous36.py` | `c56_simultaneous36.json` | the same bands over all 36 components |
+| `c40_simultaneous.py` | `c40_simultaneous.json` | max-statistic band over the 18 magnitude statistics (secondary) |
+| `c56_simultaneous36.py` | `c56_simultaneous36.json` | max-statistic band over all 36 components, the headline band |
+| `c57_stratified_band.py` | `c57_stratified_band.json` | the 36-component band with patients resampled within the design strata |
 | `c32_absdp_patient_ci.py` | `c32_absdp_patient_ci.json` | patient-clustered intervals for the artifact effect |
 | `c21_patient_cluster.py` | `c21_patient_cluster.json` | patient-clustered recomputation of the model-side quantities |
 | `c26_hair_dose_prob.py` | `c26_hair_dose_prob.json` | dose response on the probability scale |
@@ -87,11 +88,12 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c44_cache_preds.py` | `c19_preds.npz` | cached baseline and edited predictions |
 | `c49_tcav.py` | `c49_tcav.json` | concept activation vectors on the same checkpoints and concepts |
 | `c51_independent_rebuild.py` | `c51_independent_rebuild.json` | comparison against a separate reimplementation (see the note below) |
+| `c58_rebuild_trace.py` | `c58_rebuild_trace.json` | layer-by-layer trace of the one cell on which the reimplementation disagrees (see the note below) |
 | `make_figures_split.py`, `make_fig_shrinkage.py` | `paper/figures/` | figures |
 
 `c15_symmetry.py` and `audit_cohort.py`, `frozen_split.py`, `audited_models.py` are shared modules. `p2_source_guard.py` stops the data-reading figure scripts when the tree lacks its frozen manifest.
 
-`c51_independent_rebuild.py` compares this pipeline with a separate clean-room reimplementation of the same audit. It reads that reimplementation's result files from a sibling directory, which is not part of this repository, so it does not run on its own here. Its cached output, `results/c51_independent_rebuild.json`, is included.
+`c51_independent_rebuild.py` and `c58_rebuild_trace.py` compare this pipeline with a separate clean-room reimplementation of the same audit. They read that reimplementation's files from a sibling directory, passed with `--other`, which is not part of this repository, so they do not run on their own here. Their cached outputs are included.
 
 `verify_paper3.py` checks the load-bearing numbers of the manuscript against the files in `results/`. It reads the manuscript text from `paper/`, which is not part of this repository.
 
