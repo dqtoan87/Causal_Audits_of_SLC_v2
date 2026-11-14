@@ -1,14 +1,15 @@
-##### C34 control-vs-control 07:56:01 #####
+##### C34 control-vs-control 10:49:02 #####
    ... 20/83 ảnh (5s)
    ... 40/83 ảnh (9s)
-   ... 60/83 ảnh (14s)
-   ... 80/83 ảnh (18s)
-edits xong (19s)
-[erm] p_full=0.733 (23s)
-[slim] p_full=0.859 (26s)
-[causal] p_full=0.611 (28s)
+   ... 60/83 ảnh (13s)
+   ... 80/83 ảnh (17s)
+edits xong (18s)
+[erm] p_full=0.733 (22s)
+[slim] p_full=0.859 (24s)
+[causal] p_full=0.611 (26s)
 tập chung n=82 / 44 bệnh nhân
 
-30 so sánh | loại trừ 0: 27 (ảnh) 27 (bệnh nhân) | |hiệu| lớn nhất 12.91
-ngoại lệ (bệnh nhân): ['ERM contrast@0 globrot_m-rotax_m', 'Slim contrast@0 globrot_m-rotax_m', 'Inv contrast@0 globrot_m-rotax_m']
-saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c34_ctrl_vs_ctrl.json (45s)
+21 so sánh | loại trừ 0: 21 (ảnh) 21 (bệnh nhân) | |hiệu| lớn nhất 12.91
+ngoại lệ (bệnh nhân): []
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c34_ctrl_vs_ctrl.json (38s)
+c34 exit 0

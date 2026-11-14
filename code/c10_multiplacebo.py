@@ -21,6 +21,7 @@ import c7_extra_controls as c7m
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 OUT = os.path.join(os.path.dirname(HERE), "results", "c10_multiplacebo.json")
 import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
+import audit_cohort                  # noqa: E402  (frozen audit cohort)
 CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
 SEED, N_EVAL, BOOT = 42, 200, 2000
 DOSES = c3m.DOSES   # [0.3,0.6,1.0]
@@ -53,13 +54,24 @@ def proxychg(x0, xe, w0, skin0):
     return {k: abs(b[k] - a[k]) / (abs(a[k]) + 1e-6) for k in a}
 
 
-def boot(v): return p2.boot_mean_ci(np.asarray(v, float), BOOT, SEED)
+def boot(v, groups=None):
+    """Mean and 95% percentile interval. With groups, patients are the resampling unit and all
+    images of a drawn patient enter together, as in every other interval of the paper."""
+    v = np.asarray(v, float)
+    if groups is None:
+        return p2.boot_mean_ci(v, BOOT, SEED)
+    u, inv = np.unique(np.asarray(groups), return_inverse=True)
+    idx = [np.where(inv == k)[0] for k in range(len(u))]
+    rng = np.random.RandomState(SEED)
+    bs = [v[np.concatenate([idx[k] for k in rng.randint(0, len(idx), len(idx))])].mean()
+          for _ in range(BOOT)]
+    return float(v.mean()), float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))
 
 
 def main():
     print(f"##### C10 multi-placebo {time.strftime('%H:%M:%S')} #####", flush=True)
-    _, df_va = p2.build_split({"seed": SEED, "n_folds": 5})
-    imgs01, labels = p2.load_eval_images(df_va, N_EVAL, SEED)
+    imgs01, labels, _pid, _ids = audit_cohort.load()
+    _pid = np.asarray(_pid)   # frozen audit cohort, never rebuilt
     labels = np.array(labels); mal = np.where(labels == 1)[0]
 
     # edits: concept contrast/color at 3 doses + 4 placebos
@@ -100,23 +112,25 @@ def main():
         print(f"[{m}] p_full={p0.mean():.3f}", flush=True)
 
     common = (P0["erm"] >= 0.1) & (P0["slim"] >= 0.1) & (P0["causal"] >= 0.1)
-    res = {"n_common": int(common.sum()), "placebo_proxychg": pchg_s, "models": {}}
+    G = _pid[mal][common]
+    res = {"n_common": int(common.sum()), "n_patients_common": int(len(set(G.tolist()))),
+           "resampling_unit": "patient", "placebo_proxychg": pchg_s, "models": {}}
     for m in order:
         mr = {"placebo_cace": {}, "A_corr_by_placebo": {}, "A_corr_hue_by_dose": {}}
         for p in pnames:
-            mr["placebo_cace"][p] = boot(DL[m][p][common])
+            mr["placebo_cace"][p] = boot(DL[m][p][common], G)
         # corrected alignment (top dose concepts) under each placebo
         for p in pnames:
-            cc = boot((DL[m]["contrast@2"] - DL[m][p])[common])
-            co = boot((DL[m]["color_var@2"] - DL[m][p])[common])
+            cc = boot((DL[m]["contrast@2"] - DL[m][p])[common], G)
+            co = boot((DL[m]["color_var@2"] - DL[m][p])[common], G)
             mr["A_corr_by_placebo"][p] = dict(A=float(np.mean([cc[0], co[0]])),
                                               contrast=cc, color=co,
                                               aligned=bool(cc[1] > 0 and co[1] > 0),
                                               anti=bool(cc[2] < 0 and co[2] < 0))
         # per-dose corrected under hue
         for k in range(3):
-            cc = boot((DL[m][f"contrast@{k}"] - DL[m]["hue"])[common])
-            co = boot((DL[m][f"color_var@{k}"] - DL[m]["hue"])[common])
+            cc = boot((DL[m][f"contrast@{k}"] - DL[m]["hue"])[common], G)
+            co = boot((DL[m][f"color_var@{k}"] - DL[m]["hue"])[common], G)
             mr["A_corr_hue_by_dose"][f"dose{k}"] = dict(A=float(np.mean([cc[0], co[0]])),
                                                         aligned=bool(cc[1] > 0 and co[1] > 0))
         res["models"][m] = mr

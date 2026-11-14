@@ -39,9 +39,12 @@ TOP = ["contrast@2", "color_var@2", "contrast@0", "color_var@0"]
 # Cặp chỉ lập được ở nơi có từ hai control CÙNG trung tính (A2) VÀ đạt overlap (A3) trên cùng
 # target. Danh sách dưới đây đọc thẳng từ màn hình của C12, giới hạn trong các họ khớp dấu chân;
 # placebo chưa hiệu chuẩn (u:hue, u:noise) không khớp dấu chân nên không phải ứng viên của (T).
+# Derived from c25_screen_mal.json (main scheme, malignant images, calibrated "_m" families):
+# (A2) absolute <= 0.10 and ratio <= 0.15, (A3) overlap >= 0.95. rotax_m fails (A2) at contrast@0
+# (ratio 0.163), and pixperm_m fails (A3) at contrast@2 on the malignant images (0.92).
 NEUTRAL = {"contrast@2":  ["globrot_m"],
            "color_var@2": ["globrot_m", "pixperm_m"],
-           "contrast@0":  ["globrot_m", "pixperm_m", "rotax_m", "noise_m"],
+           "contrast@0":  ["globrot_m", "pixperm_m", "noise_m"],
            "color_var@0": ["globrot_m", "pixperm_m", "noise_m"]}
 
 

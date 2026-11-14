@@ -13,7 +13,6 @@
   "contrast@0": [
    "globrot_m",
    "pixperm_m",
-   "rotax_m",
    "noise_m"
   ],
   "color_var@0": [
@@ -62,23 +61,6 @@
    "model": "ERM",
    "target": "contrast@0",
    "a": "globrot_m",
-   "b": "rotax_m",
-   "diff": -0.0006004895378903645,
-   "ci_image": [
-    -0.13200676647900808,
-    0.1300916124544129
-   ],
-   "ci_patient": [
-    -0.15123948936576742,
-    0.12147644777284111
-   ],
-   "excludes_zero_image": false,
-   "excludes_zero_patient": false
-  },
-  {
-   "model": "ERM",
-   "target": "contrast@0",
-   "a": "globrot_m",
    "b": "noise_m",
    "diff": 1.962011680370424,
    "ci_image": [
@@ -96,23 +78,6 @@
    "model": "ERM",
    "target": "contrast@0",
    "a": "pixperm_m",
-   "b": "rotax_m",
-   "diff": -9.832939886465304,
-   "ci_image": [
-    -11.198788199314802,
-    -8.466812494896898
-   ],
-   "ci_patient": [
-    -11.171932259713929,
-    -8.592454359111024
-   ],
-   "excludes_zero_image": true,
-   "excludes_zero_patient": true
-  },
-  {
-   "model": "ERM",
-   "target": "contrast@0",
-   "a": "pixperm_m",
    "b": "noise_m",
    "diff": -7.870327716556991,
    "ci_image": [
@@ -122,23 +87,6 @@
    "ci_patient": [
     -9.303120795339105,
     -6.6304382879566415
-   ],
-   "excludes_zero_image": true,
-   "excludes_zero_patient": true
-  },
-  {
-   "model": "ERM",
-   "target": "contrast@0",
-   "a": "rotax_m",
-   "b": "noise_m",
-   "diff": 1.962612169908314,
-   "ci_image": [
-    1.5348867907938433,
-    2.381566226950324
-   ],
-   "ci_patient": [
-    1.4927916244715536,
-    2.398441901543888
    ],
    "excludes_zero_image": true,
    "excludes_zero_patient": true
@@ -232,23 +180,6 @@
    "model": "Slim",
    "target": "contrast@0",
    "a": "globrot_m",
-   "b": "rotax_m",
-   "diff": 0.04590440287095744,
-   "ci_image": [
-    -0.18901290427439096,
-    0.29149851618198347
-   ],
-   "ci_patient": [
-    -0.16108044264987792,
-    0.299921982640849
-   ],
-   "excludes_zero_image": false,
-   "excludes_zero_patient": false
-  },
-  {
-   "model": "Slim",
-   "target": "contrast@0",
-   "a": "globrot_m",
    "b": "noise_m",
    "diff": 3.2644489861843065,
    "ci_image": [
@@ -266,23 +197,6 @@
    "model": "Slim",
    "target": "contrast@0",
    "a": "pixperm_m",
-   "b": "rotax_m",
-   "diff": -12.85934855407331,
-   "ci_image": [
-    -14.645621827017607,
-    -10.855856150797592
-   ],
-   "ci_patient": [
-    -14.675355521940329,
-    -10.924262844384446
-   ],
-   "excludes_zero_image": true,
-   "excludes_zero_patient": true
-  },
-  {
-   "model": "Slim",
-   "target": "contrast@0",
-   "a": "pixperm_m",
    "b": "noise_m",
    "diff": -9.640803970759961,
    "ci_image": [
@@ -292,23 +206,6 @@
    "ci_patient": [
     -11.535467998406668,
     -7.769951009068249
-   ],
-   "excludes_zero_image": true,
-   "excludes_zero_patient": true
-  },
-  {
-   "model": "Slim",
-   "target": "contrast@0",
-   "a": "rotax_m",
-   "b": "noise_m",
-   "diff": 3.218544583313349,
-   "ci_image": [
-    2.3766547644465432,
-    4.1388203759246105
-   ],
-   "ci_patient": [
-    2.3461152295502252,
-    3.9906371085200987
    ],
    "excludes_zero_image": true,
    "excludes_zero_patient": true
@@ -402,23 +299,6 @@
    "model": "Inv",
    "target": "contrast@0",
    "a": "globrot_m",
-   "b": "rotax_m",
-   "diff": 0.05182849852050223,
-   "ci_image": [
-    -0.0052483813973461715,
-    0.10778917522601235
-   ],
-   "ci_patient": [
-    -0.010973121859734097,
-    0.10492267894489131
-   ],
-   "excludes_zero_image": false,
-   "excludes_zero_patient": false
-  },
-  {
-   "model": "Inv",
-   "target": "contrast@0",
-   "a": "globrot_m",
    "b": "noise_m",
    "diff": 0.6115298597369252,
    "ci_image": [
@@ -436,23 +316,6 @@
    "model": "Inv",
    "target": "contrast@0",
    "a": "pixperm_m",
-   "b": "rotax_m",
-   "diff": -1.7418838977450277,
-   "ci_image": [
-    -2.5170233089045233,
-    -1.0883747735356049
-   ],
-   "ci_patient": [
-    -2.4079298722925824,
-    -1.009311036510832
-   ],
-   "excludes_zero_image": true,
-   "excludes_zero_patient": true
-  },
-  {
-   "model": "Inv",
-   "target": "contrast@0",
-   "a": "pixperm_m",
    "b": "noise_m",
    "diff": -1.1821825365286047,
    "ci_image": [
@@ -462,23 +325,6 @@
    "ci_patient": [
     -1.8656787903050045,
     -0.4421827142541121
-   ],
-   "excludes_zero_image": true,
-   "excludes_zero_patient": true
-  },
-  {
-   "model": "Inv",
-   "target": "contrast@0",
-   "a": "rotax_m",
-   "b": "noise_m",
-   "diff": 0.559701361216423,
-   "ci_image": [
-    0.3206723087467253,
-    0.7911119265572689
-   ],
-   "ci_patient": [
-    0.34965725373411843,
-    0.7536610639792249
    ],
    "excludes_zero_image": true,
    "excludes_zero_patient": true
@@ -539,17 +385,13 @@
   "n_pairs_per_model": {
    "contrast@2": 0,
    "color_var@2": 1,
-   "contrast@0": 6,
+   "contrast@0": 3,
    "color_var@0": 3
   },
-  "n_comparisons": 30,
-  "excluding_zero_image": 27,
-  "excluding_zero_patient": 27,
+  "n_comparisons": 21,
+  "excluding_zero_image": 21,
+  "excluding_zero_patient": 21,
   "max_abs_diff": 12.905252956944269,
-  "exceptions_patient": [
-   "ERM contrast@0 globrot_m-rotax_m",
-   "Slim contrast@0 globrot_m-rotax_m",
-   "Inv contrast@0 globrot_m-rotax_m"
-  ]
+  "exceptions_patient": []
  }
 }

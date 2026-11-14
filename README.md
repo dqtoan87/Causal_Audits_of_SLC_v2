@@ -1,112 +1,89 @@
 # Causal_Audits_of_SLC
 
-Analysis code for a causal audit of skin-lesion classifiers. Two tiers are computed: the effect of measured lesion proxies on malignancy, estimated both by confounder adjustment and by a within-patient design, and the effect of performed image edits on a classifier, judged against a tolerance with a three-way interval rule.
+Analysis code and cached results for a causal audit of skin-lesion classifiers. The audit has two tiers. The artifact tier asks whether a classifier's malignant score moves under performed acquisition edits (hair and ruler overlays), judged against a stated tolerance with a three-way interval rule. The concept tier asks whether a library of performed edits identifies the classifier's response to a clinical concept, decided by the connectivity of an audit graph.
 
 ## Layout
 
 ```
-code/                37 analysis scripts and 4 driver scripts
-  lib/               vendored training modules and the legacy checkpoints
-results/             37 cached JSON and NPZ outputs
-checkpoints/         six patient-disjoint models, the leaky and blind pair, two PAD-UFES models
-logs/                run logs
+code/          analysis scripts, shared modules, the runner and the verifier
+  lib/         vendored training modules
+results/       cached JSON and NPZ outputs, one per script, plus the frozen manifests
+log/           one log per script and run_all.log for the last full run
 ```
+
+Model checkpoints are not included. The scripts expect the six audited checkpoints under `checkpoints/` (`dj_{erm,slim,causal}_{b3,r50}.pt`) and the legacy models under `code/lib/checkpoints/`. Analyses that read only cached predictions run without them (see below).
 
 ## Setup
 
-Python 3.13 with PyTorch, scikit-learn, pandas, numpy, scipy, matplotlib and Pillow.
-
-A CUDA device is needed only by the scripts that run a model over images. Eleven of the analysis scripts read cached predictions instead and run on CPU.
+Python 3 with PyTorch, torchvision, scikit-learn, pandas, numpy, scipy, matplotlib and Pillow. A CUDA device is needed only by the scripts that run a model over images.
 
 The two datasets are public and are not redistributed here.
 
 | Dataset | Expected at | Set the path in |
 | --- | --- | --- |
-| ISIC-2024 (SLICE-3D) | `$DATA_ROOT/data_ISIC2024/` with `train-metadata.csv` and `train-image/image/` | `DATA_ROOT` at the top of `code/lib/train_XAI_new_v01.py` |
-| PAD-UFES-20 | `data/PAD-UFES-20/` with `metadata.csv` and `imgs_part_1..3/` | `ROOT` at the top of `code/c46_padufes_artifact.py` |
+| ISIC-2024 (SLICE-3D) | `<DATA_ROOT>/data_ISIC2024/` with `train-metadata.csv` and the image archive | `DATA_ROOT` in `code/lib/train_XAI_new_v01.py`, and `META` / `DATA_CSV` at the top of `c1`, `c8`, `c29`, `c35` |
+| PAD-UFES-20 | `PAD-UFES-20/` with `metadata.csv` and `imgs_part_1..3/` | `ROOT` at the top of `code/c46_padufes_artifact.py` |
 
-Check the setup before running anything else. Each of these loads a frozen manifest and asserts its invariants.
+## Frozen inputs
 
-```bash
-python3 code/frozen_split.py     # train / select / audit partition, stored by isic_id
-python3 code/audit_cohort.py     # the 183 audit images, in order
-python3 code/audited_models.py   # which checkpoints every analysis loads
-```
+`results/frozen_split.json`, `results/audit_cohort.json` and `results/padufes_split.json` record the patient-disjoint partition and the audit cohort by image identifier. They are read, never regenerated: fold assignment from a grouped stratified splitter is not stable across library versions, so rebuilding a split without retraining would silently break the patient-disjoint property. `frozen_split.py` and `audit_cohort.py` rebuild them only under an explicit `--rebuild` flag, and `audited_models.py` is the single place that resolves which checkpoint every analysis loads.
 
 ## Running
 
-All commands are run from this directory. Scripts resolve paths relative to it and write into `results/`.
-
-### Cache only, no GPU and no raw images
+All commands are run from the repository root. Every script resolves its paths relative to its own location and writes into `results/`.
 
 ```bash
-python3 code/c41_within_patient.py --boot 0              # within-patient disease-side estimate
-python3 code/c43_within_patient_diagnostics.py --perm 200  # stratum, influence, permutation refuter
-python3 code/c45_partial_id.py                           # does the control library span the response
-python3 code/c26_hair_dose_prob.py                       # dose contrasts on the probability scale
-python3 code/c32_absdp_patient_ci.py                     # patient-clustered artifact intervals
-python3 code/c38_shrinkage_sensitivity.py                # shrinkage slopes with clustered intervals
-python3 code/c25_screen_full_sample.py                   # control validity screen, model free
-python3 code/make_figures_v3.py                          # causal graph figure
-python3 code/make_fig_shrinkage.py                       # shrinkage figure
+bash code/run_all.sh                                   # all analyses in dependency order, logs to log/
+PY=/path/to/python setsid nohup bash code/run_all.sh > log/nohup.out 2>&1 < /dev/null &   # detached
 ```
 
-### Needs a GPU and the raw images
+`run_all.sh` runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), regenerates the figures, and then calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes.
 
-The driver scripts run their steps in order and stop on the first failure.
-
-```bash
-bash code/run_frozen_pipeline.sh    # retrain six models, artifact criterion, dose calibration
-bash code/run_concept_frozen.sh     # the concept tier on the frozen cohort
-python3 code/c46_padufes_artifact.py --epochs 15 --boot 4000   # second cohort, trains two models
-```
-
-Retraining takes a few hours, so detach it:
-
-```bash
-setsid nohup bash code/run_frozen_pipeline.sh > logs/pipeline.log 2>&1 < /dev/null &
-```
-
-Every long-running script writes a `.partial` file after each unit of work, so an interrupted run loses at most the unit in flight.
+Scripts that read only cached predictions and need neither a GPU nor raw images include `c26_hair_dose_prob`, `c32_absdp_patient_ci`, `c38_shrinkage_sensitivity`, `c41_within_patient`, `c45_partial_id`, `c47_heterogeneity`, `c54_synthetic_scm`, `c55_identification_graph` and `make_fig_shrinkage`.
 
 ## What each script produces
 
-| Script | Output | Computes |
+| Script | Output in `results/` | Computes |
 | --- | --- | --- |
-| `c1_tier1_ate.py` | `tier1_ate.json` | disease side by doubly-robust AIPW with cross-fitting |
-| `c41_within_patient.py` | `c41_within_patient.json` | disease side by conditional logistic regression stratified by patient |
-| `c43_within_patient_diagnostics.py` | `c43_within_patient_diagnostics.json` | stratum composition, leave-one-stratum-out influence, within-stratum permutation refuter |
-| `c27_tier1_patient_weighted.py` | `c27_tier1_patient_weighted.json` | patient-weighted re-average of the same scores |
-| `c37_no_site_sensitivity.py` | `c37_no_site.json` | refit with acquisition site removed |
-| `c6_robustness.py` | `c6_robustness.json` | placebo and subset refuters |
-| `c5_padufes_ate.py` | `tier1_padufes.json` | external replication of the size association |
-| `c29_disjoint_train.py` | `c29_disjoint_split.json` | trains six models under the frozen partition |
+| `c1_tier1_ate.py` | `tier1_ate.json` | disease side: concept-to-malignancy effects by doubly robust AIPW |
+| `c41_within_patient.py` | `c41_within_patient.json` | disease side: conditional logistic regression stratified by patient |
+| `c47_heterogeneity.py` | `c47_heterogeneity.json` | common-odds-ratio check for the within-patient model |
+| `c29_disjoint_train.py` | `c29_disjoint_split.json` | trains the EfficientNet-B3 trio under the frozen partition |
+| `c8_backbone2_train.py` | checkpoints | trains the ResNet-50 trio |
+| `c2_cace_artifact.py` | `tier2_cace_artifact.json` | artifact overlays and edit precomputation |
 | `c30_disjoint_audit.py` | `c30_disjoint_audit.json` | artifact criterion on the audit cohort |
-| `c42_positive_control.py` | `c42_positive_control.json` | dose calibration of the criterion, six doses |
-| `c40_simultaneous.py` | `c40_simultaneous.json` | max-statistic simultaneous bands |
+| `c40_simultaneous.py` | `c40_simultaneous.json` | max-statistic simultaneous bands over the 18 magnitude statistics |
+| `c56_simultaneous36.py` | `c56_simultaneous36.json` | the same bands over all 36 components |
 | `c32_absdp_patient_ci.py` | `c32_absdp_patient_ci.json` | patient-clustered intervals for the artifact effect |
-| `c26_hair_dose_prob.py` | `c26_hair_dose_prob.json` | dose response and the contrast between doses |
-| `c46_padufes_artifact.py` | `c46_padufes_artifact.json`, `padufes_split.json` | the whole artifact audit on a second cohort |
-| `c35_selection_isolation.py` | `c35_selection_isolation.json` | how much the measured magnitude moves across fits |
-| `c12_matched_control.py` | `c12_matched_control.json`, `c12_preds.npz` | builds the 19-control library and caches per-image responses |
-| `c25_screen_full_sample.py` | `c25_screen_full.json` | balance, neutrality and overlap for every control |
-| `c34_ctrl_vs_ctrl.py` | `c34_ctrl_vs_ctrl.json` | control-versus-control falsification test |
-| `c45_partial_id.py` | `c45_bracketing.json` | whether the controls span the concept edit's response function |
-| `c13_fullpop.py` | `c13_fullpop.json` | full-population edit responses on the evaluation cohort |
-| `c38_shrinkage_sensitivity.py` | `c38_shrinkage_sensitivity.json` | shrinkage slopes, clustered intervals, refit without clipped points |
-| `c44_cache_preds.py` | `c19_preds.npz` | caches baseline and edited predictions for the cache-only analyses |
+| `c21_patient_cluster.py` | `c21_patient_cluster.json` | patient-clustered recomputation of the model-side quantities |
+| `c26_hair_dose_prob.py` | `c26_hair_dose_prob.json` | dose response on the probability scale |
+| `c42_positive_control.py` | `c42_positive_control.json` | dose calibration of the decision rule |
+| `c50_overlay_seed.py` | `c50_overlay_seed.json` | stability across independent overlay realizations |
+| `c52_overlay_perceptual.py` | `c52_overlay_perceptual.json` | size of each overlay as a change to the image |
 | `c19_saturation_mde.py` | `c19_saturation_mde.json` | clipping saturation and minimum detectable effects |
 | `c20_numerical_repro.py` | `c20_numerical_repro.json` | fp32 and batch-composition reproducibility |
-| `c21_patient_cluster.py` | `c21_patient_cluster.json` | patient-clustered recomputation of the model-side quantities |
-| `c11_magnitude.py` | `c11_magnitude.json` | per-edit artifact magnitudes on each model's own thresholded set |
+| `c35_selection_isolation.py` | `c35_selection_isolation.json` | checkpoint-selection effect separated from training-set size |
+| `c46_padufes_artifact.py` | `c46_padufes_artifact.json`, `padufes_split.json` | the artifact audit on a second cohort |
+| `c3_cace_concept.py` | `tier2_cace_concept.json` | concept edits and the soft lesion mask |
+| `c7_extra_controls.py` | `c7_controls.json` | additional placebo controls |
+| `c10_multiplacebo.py` | `c10_multiplacebo.json` | placebo families with patient-resampled intervals |
+| `c12_matched_control.py` | `c12_matched_control.json`, `c12_preds.npz` | the 19-control library and per-image responses |
+| `c13_fullpop.py` | `c13_fullpop.json` | edit responses on the full evaluation cohort |
+| `c25_screen_full_sample.py` | `c25_screen_full.json`, `c25_screen_mal.json` | balance, neutrality and overlap screens for every control |
+| `c34_ctrl_vs_ctrl.py` | `c34_ctrl_vs_ctrl.json` | control-versus-control diagnostic |
+| `c45_partial_id.py` | `c45_bracketing.json` | whether the controls span the concept edit's response |
+| `c55_identification_graph.py` | `c55_identification_graph.json` | the audit graph, its connectivity and the approximate-route bounds |
+| `c54_synthetic_scm.py` | `c54_synthetic_scm.json` | synthetic response model with a known concept component |
+| `c38_shrinkage_sensitivity.py` | `c38_shrinkage_sensitivity.json` | shrinkage slopes with clustered intervals |
+| `c44_cache_preds.py` | `c19_preds.npz` | cached baseline and edited predictions |
+| `c49_tcav.py` | `c49_tcav.json` | concept activation vectors on the same checkpoints and concepts |
+| `c51_independent_rebuild.py` | `c51_independent_rebuild.json` | comparison against a separate reimplementation, whose result files it reads from a sibling tree |
+| `make_figures_split.py`, `make_fig_shrinkage.py` | `paper/figures/` | figures |
 
+`c15_symmetry.py` and `audit_cohort.py`, `frozen_split.py`, `audited_models.py` are shared modules. `p2_source_guard.py` stops the data-reading figure scripts when the tree lacks its frozen manifest.
 
-The remaining files under `code/` are shared modules rather than entry points. `c2_cace_artifact.py` defines the artifact overlays and the edit precomputation, `c3_cace_concept.py` the concept edits and the soft lesion mask, `c7_extra_controls.py` and `c10_multiplacebo.py` the placebo families, `c8_backbone2_train.py` the ResNet-50 variants, and `c15_symmetry.py` helper routines that the clustering scripts import. `audit_cohort.py`, `frozen_split.py` and `audited_models.py` resolve the frozen manifests and are described under Setup.
+`verify_paper3.py` checks the load-bearing numbers of the manuscript against the files in `results/`. It reads the manuscript text from `paper/`, which is not part of this repository.
 
-## Three invariants to preserve
+## License
 
-**Splits are frozen, not rebuilt.** Fold assignment from a grouped stratified splitter is not stable across library versions. On this machine, rebuilding gives 199 audit patients where the original training run recorded 202, and the original fold membership was never stored. Every audited checkpoint is therefore trained under `results/frozen_split.json`, and `results/audit_cohort.json` fixes the evaluation images by identifier. Rebuilding a split without retraining silently breaks the patient-disjoint property.
-
-**Checkpoints resolve in one place.** `code/audited_models.py` is the single source for which models every analysis loads, so training and evaluation images are verifiably separate rather than assumed to be.
-
-**Every cached file has a generator.** Nothing in `results/` is an orphan. Do not add one.
+MIT, see `LICENSE`.

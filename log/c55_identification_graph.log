@@ -1,33 +1,70 @@
 ##### C55 identification graph #####
-183 images; rebuilding the edit library
-   ... 20/183 images (53s)
-   ... 40/183 images (104s)
-   ... 60/183 images (154s)
-   ... 80/183 images (206s)
-   ... 100/183 images (257s)
-   ... 120/183 images (308s)
-   ... 140/183 images (359s)
-   ... 160/183 images (412s)
-   ... 180/183 images (464s)
 library holds 88 distinct performed edits over 183 images
   contrast@2     bottleneck   2.13x, total mismatch   6.39 tolerance units, length-two  12.71x
   color_var@2    bottleneck   1.17x, total mismatch   6.07 tolerance units, length-two  11.94x
   contrast@0     bottleneck   1.29x, total mismatch   5.43 tolerance units, length-two  13.27x
   color_var@0    bottleneck   1.46x, total mismatch   6.98 tolerance units, length-two   9.65x
-   ... bootstrap 100/400 (536s)
-   ... bootstrap 200/400 (543s)
-   ... bootstrap 300/400 (549s)
-   ... bootstrap 400/400 (555s)
-  contrast@2     bottleneck 95% CI [1.20, 2.36], P(<=1) = 0.010
-  color_var@2    bottleneck 95% CI [0.87, 1.95], P(<=1) = 0.105
-  contrast@0     bottleneck 95% CI [1.11, 1.94], P(<=1) = 0.005
-  color_var@0    bottleneck 95% CI [1.25, 2.08], P(<=1) = 0.000
+   ... bootstrap 100/5000 (7s)
+   ... bootstrap 200/5000 (13s)
+   ... bootstrap 300/5000 (19s)
+   ... bootstrap 400/5000 (25s)
+   ... bootstrap 500/5000 (31s)
+   ... bootstrap 600/5000 (38s)
+   ... bootstrap 700/5000 (44s)
+   ... bootstrap 800/5000 (50s)
+   ... bootstrap 900/5000 (56s)
+   ... bootstrap 1000/5000 (62s)
+   ... bootstrap 1100/5000 (68s)
+   ... bootstrap 1200/5000 (74s)
+   ... bootstrap 1300/5000 (80s)
+   ... bootstrap 1400/5000 (86s)
+   ... bootstrap 1500/5000 (92s)
+   ... bootstrap 1600/5000 (98s)
+   ... bootstrap 1700/5000 (105s)
+   ... bootstrap 1800/5000 (111s)
+   ... bootstrap 1900/5000 (117s)
+   ... bootstrap 2000/5000 (123s)
+   ... bootstrap 2100/5000 (129s)
+   ... bootstrap 2200/5000 (135s)
+   ... bootstrap 2300/5000 (142s)
+   ... bootstrap 2400/5000 (148s)
+   ... bootstrap 2500/5000 (154s)
+   ... bootstrap 2600/5000 (160s)
+   ... bootstrap 2700/5000 (167s)
+   ... bootstrap 2800/5000 (173s)
+   ... bootstrap 2900/5000 (179s)
+   ... bootstrap 3000/5000 (184s)
+   ... bootstrap 3100/5000 (190s)
+   ... bootstrap 3200/5000 (197s)
+   ... bootstrap 3300/5000 (202s)
+   ... bootstrap 3400/5000 (209s)
+   ... bootstrap 3500/5000 (215s)
+   ... bootstrap 3600/5000 (221s)
+   ... bootstrap 3700/5000 (227s)
+   ... bootstrap 3800/5000 (233s)
+   ... bootstrap 3900/5000 (239s)
+   ... bootstrap 4000/5000 (245s)
+   ... bootstrap 4100/5000 (251s)
+   ... bootstrap 4200/5000 (257s)
+   ... bootstrap 4300/5000 (263s)
+   ... bootstrap 4400/5000 (270s)
+   ... bootstrap 4500/5000 (276s)
+   ... bootstrap 4600/5000 (282s)
+   ... bootstrap 4700/5000 (288s)
+   ... bootstrap 4800/5000 (295s)
+   ... bootstrap 4900/5000 (301s)
+   ... bootstrap 5000/5000 (307s)
+  contrast@2     bottleneck 95% CI [1.10, 2.34], P(<=1) = 0.015
+  color_var@2    bottleneck 95% CI [0.90, 1.95], P(<=1) = 0.101
+  contrast@0     bottleneck 95% CI [1.09, 1.95], P(<=1) = 0.004
+  color_var@0    bottleneck 95% CI [1.24, 2.10], P(<=1) = 0.000
+  corrected-score range over 12 target cells: 0.289 to 2.362, span 2.073
 
   binding pair Slim/contrast@0 pixperm_m-noise_m: 9.64 logits over 7.24 scored units -> L_g >= 1.33
-  second largest floor 1.16, median 0.17, conservative floor 0.83
-  contrast@2     route total  6.39 =  0.71 footprint +  5.69 concept; footprint-only half-width  0.94 logits; break-even kappa*L_h 0.230
+  second largest floor 1.16, median 0.26, conservative floor 0.84
+  contrast@2     route total  6.39 =  0.71 footprint +  5.69 concept; footprint-only half-width  0.94 logits; break-even kappa*L_h 0.017
   color_var@2    route total  6.07 =  3.41 footprint +  2.66 concept; footprint-only half-width  4.54 logits; break-even kappa*L_h 0.000
-  contrast@0     route total  5.43 =  0.72 footprint +  4.72 concept; footprint-only half-width  0.95 logits; break-even kappa*L_h 0.275
-  color_var@0    route total  6.98 =  0.47 footprint +  6.52 concept; footprint-only half-width  0.62 logits; break-even kappa*L_h 0.250
+  contrast@0     route total  5.43 =  0.72 footprint +  4.72 concept; footprint-only half-width  0.95 logits; break-even kappa*L_h 0.017
+  color_var@0    route total  6.98 =  0.47 footprint +  6.52 concept; footprint-only half-width  0.62 logits; break-even kappa*L_h 0.064
 
-saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c55_identification_graph.json  (555.3s)
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c55_identification_graph.json  (312.8s)

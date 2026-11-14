@@ -37,6 +37,7 @@ p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c21_patient_cluster.json")
 import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
+import audit_cohort                  # noqa: E402  (frozen audit cohort)
 CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
 SEED, N_EVAL, BOOT = 42, 200, 2000
 ORDER = ["erm", "slim", "causal"]
@@ -72,11 +73,8 @@ def main():
     t0 = time.time()
     print(f"##### C21 patient-clustered Tier-2 inference {time.strftime('%H:%M:%S')} #####", flush=True)
 
-    _, df_va = p2.build_split({"seed": SEED, "n_folds": 5}); df_va = df_va.reset_index(drop=True)
-    imgs01, labels = p2.load_eval_images(df_va, N_EVAL, SEED); labels = np.array(labels)
-    pos = df_va[df_va["target"] == 1].sample(n=int((labels == 1).sum()), random_state=SEED)
-    neg = df_va[df_va["target"] == 0].sample(n=int((labels == 0).sum()), random_state=SEED)
-    pid = df_va.loc[np.r_[pos.index.values, neg.index.values], "patient_id"].values
+    imgs01, labels, pid, _ids = audit_cohort.load()   # frozen audit cohort, never rebuilt
+    labels = np.array(labels); pid = np.array(pid)
     assert len(pid) == len(imgs01)
     print(f"{len(imgs01)} images from {len(np.unique(pid))} patients "
           f"(max {max(np.bincount(np.unique(pid, return_inverse=True)[1]))} per patient)", flush=True)
@@ -157,7 +155,7 @@ def main():
 
     W = 108
     print("=" * W)
-    print("A) CONCEPT SCORES — image-level vs patient-clustered (primary 178-image sample)")
+    print("A) CONCEPT SCORES — image-level vs patient-clustered (frozen 183-image audit cohort)")
     print(f"{'model':6s}{'quantity':16s}{'mean':>8s}{'CI image':>22s}{'CI patient':>22s}{'sig':>16s}")
     for m in ORDER:
         for k, v in res["quantities"]["all"][m].items():
@@ -168,7 +166,7 @@ def main():
                   f"{('[%+.2f, %+.2f]' % tuple(v['ci_patient'])):>22s}"
                   f"{('img %s / pat %s' % ('Y' if v['sig_image'] else 'n', 'Y' if v['sig_patient'] else 'n')):>16s}")
     print("-" * W)
-    print("B) SYMMETRY TEST AND RESIDUAL BOUND (all 178 images)")
+    print("B) SYMMETRY TEST AND RESIDUAL BOUND (all 183 images)")
     print(f"{'model':6s}{'target':14s}{'a+ - a-':>10s}{'reject img':>12s}{'reject pat':>12s}"
           f"{'resid up img':>14s}{'resid up pat':>14s}")
     n_rej_i = n_rej_p = n_pass02_i = n_pass02_p = n_pass06_i = n_pass06_p = 0

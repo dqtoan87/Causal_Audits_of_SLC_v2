@@ -63,7 +63,7 @@ TARGETS = c12.TARGETS
 
 
 CACHE = os.path.join(RES, "c55_design_cache.npz")
-BOOT = 400
+BOOT = 5000   # route search is re-run inside every resample
 C34 = os.path.join(RES, "c34_ctrl_vs_ctrl.json")
 
 
@@ -291,15 +291,32 @@ def main():
     # the concept part is a free sensitivity parameter. We therefore report the footprint-only
     # half-width, and the break-even concept-side constant at which the interval stops being
     # narrower than the full range of the corrected scores it would qualify.
-    SCORE_RANGE = 2.25          # corrected scores span -0.19 to 2.06 logits
+    # The range is the span of the corrected scores at the four targets, read from c7
+    # rather than fixed here, so that it tracks the responses the same run produces.
+    _c7 = json.load(open(os.path.join(RES, "c7_controls.json")))["models"]
+    _cells = []
+    for _m in _c7.values():
+        for _k, _i in (("contrast_corr", 2), ("color_corr", 2),
+                       ("contrast_corr", 0), ("color_corr", 0)):
+            _a = _m.get(_k)
+            if isinstance(_a, list):
+                _cells.append(_a[_i])
+    SCORE_RANGE = float(max(_cells) - min(_cells))
+    print(f"  corrected-score range over {len(_cells)} target cells: "
+          f"{min(_cells):.3f} to {max(_cells):.3f}, span {SCORE_RANGE:.3f}", flush=True)
     hw_fp = {t: Lmin * out_targets[t]["total_footprint_part"] for t in TARGETS}
     hw_fp_loo = {t: second["implied_L"] * out_targets[t]["total_footprint_part"] for t in TARGETS}
     hw_fp_cons = {t: Lcons * out_targets[t]["total_footprint_part"] for t in TARGETS}
-    breakeven = {}
+    # The interval [S - hw, S + hw] has full width 2*hw, so it is narrower than the span of the
+    # corrected scores only while hw <= SCORE_RANGE / 2. The half-width criterion is kept as a
+    # separate field for transparency; the full-width one is what the paper reports.
+    breakeven, breakeven_hw = {}, {}
     for t in TARGETS:
         cpart = out_targets[t]["total_concept_part"]
-        rem = SCORE_RANGE - hw_fp[t]
+        rem = SCORE_RANGE / 2.0 - hw_fp[t]
         breakeven[t] = (rem / cpart) if (cpart > 1e-9 and rem > 0) else 0.0
+        rem2 = SCORE_RANGE - hw_fp[t]
+        breakeven_hw[t] = (rem2 / cpart) if (cpart > 1e-9 and rem2 > 0) else 0.0
     print(f"\n  binding pair {worst['model']}/{worst['target']} {worst['a']}-{worst['b']}: "
           f"{worst['abs_diff_logits']:.2f} logits over "
           f"{worst['distance_tolerance_units']:.2f} scored units -> L_g >= {Lmin:.2f}", flush=True)
@@ -314,7 +331,7 @@ def main():
 
     rs = [v["bottleneck_over_all_paths"] for v in out_targets.values()]
     out = {
-        "n_images": n_img, "n_edits": N, "boot": BOOT,
+        "n_images": n_img, "n_edits": N, "boot": BOOT, "route_reselected_each_resample": True,
         "smd_tol": SMD_TOL, "neutral_tol": NEUTRAL_TOL, "neutral_ratio": c12.NEUTRAL_RATIO,
         "note": ("Two graphs. G0 is the exact identification graph of the theorem, in which an "
                  "edge needs exact equality; it has no non-trivial edges here. G_eps is a "
@@ -351,9 +368,12 @@ def main():
             "footprint_only_half_width_conservative": hw_fp_cons,
             "score_range_logits": SCORE_RANGE,
             "breakeven_kappa_Lh": breakeven,
-            "breakeven_note": ("Concept-side constant at which the single-route outer interval "
-                               "stops being narrower than the full range of the corrected scores. "
-                               "Zero means the footprint side alone already exhausts that range."),
+            "breakeven_kappa_Lh_halfwidth_criterion": breakeven_hw,
+            "breakeven_note": ("Concept-side constant at which the full width 2*hw of the "
+                               "single-route outer interval stops being narrower than the span of "
+                               "the corrected scores. Zero means the footprint side alone already "
+                               "makes the interval wider than that span. The second field uses "
+                               "hw <= span instead and is kept only for comparison."),
             "binding_L_note": ("L must hold for every pair, so the largest implied value binds. "
                                "The conservative variant divides the lower end of each pair's "
                                "patient-clustered response interval by the upper end of its "

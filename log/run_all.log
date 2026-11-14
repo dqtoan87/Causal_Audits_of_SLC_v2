@@ -99,5 +99,4 @@ make_fig_shrinkage           ok      3s
 ok=24 fail=4
 failed: c26_hair_dose_prob c32_absdp_patient_ci c51_independent_rebuild make_figures_split
 results written: 29 files
-verification: see log/verify_paper2.log
 === all done 2026-08-21T12:36:25+00:00 ===

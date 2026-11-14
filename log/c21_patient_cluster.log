@@ -1,39 +1,40 @@
-##### C21 patient-clustered Tier-2 inference 07:45:47 #####
-178 images from 90 patients (max 12 per patient)
-edits/image = 12  (13s)
-[ERM] done (18s)
-[Slim] done (23s)
-[Inv] done (28s)
+##### C21 patient-clustered Tier-2 inference 10:29:13 #####
+183 images from 100 patients (max 14 per patient)
+edits/image = 12  (8s)
+[ERM] done (14s)
+[Slim] done (18s)
+[Inv] done (23s)
 ============================================================================================================
 A) CONCEPT SCORES — image-level vs patient-clustered (primary 178-image sample)
 model quantity            mean              CI image            CI patient             sig
-ERM   A_raw             +0.454        [+0.31, +0.60]        [+0.31, +0.59]   img Y / pat Y
-ERM   A_corr_flip       +0.719        [+0.52, +0.92]        [+0.51, +0.92]   img Y / pat Y
-ERM   A_corr_jitter     +0.632        [+0.42, +0.86]        [+0.39, +0.89]   img Y / pat Y
-Slim  A_raw             +0.100        [-0.19, +0.39]        [-0.19, +0.41]   img n / pat n
-Slim  A_corr_flip       -0.008        [-0.42, +0.43]        [-0.40, +0.42]   img n / pat n
-Slim  A_corr_jitter     +0.097        [-0.25, +0.46]        [-0.25, +0.47]   img n / pat n
-Inv   A_raw             -0.024        [-0.09, +0.04]        [-0.10, +0.06]   img n / pat n
-Inv   A_corr_flip       +0.033        [-0.20, +0.25]        [-0.20, +0.25]   img n / pat n
-Inv   A_corr_jitter     -0.174        [-0.37, -0.04]        [-0.37, -0.04]   img Y / pat Y
+ERM   A_raw             +0.433        [+0.30, +0.56]        [+0.28, +0.60]   img Y / pat Y
+ERM   A_corr_flip       +0.511        [+0.34, +0.67]        [+0.36, +0.66]   img Y / pat Y
+ERM   A_corr_jitter     +0.587        [+0.40, +0.76]        [+0.37, +0.82]   img Y / pat Y
+Slim  A_raw             +0.288        [+0.08, +0.52]        [+0.05, +0.55]   img Y / pat Y
+Slim  A_corr_flip       +0.180        [-0.14, +0.56]        [-0.11, +0.52]   img n / pat n
+Slim  A_corr_jitter     +0.180        [-0.16, +0.54]        [-0.18, +0.53]   img n / pat n
+Inv   A_raw             -0.010        [-0.18, +0.11]        [-0.17, +0.11]   img n / pat n
+Inv   A_corr_flip       +0.043        [-0.14, +0.18]        [-0.15, +0.18]   img n / pat n
+Inv   A_corr_jitter     -0.032        [-0.21, +0.09]        [-0.21, +0.09]   img n / pat n
 ------------------------------------------------------------------------------------------------------------
 B) SYMMETRY TEST AND RESIDUAL BOUND (all 178 images)
 model target           a+ - a-  reject img  reject pat  resid up img  resid up pat
-ERM   contrast@0        -0.017          no          no          0.49          0.40
-ERM   contrast@2        +0.319         yes         yes         33.86         35.18
-ERM   color_var@0       +0.026          no          no          0.55          0.51
-ERM   color_var@2       +0.365         yes         yes         16.00         16.84
-Slim  contrast@0        -0.006          no          no          0.36          0.38
-Slim  contrast@2        +0.204          no          no          0.99          1.02
-Slim  color_var@0       -0.037          no          no          1.18          1.27
-Slim  color_var@2       +0.442         yes         yes          2.12          2.16
-Inv   contrast@0        -0.397          no          no         10.51         10.65
-Inv   contrast@2        +0.279         yes         yes         16.34         17.28
-Inv   color_var@0       -0.387          no          no         16.78         17.00
-Inv   color_var@2       +0.388         yes         yes         12.20         13.20
+ERM   contrast@0        +0.032          no          no          0.87          0.89
+ERM   contrast@2        +0.228         yes         yes          8.12          8.07
+ERM   color_var@0       +0.048          no          no          1.04          1.02
+ERM   color_var@2       +0.308         yes         yes         12.01         12.27
+Slim  contrast@0        -0.118          no          no          1.44          1.53
+Slim  contrast@2        +0.521         yes         yes          1.94          2.01
+Slim  color_var@0       +0.058          no          no          2.19          2.35
+Slim  color_var@2       +0.235          no          no          1.62          1.59
+Inv   contrast@0        -0.056         yes         yes          1.69          1.68
+Inv   contrast@2        +0.314         yes         yes          4.81          4.80
+Inv   color_var@0       -0.020          no          no          3.32          3.39
+Inv   color_var@2       +0.360         yes         yes         20.87         21.41
 ------------------------------------------------------------------------------------------------------------
-  symmetry rejected : image 5/12   patient 5/12
+  symmetry rejected : image 6/12   patient 6/12
   residual <= 0.2   : image 0/12   patient 0/12
-  residual <= 0.6   : image 3/12   patient 3/12
+  residual <= 0.6   : image 0/12   patient 0/12
 ============================================================================================================
-saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c21_patient_cluster.json   (35s)
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c21_patient_cluster.json   (29s)
+c21 exit 0

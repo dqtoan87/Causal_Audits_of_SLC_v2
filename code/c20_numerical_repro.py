@@ -32,6 +32,7 @@ p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c20_numerical_repro.json")
 import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
+import audit_cohort                  # noqa: E402  (frozen audit cohort)
 CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
 SEED, N_EVAL = 42, 200
 ORDER = ["erm", "slim", "causal"]
@@ -84,8 +85,7 @@ def aggregate(p0, pe, names, keep):
 def main():
     t0 = time.time()
     print(f"##### C20 numerical reproducibility {time.strftime('%H:%M:%S')} #####", flush=True)
-    _, df_va = p2.build_split({"seed": SEED, "n_folds": 5})
-    imgs01, labels = p2.load_eval_images(df_va, N_EVAL, SEED)
+    imgs01, labels, _pid, _ids = audit_cohort.load()   # frozen audit cohort, never rebuilt
     labels = np.array(labels)
     edits, names = c13.build_all_edits(imgs01)
     print(f"eval {len(imgs01)} images, {len(names)} edits/image  ({time.time()-t0:.0f}s)", flush=True)
