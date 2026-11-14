@@ -9,6 +9,7 @@ code/          analysis scripts, shared modules, the runner and the verifier
   lib/         vendored training modules
 results/       cached JSON and NPZ outputs, one per script, plus the frozen manifests
 log/           one log per script and run_all.log for the last full run
+requirements.txt  exact package versions
 ```
 
 Model checkpoints are not included. The scripts expect the six audited checkpoints under `checkpoints/` (`dj_{erm,slim,causal}_{b3,r50}.pt`) and the legacy models under `code/lib/checkpoints/`. Analyses that read only cached predictions run without them (see below).
