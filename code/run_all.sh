@@ -44,6 +44,7 @@ SCRIPTS=(
   c40_simultaneous
   c56_simultaneous36
   c57_stratified_band
+  c60_design_coverage
   c42_positive_control
   c45_partial_id
   c46_padufes_artifact
@@ -51,6 +52,7 @@ SCRIPTS=(
   c50_overlay_seed
   c51_independent_rebuild
   c58_rebuild_trace
+  c59_rebuild_generator
   c52_overlay_perceptual
   c55_identification_graph
   make_figures_split
@@ -67,18 +69,18 @@ SCRIPTS=(
 } > "$MASTER"
 
 # Per-script arguments. c46 audits the released PAD-UFES-20 checkpoints rather than retraining them,
-# which is how the reported numbers were produced. c51 and c58 compare against a separate
+# which is how the reported numbers were produced. c51, c58 and c59 compare against a separate
 # reimplementation; they run only when OTHER points at its root directory.
 args_for() {
     case "$1" in
         c46_padufes_artifact) echo "--use-saved" ;;
-        c51_independent_rebuild|c58_rebuild_trace) [ -n "${OTHER:-}" ] && echo "--other $OTHER" ;;
+        c51_independent_rebuild|c58_rebuild_trace|c59_rebuild_generator) [ -n "${OTHER:-}" ] && echo "--other $OTHER" ;;
     esac
 }
 
 ok=0; fail=0; failed=(); skipped=()
 for s in "${SCRIPTS[@]}"; do
-    if { [ "$s" = c51_independent_rebuild ] || [ "$s" = c58_rebuild_trace ]; } && [ -z "${OTHER:-}" ]; then
+    if { [ "$s" = c51_independent_rebuild ] || [ "$s" = c58_rebuild_trace ] || [ "$s" = c59_rebuild_generator ]; } && [ -z "${OTHER:-}" ]; then
         skipped+=("$s"); printf '%-26s skipped (set OTHER to the reimplementation root)\n' "$s" >> "$MASTER"
         continue
     fi

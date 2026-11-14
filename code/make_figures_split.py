@@ -296,7 +296,7 @@ def p3_fig1_dag():
     fig.text(0.5, 0.190, "Green box: estimated from the audited images.   Amber dashed rung: "
              "granted or assumed, not established.   Red rung: not satisfied by the design.",
              ha="center", va="center", fontsize=SM, color="0.25")
-    fig.text(0.5, 0.145, "Z: measured confounders   Dis: disease state (latent)   C: lesion concepts   "
+    fig.text(0.5, 0.145, "Z: measured confounders   Dis: disease state (latent)   C: clinical appearance   "
              "X: image   U: artifact   Y: recorded label   f: classifier output",
              ha="center", va="center", fontsize=SM)
     fig.text(0.5, 0.100, "The graph gives no directed path U \u2192 Y. It does not give $f(T_A(X)) = f(X)$; "

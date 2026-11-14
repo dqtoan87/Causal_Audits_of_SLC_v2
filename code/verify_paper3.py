@@ -149,8 +149,7 @@ if d:
           sum(c["signed_verdict"] != "exceedance" for c in cl), 7,
           text="Seven of the eighteen cells do not exceed on the signed component")
     check("two cells within the signed band", sum(c["signed_verdict"] == "equivalence" for c in cl), 2)
-    check("primary magnitudes 0.085 to 0.769", rng([c["mean"] for c in cl]), (0.085, 0.769), 5e-4,
-          text="0.085 to 0.769")
+    check("primary magnitudes 0.085 to 0.769", rng([c["mean"] for c in cl]), (0.085, 0.769), 5e-4)
     au = [d["models"][b][m]["audit_auroc"] for b in d["models"] for m in d["models"][b]]
     check("audit-cohort AUROC 0.864 to 0.893", rng(au), (0.864, 0.893), 5e-4, text="0.864 to 0.893")
     check("hair alters 2.4% of pixels", 100 * d["change_frac"]["hair"], 2.4, 0.05, text="2.4% of pixels")
@@ -235,6 +234,35 @@ if d:
     check("trace: rerun vs cache max 0.72", r7["max_abs"], 0.72, 5e-3, text="up to 0.72", where="supp")
     check("trace: 4.9% of images above 0.05", 100 * r7["share_over_0.05"], 4.9, 0.05, text="4.9% of images", where="supp")
     check("trace: 1.04 blends per touched pixel", d["blends_per_touched_pixel_heavy_hair"], 1.04, 5e-3, text="1.04 times", where="supp")
+d = load("c59_rebuild_generator")
+if d:
+    m = d["models"]["r50_inv_s42"]
+    check("rerun: overlays reproduce the cached pixel fractions", all(d["pixel_fraction_matches_cache"].values()), True)
+    check("rerun: cell 0.041", m["rerun"]["benign"]["magnitude"], 0.041, 5e-4, text="0.041", where="supp")
+    check("rerun: interval [0.030, 0.052]", tuple(m["rerun"]["benign"]["ci"]), (0.030, 0.052), 5e-4, text="[0.030, 0.052]", where="supp")
+    check("rerun: cell indeterminate", m["rerun"]["benign"]["joint_verdict"], "indeterminate")
+    check("cache: cell within tolerance", m["cache"]["benign"]["joint_verdict"], "equivalence")
+    same = sum(v["rerun"][g]["joint_verdict"] == v["cache"][g]["joint_verdict"]
+               for v in d["models"].values() for g in ("all", "malignant", "benign"))
+    check("rerun keeps 17 of 18 cached decisions", same, 17, text="keeps the other 17 decisions", where="supp")
+    mm = [v["unedited_rerun_vs_cache"]["mean_abs"] for v in d["models"].values()]
+    check("rerun vs cache, unedited, 0.016 to 0.033 on average", (min(mm), max(mm)), (0.016, 0.033), 5e-4,
+          text="0.016 to 0.033 on average", where="supp")
+    check("rerun is deterministic", max(v["unedited_rerun_vs_rerun_max_abs"] for v in d["models"].values()), 0.0, 0.0)
+d = load("c60_design_coverage")
+if d:
+    check("benign redraw: joint coverage 97.0%", 100 * d["joint_coverage"], 97.0, 0.05, text="in 97.0% of draws")
+    check("benign redraw: MC se 0.8 points", 100 * d["joint_coverage_mc_se"], 0.8, 0.05, text="0.8 percentage points", where="supp")
+    check("benign redraw: component coverage min 99.0%", 100 * d["component_coverage_min"], 99.0, 0.05, text="fewer than 99.0% of draws", where="supp")
+    check("benign redraw: crit 3.01 to 3.26", tuple(d["crit_range"]), (3.01, 3.26), 5e-3, text="from 3.01 to 3.26", where="supp")
+    check("benign redraw: crit median 3.10", d["crit_median"], 3.10, 5e-3, text="median of 3.10", where="supp")
+    check("benign redraw: frontier median 0.0697", d["frontier_median"], 0.0697, 5e-5, text="median of 0.0697", where="supp")
+    check("benign redraw: frontier range 0.068 to 0.072", tuple(d["frontier_2.5_97.5"]), (0.068, 0.072), 5e-4, text="0.068 to 0.072", where="supp")
+    check("benign redraw: frontier min 0.0668", d["frontier_min"], 0.0668, 5e-5, text="minimum of 0.0668", where="supp")
+    check("benign redraw: every tolerance below 0.066", d["frontier_min"], 0.066, floor=True, text="every tolerance below 0.066 in every draw")
+    check("benign redraw: all 18 exceed in every draw", d["share_draws_all_18_exceed"], 1.0, 0.0)
+    check("benign redraw: frame 4,150 benign from 198 patients", (d["n_benign_frame"], d["n_benign_frame_patients"]), (4150, 198), 0, text="4,150 benign images from 198 patients", where="supp")
+    check("benign redraw: 500 draws", d["draws"], 500, text="redraws the 100 benign images 500 times")
 d = load("c56_simultaneous36")
 if d:
     check("36-component critical value 3.11 (headline band)", d["crit_36"], 3.11, 5e-3, text="1.96 to 3.11")
@@ -327,8 +355,8 @@ if d:
             for t in ("cpt:contrast@0", "cpt:contrast@2", "cpt:color_var@0", "cpt:color_var@2")]
     mx = max(abs(x) for x in resp)
     check("largest concept response 0.44 logits", mx, 0.44, 5e-3,
-          text="largest observed concept response on the 183 audit images is 0.44 logits")
-    check("component-range width 27.19 logits", 2 * B - mx, 27.19, 5e-3, text="27.19 logits")
+          text="At the largest, 0.44 logits", where="supp")
+    check("component-range width 27.19 logits", 2 * B - mx, 27.19, 5e-3, text="27.19 logits", where="supp")
     check("width is 98.4% of the 27.63-logit range", 100 * (2 * B - mx) / (2 * B), 98.4, 0.05,
           text=["98.4%", "27.63-logit"])
     check("concept responses run −0.06 to +0.44", rng(resp), (-0.06, 0.44), 5e-3,
@@ -452,25 +480,25 @@ if d:
     check("Table S26 shares", "%.1f, %.1f, %.1f, %.1f" % (fr["contrast@2"], fr["color_var@2"], fr["contrast@0"], fr["color_var@0"]),
           "1.5, 10.1, 0.4, 0.0", text="[1.24, 2.10] | 0.0%", where="supp")
     check("footprint parts 0.47 to 3.41", rng([v["total_footprint_part"] for v in pt.values()]),
-          (0.47, 3.41), 5e-3, text="0.47 to 3.41")
+          (0.47, 3.41), 5e-3, text="0.47, 0.71, 0.72 and 3.41", where="supp")
     check("concept parts 2.66 to 6.52", rng([v["total_concept_part"] for v in pt.values()]),
-          (2.66, 6.52), 5e-3, text="2.66 to 6.52")
+          (2.66, 6.52), 5e-3, text="6.52, 5.69, 4.72 and 2.66", where="supp")
     L = d["lipschitz"]
     wp = L["worst_pair"]
     check("binding pair 9.64 logits", wp["abs_diff_logits"], 9.64, 5e-3, text="9.64 logits")
     check("at 7.24 scored units", wp["distance_tolerance_units"], 7.24, 5e-3, text="7.24 scored units")
     check("L^g >= 1.33", L["implied_L_binding"], 1.33, 5e-3, text="= 1.33$")
     check("dropping the binding pair gives 1.16", L["implied_L_second_largest"], 1.16, 5e-3,
-          text="gives 1.16")
-    check("conservative floor 0.84", L["implied_L_conservative_interval_ends"], 0.84, 5e-3, text="gives 0.84")
-    check("median implied constant 0.26", L["implied_L_median"], 0.26, 5e-3, text="implies only 0.26")
+          text="leaves *L*ᵍ ≥ 1.16", where="supp")
+    check("conservative floor 0.84", L["implied_L_conservative_interval_ends"], 0.84, 5e-3, text="gives *L*ᵍ ≥ 0.84", where="supp")
+    check("median implied constant 0.26", L["implied_L_median"], 0.26, 5e-3, text="over the twenty-one pairs is 0.26", where="supp")
     check("quartiles 0.12 and 0.71", tuple(L["implied_L_quartiles"]), (0.12, 0.71), 5e-3,
           text="quartiles 0.12 and 0.71", where="supp")
     check("twenty-one Lipschitz comparisons", L["n_pairs"], 21)
     hw = L["footprint_only_half_width_at_binding_L"]
     check("half-widths 0.62, 0.94, 0.95, 4.54",
           "%.2f, %.2f, %.2f, %.2f" % (hw["color_var@0"], hw["contrast@2"], hw["contrast@0"], hw["color_var@2"]),
-          "0.62, 0.94, 0.95, 4.54", text="0.62, 0.94, 0.95 and 4.54")
+          "0.62, 0.94, 0.95, 4.54", text="0.62, 0.94, 0.95 and 4.54", where="supp")
     be = L["breakeven_kappa_Lh"]
     check("full-width break-even 0.017, 0.017, 0.064 and none at color_var@2",
           "%.3f, %.3f, %.3f, %.3f" % (be["contrast@2"], be["contrast@0"], be["color_var@0"], be["color_var@2"]),
@@ -478,8 +506,8 @@ if d:
     check("break-even uses full width (hw <= range/2)",
           be["contrast@2"], (L["score_range_logits"] / 2 - hw["contrast@2"]) / pt["contrast@2"]["total_concept_part"], 1e-9)
     check("break-even is 21 to 80 times below the floor",
-          rng([L["implied_L_binding"] / v for v in be.values() if v > 0]), (21, 80), 0.6, text="21 to 80 times")
-    check("full width 9.09 at color_var@2", 2 * hw["color_var@2"], 9.09, 5e-3, text="full width of 9.09 logits")
+          rng([L["implied_L_binding"] / v for v in be.values() if v > 0]), (21, 80), 0.6, text="21 to 80 times", where="supp")
+    check("full width 9.09 at color_var@2", 2 * hw["color_var@2"], 9.09, 5e-3, text="full width is 9.09 logits")
     check("corrected scores span 2.07 logits", L["score_range_logits"], 2.07, 5e-3, text="2.07 logits")
     check("interaction price eps_q >= 4.82", wp["abs_diff_logits"] / 2, 4.82, 5e-3, text="4.82$ logits")
 

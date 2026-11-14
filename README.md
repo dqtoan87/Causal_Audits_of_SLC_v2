@@ -46,7 +46,7 @@ bash code/run_all.sh                                   # all analyses in depende
 PY=/path/to/python setsid nohup bash code/run_all.sh > log/nohup.out 2>&1 < /dev/null &   # detached
 ```
 
-`run_all.sh` audits the released PAD-UFES-20 checkpoints (`c46 --use-saved`), which is how the reported numbers were produced, and runs `c51` and `c58` only when `OTHER` points at the reimplementation. It runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), regenerates the figures, and then calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes.
+`run_all.sh` audits the released PAD-UFES-20 checkpoints (`c46 --use-saved`), which is how the reported numbers were produced, and runs `c51`, `c58` and `c59` only when `OTHER` points at the reimplementation. It runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), regenerates the figures, and then calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes.
 
 Scripts that read only cached predictions and need neither a GPU nor raw images include `c26_hair_dose_prob`, `c32_absdp_patient_ci`, `c38_shrinkage_sensitivity`, `c41_within_patient`, `c45_partial_id`, `c47_heterogeneity`, `c54_synthetic_scm`, `c55_identification_graph` and `make_fig_shrinkage`.
 
@@ -64,6 +64,7 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c40_simultaneous.py` | `c40_simultaneous.json` | max-statistic band over the 18 magnitude statistics (secondary) |
 | `c56_simultaneous36.py` | `c56_simultaneous36.json` | max-statistic band over all 36 components, the headline band |
 | `c57_stratified_band.py` | `c57_stratified_band.json` | the 36-component band with patients resampled within the design strata |
+| `c60_design_coverage.py` | `c60_design_coverage.json` | coverage of the 36-component band over 500 redraws of the 100 benign audit images, with the fold's patients fixed |
 | `c32_absdp_patient_ci.py` | `c32_absdp_patient_ci.json` | patient-clustered intervals for the artifact effect |
 | `c21_patient_cluster.py` | `c21_patient_cluster.json` | patient-clustered recomputation of the model-side quantities |
 | `c26_hair_dose_prob.py` | `c26_hair_dose_prob.json` | dose response on the probability scale |
@@ -89,11 +90,12 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c49_tcav.py` | `c49_tcav.json` | concept activation vectors on the same checkpoints and concepts |
 | `c51_independent_rebuild.py` | `c51_independent_rebuild.json` | comparison against a separate reimplementation (see the note below) |
 | `c58_rebuild_trace.py` | `c58_rebuild_trace.json` | layer-by-layer trace of the one cell on which the reimplementation disagrees (see the note below) |
+| `c59_rebuild_generator.py` | `c59_rebuild_generator.json` | reruns the reimplementation's own loader, overlay generator, inference and checkpoints, and compares them with its cached predictions (see the note below) |
 | `make_figures_split.py`, `make_fig_shrinkage.py` | `paper/figures/` | figures |
 
 `c15_symmetry.py` and `audit_cohort.py`, `frozen_split.py`, `audited_models.py` are shared modules. `p2_source_guard.py` stops the data-reading figure scripts when the tree lacks its frozen manifest.
 
-`c51_independent_rebuild.py` and `c58_rebuild_trace.py` compare this pipeline with a separate clean-room reimplementation of the same audit. They read that reimplementation's files from a sibling directory, passed with `--other`, which is not part of this repository, so they do not run on their own here. Their cached outputs are included.
+`c51_independent_rebuild.py`, `c58_rebuild_trace.py` and `c59_rebuild_generator.py` compare this pipeline with a separate clean-room reimplementation of the same audit. They read that reimplementation's files from a sibling directory, passed with `--other`, which is not part of this repository, so they do not run on their own here. Their cached outputs are included.
 
 `verify_paper3.py` checks the load-bearing numbers of the manuscript against the files in `results/`. It reads the manuscript text from `paper/`, which is not part of this repository.
 
