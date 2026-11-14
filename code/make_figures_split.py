@@ -9,6 +9,7 @@ paper1 (disease side)
 
 paper2 (model and concept side)
   p2_fig1_dag       the part of the graph the model side reads, with the edit operator
+  p3_fig1_dag       working graph with the latent disease state Dis, and the ladder
   p2_fig2_tradeoff  footprint balance against concept neutrality over the control library
   fig_shrinkage     produced by make_fig_shrinkage.py, reused unchanged
 
@@ -57,6 +58,7 @@ def load(n):
 
 
 def save(fig, name):
+    os.makedirs(FIG, exist_ok=True)
     w_in, h_in = fig.get_size_inches()
     if not (MIN_W_IN - 1e-6 <= w_in <= MAX_W_IN + 1e-6) or h_in > MAX_H_IN + 1e-6:
         raise ValueError(f"{name}: {w_in:.2f}x{h_in:.2f} in outside the allowed range")
@@ -252,6 +254,63 @@ def p2_fig1_dag():
     return save(fig, "p2_fig1_dag")
 
 
+# ----------------------------------------------------------------- paper 3, figure 1
+def p3_fig1_dag():
+    """Working graph with the latent disease state Dis, and the identification ladder."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(W2, 4.35),
+                                 gridspec_kw={"width_ratios": [1.0, 1.28]})
+    for ax in (a1, a2):
+        ax.axis("off"); ax.set_xlim(0, 1); ax.set_ylim(0, 1)
+
+    Z = node(a1, "Z", 0.14, 0.86, rx=0.070, ry=0.090)
+    D = node(a1, "D", 0.50, 0.86, rx=0.070, ry=0.090, dashed=True, label="Dis")
+    Y = node(a1, "Y", 0.86, 0.86, rx=0.070, ry=0.090)
+    C = node(a1, "C", 0.50, 0.60, rx=0.070, ry=0.090)
+    U = node(a1, "U", 0.14, 0.34, rx=0.070, ry=0.090)
+    X = node(a1, "X", 0.50, 0.34, rx=0.070, ry=0.090)
+    T = node(a1, "T", 0.86, 0.34, rx=0.086, ry=0.090, label="$T_A$")
+    F = node(a1, "f", 0.86, 0.08, rx=0.065, ry=0.065)
+    edge(a1, Z, D); edge(a1, D, Y); edge(a1, Z, Y, rad=-0.30); edge(a1, D, C); edge(a1, Z, C)
+    edge(a1, C, X); edge(a1, Z, X); edge(a1, Z, U)
+    edge(a1, U, X, c=SPUR, ls="--"); edge(a1, X, T, c=SPUR); edge(a1, T, F, c=DET, ls=":")
+    a1.text(0.68, 0.255, "performed edit", ha="center", va="center", fontsize=SM, color=SPUR)
+    a1.set_title("(a) The working graph", fontsize=LG, weight="bold", pad=2)
+
+    a2.set_title("(b) The identification ladder", fontsize=LG, weight="bold", pad=2)
+    box = dict(boxstyle="round,pad=0.28", fc="#eef3fb", ec="0.45", lw=0.9)
+    obs = dict(boxstyle="round,pad=0.28", fc="#e7f5e9", ec="0.45", lw=0.9)
+    a2.text(0.09, 0.86, r"$\theta^{\,\mathrm{edit}}$", ha="center", va="center", fontsize=MD, bbox=obs)
+    a2.text(0.72, 0.86, r"$\theta^{\,\mathrm{do}}$", ha="center", va="center", fontsize=MD, bbox=box)
+    _rung(a2, 0.86, 0.18, 0.63, "T1  transfer\nassumed, untested", "assumed", ASSC)
+    a2.text(0.0, 0.98, "artifact side", fontsize=SM, weight="bold", ha="left", color="0.30")
+    a2.text(0.0, 0.63, "concept side", fontsize=SM, weight="bold", ha="left", color="0.30")
+    a2.text(0.09, 0.46, r"$R(e)$", ha="center", va="center", fontsize=MD, bbox=obs)
+    a2.text(0.44, 0.46, r"$g+h$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.72, 0.46, r"$h$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.95, 0.46, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
+    _rung(a2, 0.46, 0.19, 0.36, "C1  working form\ngranted; probed by\ndiagnostic (T)", "assumed", ASSC)
+    _rung(a2, 0.46, 0.52, 0.67, "C2  identification\nfrom the library\nnot satisfied", "tested", BADC)
+    _rung(a2, 0.46, 0.77, 0.90, "C3  intervention\nvalidity\nassumed", "assumed", ASSC)
+    a2.text(0.52, 0.27, "C0 gates C2: it selects\nthe branch of Statement 1", ha="center", va="center",
+            fontsize=SM, color="0.30")
+    fig.text(0.5, 0.190, "Green box: estimated from the audited images.   Amber dashed rung: "
+             "granted or assumed, not established.   Red rung: not satisfied by the design.",
+             ha="center", va="center", fontsize=SM, color="0.25")
+    fig.text(0.5, 0.145, "Z: measured confounders   Dis: disease state (latent)   C: lesion concepts   "
+             "X: image   U: artifact   Y: recorded label   f: classifier output",
+             ha="center", va="center", fontsize=SM)
+    fig.text(0.5, 0.100, "The graph gives no directed path U \u2192 Y. It does not give $f(T_A(X)) = f(X)$; "
+             "that step is the requirement the audit imposes.", ha="center", va="center",
+             fontsize=SM, color=SPUR)
+    fig.text(0.5, 0.055, "C and Y are associated through Dis, not by an effect of C on Y. Z \u2192 U makes "
+             "artifacts informative about the label.", ha="center", va="center", fontsize=SM)
+    fig.text(0.5, 0.012, "$T_A$ is applied to the image, so the model-side response is estimated "
+             r"rather than identified; $\mathrm{do}(U)$ is not available on an archived image.",
+             ha="center", va="center", fontsize=SM)
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.95, bottom=0.225, wspace=0.03)
+    return save(fig, "p3_fig1_dag")
+
+
 # ----------------------------------------------------------------- paper 2, figure 2
 def p2_fig2_tradeoff():
     require_p2_source(BASE, "p2_fig2_tradeoff", "make_figures_split.py")
@@ -291,8 +350,8 @@ def p2_fig2_tradeoff():
 
 
 if __name__ == "__main__":
-    for fn in (p1_fig1_dag, p1_fig2_forest, p2_fig1_dag, p2_fig2_tradeoff):
+    for fn in (p1_fig1_dag, p1_fig2_forest, p2_fig1_dag, p3_fig1_dag, p2_fig2_tradeoff):
         try:
             print("wrote", fn())
         except WrongSourceTree as e:
-            print("BO QUA %s:\n%s" % (fn.__name__, e))
+            print("skipped %s:\n%s" % (fn.__name__, e))

@@ -196,9 +196,9 @@ if d:
 d = load("c40_simultaneous")
 if d:
     lo = [v["ci_simultaneous"][0] for v in d["disjoint_18"]["cells"].values()]
-    check("critical value rises to 2.94", d["disjoint_18"]["crit_z"], 2.94, 5e-3, text="1.96 to 2.94")
-    check("every cell exceeds every tolerance below 0.067", min(lo), 0.067, floor=True,
-          text="every tolerance below 0.067 probability units")
+    check("secondary 18-magnitude band: critical value 2.94", d["disjoint_18"]["crit_z"], 2.94, 5e-3, text="critical value of 2.94")
+    check("secondary 18-magnitude band: frontier 0.067", min(lo), 0.067, floor=True,
+          text="frontier of 0.067")
     check("simultaneous replicates 20,000", d["boot"], 20000)
     p9 = d["primary_9"]
     check("nine cached-prediction cells: critical value 2.66", p9["crit_z"], 2.66, 5e-3,
@@ -208,9 +208,9 @@ if d:
           text="0.122", where="supp")
 d = load("c56_simultaneous36")
 if d:
-    check("36-component critical value 3.11", d["crit_36"], 3.11, 5e-3, text="critical value to 3.11")
-    check("36-component frontier below 0.064", d["frontier_36"], 0.064, floor=True,
-          text="joint frontier to 0.064")
+    check("36-component critical value 3.11 (headline band)", d["crit_36"], 3.11, 5e-3, text="1.96 to 3.11")
+    check("every cell exceeds every tolerance below 0.064 (36 components)", d["frontier_36"], 0.064, floor=True,
+          text="every tolerance below 0.064 probability units")
     check("36-component frontier 0.0647 (supp)", d["frontier_36"], 0.0647, 5e-5, text="0.0647", where="supp")
     check("36 band: magnitude still exceeds in all 18", d["magnitude_exceed_36"], 18)
     check("36 band signed: 11 exceed / 1 within / 6 indet",
@@ -407,10 +407,10 @@ if d:
     check("best route rho 1.17 to 2.13", rng([v["bottleneck_over_all_paths"] for v in pt.values()]),
           (1.17, 2.13), 5e-3, text="1.17 to 2.13")
     bf = sorted(v["boot_frac_at_or_below_one"] for v in pt.values())
-    check("three targets reach the threshold in 0.0 to 1.5% of resamples", (100 * bf[0], 100 * bf[2]), (0.0, 1.5), 0.05,
-          text="0.0 to 1.5% of resamples")
-    check("color variegation at top dose: 10.1%", 100 * pt["color_var@2"]["boot_frac_at_or_below_one"],
-          10.1, 0.05, text="10.1%")
+    check("three targets: bottleneck above one in 98.5 to 100% of resamples", (100 - 100 * bf[2], 100 - 100 * bf[0]), (98.5, 100.0), 0.05,
+          text="98.5 to 100% of resamples")
+    check("color variegation at top dose: above one in 89.9%", 100 - 100 * pt["color_var@2"]["boot_frac_at_or_below_one"],
+          89.9, 0.05, text="89.9%")
     check("its bottleneck interval [0.90, 1.95]", tuple(pt["color_var@2"]["bottleneck_ci95"]),
           (0.90, 1.95), 5e-3, text="[0.90, 1.95]")
     check("route bootstrap 5,000 resamples", d["boot"], 5000, text="5,000 resamples")
