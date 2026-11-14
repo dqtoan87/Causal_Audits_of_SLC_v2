@@ -15,7 +15,7 @@ Model checkpoints are not included. The scripts expect the six audited checkpoin
 
 ## Setup
 
-Python 3 with PyTorch, torchvision, scikit-learn, pandas, numpy, scipy, matplotlib and Pillow. A CUDA device is needed only by the scripts that run a model over images.
+Python 3.12 with PyTorch, torchvision, scikit-learn, pandas, numpy, scipy, matplotlib and Pillow. `requirements.txt` pins the exact versions the reported numbers were produced with (PyTorch 2.10.0, CUDA 12.8 build). A CUDA device is needed only by the scripts that run a model over images.
 
 The two datasets are public and are not redistributed here.
 
