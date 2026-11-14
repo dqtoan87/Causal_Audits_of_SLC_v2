@@ -263,6 +263,10 @@ if d:
     check("benign redraw: all 18 exceed in every draw", d["share_draws_all_18_exceed"], 1.0, 0.0)
     check("benign redraw: frame 4,150 benign from 198 patients", (d["n_benign_frame"], d["n_benign_frame_patients"]), (4150, 198), 0, text="4,150 benign images from 198 patients", where="supp")
     check("benign redraw: 500 draws", d["draws"], 500, text="redraws the 100 benign images 500 times")
+import math as _m
+_Phi = lambda z: 0.5 * (1 + _m.erf(z / _m.sqrt(2)))
+check("signed exceedance size at eps/se = 0.25 is 0.032", _Phi(-1.959964) + _Phi(-1.959964 - 0.5), 0.032, 5e-4,
+      text="0.032 at *ε*/*se* = 0.25", where="supp")
 d = load("c56_simultaneous36")
 if d:
     check("36-component critical value 3.11 (headline band)", d["crit_36"], 3.11, 5e-3, text="1.96 to 3.11")
