@@ -213,6 +213,12 @@ if d:
     check("stratified band: frontier 0.0651 (supp)", d["frontier_36"], 0.0651, 5e-5, text="0.0651", where="supp")
     check("stratified band: strata 44 and 56", tuple(d["n_patients_strata"]), (44, 56), 0, text="the 44 patients", where="supp")
     check("stratified band: all 18 still exceed", d["magnitude_exceed_36"], 18)
+    dr = d.get("design_ratio")
+    if dr:
+        check("observed malignant share 45%", 100 * dr["malignant_share_observed"], 45, 0.5, text="observed share is 45%", where="supp")
+        check("plain bootstrap share 34 to 57%", tuple(100 * x for x in dr["malignant_share_plain_2.5_97.5"]), (34, 57), 0.5, text="34 to 57%", where="supp")
+        check("stratified share 36 to 55%", tuple(100 * x for x in dr["malignant_share_stratified_2.5_97.5"]), (36, 55), 0.5, text="36 to 55%", where="supp")
+        check("19 patients hold both labels, 57 images", (dr["n_patients_with_both_labels"], dr["n_images_of_patients_with_both_labels"]), (19, 57), 0, text="Nineteen patients hold both labels, with 57 images", where="supp")
 d = load("c58_rebuild_trace")
 if d:
     mix = lambda k: d[k]["mixture"]["magnitude"]

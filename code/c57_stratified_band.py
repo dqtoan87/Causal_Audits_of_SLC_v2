@@ -110,6 +110,21 @@ def main():
             out["signed_decisions_36"][k] = decide(lo36[j], hi36[j], MARGIN, False)
     vals = list(out["signed_decisions_36"].values())
     out["signed_counts_36"] = {v: vals.count(v) for v in ("exceeds", "within", "indet.")}
+    # How well each scheme holds the design's image class ratio (83 malignant of 183).
+    both = [bool(labels[ix].min() == 0 and labels[ix].max() == 1) for ix in idx]
+    r2 = np.random.RandomState(SEED + 1)
+    share = {"plain": [], "stratified": []}
+    for _ in range(BOOT):
+        s1 = np.concatenate([idx[k] for k in r2.randint(0, len(idx), len(idx))])
+        s2 = np.concatenate([idx[k] for st in strata for k in st[r2.randint(0, len(st), len(st))]])
+        share["plain"].append(labels[s1].mean()); share["stratified"].append(labels[s2].mean())
+    out["design_ratio"] = {
+        "malignant_share_observed": float(labels.mean()),
+        "n_patients_with_both_labels": int(sum(both)),
+        "n_images_of_patients_with_both_labels": int(sum(len(ix) for ix, b in zip(idx, both) if b)),
+        "malignant_share_plain_2.5_97.5": [float(np.percentile(share["plain"], q)) for q in (2.5, 97.5)],
+        "malignant_share_stratified_2.5_97.5": [float(np.percentile(share["stratified"], q)) for q in (2.5, 97.5)]}
+    print("design ratio:", out["design_ratio"])
     out["runtime_sec"] = round(time.time() - t0, 1)
     print("crit 36 = %.3f  crit 18 (magnitude) = %.3f" % (crit36, crit18))
     print("frontier 36 = %.4f  frontier 18 = %.4f" % (out["frontier_36"], out["frontier_18"]))

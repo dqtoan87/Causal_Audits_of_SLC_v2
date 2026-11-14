@@ -50,6 +50,7 @@ SCRIPTS=(
   c49_tcav
   c50_overlay_seed
   c51_independent_rebuild
+  c58_rebuild_trace
   c52_overlay_perceptual
   c55_identification_graph
   make_figures_split
@@ -65,11 +66,26 @@ SCRIPTS=(
   echo
 } > "$MASTER"
 
-ok=0; fail=0; failed=()
+# Per-script arguments. c46 audits the released PAD-UFES-20 checkpoints rather than retraining them,
+# which is how the reported numbers were produced. c51 and c58 compare against a separate
+# reimplementation; they run only when OTHER points at its root directory.
+args_for() {
+    case "$1" in
+        c46_padufes_artifact) echo "--use-saved" ;;
+        c51_independent_rebuild|c58_rebuild_trace) [ -n "${OTHER:-}" ] && echo "--other $OTHER" ;;
+    esac
+}
+
+ok=0; fail=0; failed=(); skipped=()
 for s in "${SCRIPTS[@]}"; do
+    if { [ "$s" = c51_independent_rebuild ] || [ "$s" = c58_rebuild_trace ]; } && [ -z "${OTHER:-}" ]; then
+        skipped+=("$s"); printf '%-26s skipped (set OTHER to the reimplementation root)\n' "$s" >> "$MASTER"
+        continue
+    fi
     t0=$(date +%s)
     printf '%-26s start %s\n' "$s" "$(date +%H:%M:%S)" >> "$MASTER"
-    "$PY" "$HERE/$s.py" > "$LOG/$s.log" 2>&1
+    # shellcheck disable=SC2046
+    "$PY" "$HERE/$s.py" $(args_for "$s") > "$LOG/$s.log" 2>&1
     rc=$?
     t1=$(date +%s)
     if [ $rc -eq 0 ]; then
@@ -86,6 +102,7 @@ done
   echo "=== run finished $(date -Is) ==="
   echo "ok=$ok fail=$fail"
   [ $fail -gt 0 ] && echo "failed: ${failed[*]}"
+  [ ${#skipped[@]} -gt 0 ] && echo "skipped: ${skipped[*]}"
   echo "results written: $(ls -1 "$RES" | wc -l) files"
 } >> "$MASTER"
 

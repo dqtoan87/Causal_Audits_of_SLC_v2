@@ -329,5 +329,18 @@
   "within": 1,
   "indet.": 6
  },
- "runtime_sec": 63.8
+ "design_ratio": {
+  "malignant_share_observed": 0.453551912568306,
+  "n_patients_with_both_labels": 19,
+  "n_images_of_patients_with_both_labels": 57,
+  "malignant_share_plain_2.5_97.5": [
+   0.33532934131736525,
+   0.5671641791044776
+  ],
+  "malignant_share_stratified_2.5_97.5": [
+   0.3626373626373626,
+   0.5463414634146342
+  ]
+ },
+ "runtime_sec": 274.8
 }
