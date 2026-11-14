@@ -1,26 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""CausalXAI v14 — C29: huấn luyện lại sáu model trên SPLIT BA PHẦN TÁCH BỆNH NHÂN.
+"""C29: retrain the six models on a patient-disjoint three-way split.
 
-Vì sao cần. Trong thiết kế hiện tại, một fold validation duy nhất đóng ba vai: chọn checkpoint,
-khớp calibration, và cung cấp ảnh cho Tier 2. Bootstrap theo bệnh nhân sửa được phần phụ thuộc
-giữa các quan sát nhưng KHÔNG sửa được rò rỉ do chọn model. Mọi kết quả Tier-2 vì thế là chẩn đoán
-hậu-chọn, không phải kiểm định độc lập.
+Why this is needed. With a single validation fold, that fold plays three roles: checkpoint selection,
+calibration fitting, and supplying the images for Tier 2. A patient-level bootstrap fixes the dependence
+between observations but does not fix leakage from model selection. Tier-2 results are then post-selection
+diagnostics, not independent tests.
 
-Script này dựng ba phần TÁCH BỆNH NHÂN từ StratifiedGroupKFold(5, seed 42):
+This script builds three patient-disjoint parts from StratifiedGroupKFold(5, seed 42):
 
-    fold 0            -> AUDIT   (không bao giờ chạm tới khi huấn luyện hay hiệu chỉnh)
-    fold 1            -> SELECT  (early stopping, chọn checkpoint, khớp calibration)
+    fold 0            -> AUDIT   (never touched during training or calibration)
+    fold 1            -> SELECT  (early stopping, checkpoint selection, calibration fitting)
     fold 2, 3, 4      -> TRAIN
 
-rồi huấn luyện lại cả sáu model (ba EfficientNet-B3 và ba ResNet-50) với việc chọn checkpoint chỉ
-dựa trên SELECT. Tier 2 sau đó chạy trên AUDIT (script C30).
+and retrains all six models (three EfficientNet-B3 and three ResNet-50) with checkpoint selection based
+only on SELECT. Tier 2 then runs on AUDIT (script C30).
 
-Chi phí: tập huấn luyện giảm từ 315 xuống 237 ca dương, vì một phần năm bệnh nhân được giữ lại
-cho AUDIT.
+Cost: the training set drops from 315 to 237 positive cases, because one fifth of the patients is held out
+for AUDIT.
 
-Out -> checkpoints/dj_*.pt và results/c29_disjoint_split.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c29_disjoint_train.py
+Out -> checkpoints/dj_*.pt and results/c29_disjoint_split.json
+Run:  .venv/bin/python Causal_XAI_v3/code/c29_disjoint_train.py
 """
 from __future__ import annotations
 
@@ -52,24 +52,24 @@ RES = os.path.join(BASE, "results")
 OUT = os.path.join(RES, "c29_disjoint_split.json")
 META = "/mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv"
 SEED, N_FOLDS, EPOCHS, NUM_WORKERS = 42, 5, 15, 0
-FORCE = os.environ.get("C29_FORCE", "") == "1"   # huấn luyện lại dù đã có checkpoint
-CAUSAL_BATCH = 24          # job causal cần gấp đôi bộ nhớ kích hoạt
-# /dev/shm chỉ 64 MB trên máy này, không đủ cho worker của DataLoader -> nạp đơn tiến trình
+FORCE = os.environ.get("C29_FORCE", "") == "1"   # retrain even if a checkpoint exists
+CAUSAL_BATCH = 24          # the causal job needs twice the activation memory
+# /dev/shm is only 64 MB on this machine, not enough for DataLoader workers -> single-process loading
 
 
 def build_split3(seed=SEED, n_folds=N_FOLDS):
-    """Ba phần tách bệnh nhân, ĐỌC TỪ MANIFEST CỐ ĐỊNH.
+    """Three patient-disjoint parts, read from a fixed manifest.
 
-    Trước đây hàm này dựng lại phân hoạch mỗi lần gọi. StratifiedGroupKFold không ổn định giữa
-    các phiên bản sklearn, nên cùng seed vẫn ra fold khác, và checkpoint huấn luyện dưới phân
-    hoạch cũ không còn ghép được với cohort audit một cách kiểm chứng được. Nay phân hoạch được
-    ghi ra results/frozen_split.json và mọi thứ đọc từ đó."""
+    StratifiedGroupKFold is not stable across sklearn versions, so the same seed can still give
+    different folds, and checkpoints trained under a different partition could not be matched
+    to the audit cohort in a verifiable way. The partition is therefore written to
+    results/frozen_split.json and everything reads from it."""
     import frozen_split
     return frozen_split.load()
 
 
 def _build_split3_legacy(seed=SEED, n_folds=N_FOLDS):
-    """Bản dựng lại cũ, giữ để tham chiếu. Không dùng."""
+    """On-the-fly construction of the split, kept for reference. Not used."""
     df = p1.load_isic_df()
     sgkf = StratifiedGroupKFold(n_splits=n_folds, shuffle=True, random_state=seed)
     folds = [va for _, va in sgkf.split(df, df["target"].values, df["patient_id"].values)]
@@ -78,9 +78,9 @@ def _build_split3_legacy(seed=SEED, n_folds=N_FOLDS):
     df_tr = p1.undersample(df.iloc[train_i], p1.CFG["train_neg_ratio"], seed * 100)
     df_se = p1.undersample(df.iloc[select_i], p1.CFG["val_neg_ratio"], seed * 100 + 1)
     df_au = p1.undersample(df.iloc[audit_i], p1.CFG["val_neg_ratio"], seed * 100 + 2)
-    # bất biến phải giữ: không bệnh nhân nào xuất hiện ở hai phần
+    # invariant to keep: no patient appears in two parts
     S = [set(d["patient_id"]) for d in (df_tr, df_se, df_au)]
-    assert not (S[0] & S[1]) and not (S[0] & S[2]) and not (S[1] & S[2]), "rò rỉ bệnh nhân"
+    assert not (S[0] & S[1]) and not (S[0] & S[2]) and not (S[1] & S[2]), "patient leakage"
     return df_tr, df_se, df_au
 
 
@@ -110,10 +110,10 @@ def main():
     df_tr, df_se, df_au = build_split3()
     n_env = add_env([df_tr, df_se, df_au])
     for nm, d in [("TRAIN", df_tr), ("SELECT", df_se), ("AUDIT", df_au)]:
-        print("  %-7s %6d ảnh  %4d bệnh nhân  %4d dương (%.2f%%)"
+        print("  %-7s %6d images  %4d patients  %4d positive (%.2f%%)"
               % (nm, len(d), d["patient_id"].nunique(), int(d["target"].sum()),
                  100 * d["target"].mean()), flush=True)
-    print(f"  môi trường (site): {n_env}   epochs={EPOCHS}", flush=True)
+    print(f"  environments (site): {n_env}   epochs={EPOCHS}", flush=True)
 
     json.dump({"seed": SEED, "n_folds": N_FOLDS, "epochs": EPOCHS,
                "note": ("Patient-disjoint three-way split. Checkpoint selection and calibration "
@@ -138,24 +138,24 @@ def main():
     for name, make, kind in jobs:
         f = os.path.join(CKPT, name + ".pt")
         if os.path.exists(f) and not FORCE:
-            print(f"[{name}] đã có, bỏ qua (dùng --force để huấn luyện lại)", flush=True); continue
-        print(f"\n[{name}] huấn luyện ({kind}) ...", flush=True)
+            print(f"[{name}] already exists, skipping (use --force to retrain)", flush=True); continue
+        print(f"\n[{name}] training ({kind}) ...", flush=True)
         p1.set_seed(SEED)
         if kind == "plain":
             tr, se = loaders(p1.ISICImgDataset, df_tr, df_se, cfg["batch_size"])
             m, auc = p1.train_one(make(), tr, se, cfg, w, name)
         else:
-            # train_causal chạy hai lượt forward (ảnh gốc và ảnh có artifact), nên cần gấp đôi
-            # bộ nhớ kích hoạt. GPU này đang bị tiến trình khác chiếm phần lớn, nên hạ batch.
+            # train_causal runs two forward passes (original image and image with artifact), so it needs
+            # twice the activation memory. This GPU is largely occupied by another process, so the batch is reduced.
             tr, se = loaders(p3.ISICEnvDataset, df_tr, df_se, CAUSAL_BATCH)
             m, auc = p3.train_causal(make(), tr, se, cfg3, w, name)
         torch.save(m.state_dict(), f)
-        print(f"[{name}] lưu, select-AUC={auc:.4f}  ({time.time()-t0:.0f}s)", flush=True)
+        print(f"[{name}] saved, select-AUC={auc:.4f}  ({time.time()-t0:.0f}s)", flush=True)
         del m, tr, se
         if DEVICE == "cuda":
             torch.cuda.empty_cache()
 
-    print(f"\nXONG sáu checkpoint -> {CKPT}   ({time.time()-t0:.0f}s)", flush=True)
+    print(f"\nDone: six checkpoints -> {CKPT}   ({time.time()-t0:.0f}s)", flush=True)
 
 
 if __name__ == "__main__":

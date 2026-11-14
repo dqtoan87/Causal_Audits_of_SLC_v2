@@ -12,7 +12,15 @@ log/           one log per script and run_all.log for the last full run
 requirements.txt  exact package versions
 ```
 
-Model checkpoints are not included. The scripts expect the six audited checkpoints under `checkpoints/` (`dj_{erm,slim,causal}_{b3,r50}.pt`) and the legacy models under `code/lib/checkpoints/`. Analyses that read only cached predictions run without them (see below).
+Model checkpoints are published as assets of the release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC/releases/tag/checkpoints-v1.0), with a `SHA256SUMS` file. Download them into `checkpoints/` at the repository root:
+
+```bash
+mkdir -p checkpoints && cd checkpoints
+gh release download checkpoints-v1.0 --repo dqtoan87/Causal_Audits_of_SLC
+sha256sum -c SHA256SUMS
+```
+
+The release holds the six audited classifiers (`dj_{erm,slim,causal}_{b3,r50}.pt`), the two PAD-UFES-20 classifiers (`pad_{erm,slim}.pt`) and the checkpoints of the selection analysis (`sel_{blind,leaky}_{erm,slim,causal}.pt`). Analyses that read only cached predictions run without them (see below).
 
 ## Setup
 
@@ -78,10 +86,12 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c38_shrinkage_sensitivity.py` | `c38_shrinkage_sensitivity.json` | shrinkage slopes with clustered intervals |
 | `c44_cache_preds.py` | `c19_preds.npz` | cached baseline and edited predictions |
 | `c49_tcav.py` | `c49_tcav.json` | concept activation vectors on the same checkpoints and concepts |
-| `c51_independent_rebuild.py` | `c51_independent_rebuild.json` | comparison against a separate reimplementation, whose result files it reads from a sibling tree |
+| `c51_independent_rebuild.py` | `c51_independent_rebuild.json` | comparison against a separate reimplementation (see the note below) |
 | `make_figures_split.py`, `make_fig_shrinkage.py` | `paper/figures/` | figures |
 
 `c15_symmetry.py` and `audit_cohort.py`, `frozen_split.py`, `audited_models.py` are shared modules. `p2_source_guard.py` stops the data-reading figure scripts when the tree lacks its frozen manifest.
+
+`c51_independent_rebuild.py` compares this pipeline with a separate clean-room reimplementation of the same audit. It reads that reimplementation's result files from a sibling directory, which is not part of this repository, so it does not run on its own here. Its cached output, `results/c51_independent_rebuild.json`, is included.
 
 `verify_paper3.py` checks the load-bearing numbers of the manuscript against the files in `results/`. It reads the manuscript text from `paper/`, which is not part of this repository.
 

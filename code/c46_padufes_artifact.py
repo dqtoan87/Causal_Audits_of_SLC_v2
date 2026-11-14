@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C46 — Tiêu chí artifact trên cohort thứ hai: PAD-UFES-20.
+C46: the artifact criterion on a second cohort, PAD-UFES-20.
 
-Vì sao. Kết quả artifact hiện dựa trên một cohort duy nhất, ISIC-2024, tức ảnh cắt từ chụp toàn
-thân 3D. Câu hỏi hiển nhiên của phản biện là kết quả có riêng cho cohort đó hay cho phương thức
-thu nhận đó không. PAD-UFES-20 là ảnh lâm sàng chụp bằng điện thoại, khác hẳn về phương thức, có
-mã bệnh nhân nên chia tách theo bệnh nhân được, và tỉ lệ ác tính 47% nên không cần undersample.
+Why. The artifact results rest on a single cohort, ISIC-2024, i.e. tiles cropped from 3D total-body
+photography. The obvious question is whether the results are specific to that cohort or to that acquisition
+modality. PAD-UFES-20 consists of clinical smartphone photos, a clearly different modality; it has
+patient IDs, so a patient-level split is possible, and a 47% malignancy rate, so no undersampling is needed.
 
-Ba bước, mỗi bước dùng lại đúng quy ước của cohort chính.
-  1. Phân hoạch ba phần theo bệnh nhân, cố định theo img_id, ghi ra manifest.
-  2. Huấn luyện ERM và Slim với cùng backbone, cùng loss, cùng lịch. Không huấn luyện Inv vì
-     cohort này không có biến môi trường tương đương acquisition site.
-  3. Áp cùng họ overlay, cùng thang liều và cùng quy tắc khoảng ba nhánh.
+Three steps, each reusing the exact conventions of the primary cohort.
+  1. Three-way patient-level partition, fixed by img_id, written to a manifest.
+  2. Train ERM and Slim with the same backbone, loss and schedule. Inv is not trained because
+     this cohort has no environment variable equivalent to acquisition site.
+  3. Apply the same overlay family, the same dose ladder and the same three-way interval rule.
 
-Ba điều phải đọc kèm kết quả. Lông giả kém hợp lý về vật lý trên ảnh lâm sàng hơn trên ảnh
-dermoscopy, còn thước thì hợp lý hơn. Tổn thương không được cắt căn giữa như tile TBP. Và xác
-suất nền nằm ở vùng hoàn toàn khác vì prevalence là 47% chứ không phải 0,1%, điều này tương tác
-trực tiếp với quy luật co rút.
+Three things to read alongside the results. Synthetic hair is less physically plausible on clinical images than on
+dermoscopy images, while a ruler is more plausible. Lesions are not center-cropped as in TBP tiles. And the
+baseline probability sits in a completely different range because prevalence is 47% rather than 0.1%, which interacts
+directly with the shrinkage law.
 
 Out -> results/c46_padufes_artifact.json, results/padufes_split.json
-Chạy:  python code/c46_padufes_artifact.py [--epochs 15] [--boot 4000]
+Run:  python code/c46_padufes_artifact.py [--epochs 15] [--boot 4000]
 """
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ def load_meta():
 
 
 def build_split():
-    """Ba phần tách BỆNH NHÂN, cố định theo img_id. Cùng khuôn với cohort chính."""
+    """Three patient-disjoint parts, fixed by img_id. Same template as the primary cohort."""
     if os.path.exists(SPLIT):
         return json.load(open(SPLIT))
     m = load_meta()
@@ -108,7 +108,7 @@ def build_split():
     parts = {k: m.iloc[v] for k, v in
              [("train", train_i), ("select", select_i), ("audit", audit_i)]}
     S = [set(d["patient_id"]) for d in parts.values()]
-    assert not (S[0] & S[1]) and not (S[0] & S[2]) and not (S[1] & S[2]), "rò rỉ bệnh nhân"
+    assert not (S[0] & S[1]) and not (S[0] & S[2]) and not (S[1] & S[2]), "patient leakage"
     out = {"seed": SEED, "n_folds": N_FOLDS,
            "note": ("Frozen three-way patient-disjoint split of PAD-UFES-20, stored by img_id so "
                     "that the fold assignment is never rebuilt."),
@@ -117,7 +117,7 @@ def build_split():
     for k, d in parts.items():
         out[k] = list(d["img_id"])
     json.dump(out, open(SPLIT, "w"), indent=1)
-    log(f"phân hoạch mới -> {SPLIT}")
+    log(f"new partition -> {SPLIT}")
     return out
 
 
@@ -180,7 +180,7 @@ def train_model(kind, df_tr, df_se, epochs, size, batch, lr, wd, patience):
         else:
             bad += 1
             if bad >= patience:
-                log(f"      dừng sớm @ ep{ep+1}"); break
+                log(f"      early stop @ ep{ep+1}"); break
     model.load_state_dict(best_state)
     return model, best
 
@@ -201,25 +201,25 @@ def main():
     log("##### C46 PAD-UFES-20 artifact criterion #####")
     sp = build_split()
     for k, v in sp["counts"].items():
-        log(f"  {k:7s} n={v['n']:5d}  bệnh nhân={v['n_patients']:5d}  ác tính={v['n_pos']:4d}")
+        log(f"  {k:7s} n={v['n']:5d}  patients={v['n_patients']:5d}  malignant={v['n_pos']:4d}")
 
     m = load_meta().set_index("img_id")
     dfs = {k: m.loc[sp[k]].reset_index() for k in ("train", "select", "audit")}
     size = p1.CFG["img_size"]
 
-    # đăng ký ba liều thấp, giữ nguyên ba liều của cohort chính
+    # register the three low doses, keep the primary cohort's three doses unchanged
     for name, n, a in LADDER:
         if name not in c2m.ARTIFACTS:
             c2m.ARTIFACTS[name] = (lambda n_, a_: (lambda x, rng: c2m._hair(x, rng, n=n_, alpha=a_)))(n, a)
     names = [n for n, _, _ in LADDER] + ["ruler", "identity"]
 
-    log("nạp ảnh audit ...")
+    log("loading audit images ...")
     imgs = raw_images(dfs["audit"], size)
     labels = dfs["audit"]["target"].to_numpy()
     pid = dfs["audit"]["patient_id"].to_numpy()
-    log(f"  audit: {len(imgs)} ảnh / {len(np.unique(pid))} bệnh nhân / {int(labels.sum())} ác tính")
+    log(f"  audit: {len(imgs)} images / {len(np.unique(pid))} patients / {int(labels.sum())} malignant")
     edits, cf = c2m.precompute_edits(imgs, names, SEED)
-    log("pixel bị đổi: " + "  ".join(f"{n}={100*cf[n]:.2f}%" for n in names))
+    log("pixels changed: " + "  ".join(f"{n}={100*cf[n]:.2f}%" for n in names))
 
     res = {"cohort": "PAD-UFES-20", "margin_p": MARGIN_P, "boot": args.boot, "seed": SEED,
            "weights": ("saved" if args.use_saved else "retrained"),
@@ -234,12 +234,12 @@ def main():
     for kind, nm in [("erm", "ERM"), ("slim", "Slim")]:
         saved = os.path.join(CKPT, f"pad_{kind}.pt")
         if args.use_saved:
-            log(f"[{nm}] audit các trọng số đã lưu: {saved}")
+            log(f"[{nm}] auditing saved weights: {saved}")
             model = p1.build_model(kind, p1.CFG["z_dim"]).to(DEVICE)
             model.load_state_dict(torch.load(saved, map_location=DEVICE))
             auc = float("nan")
         else:
-            log(f"[{nm}] huấn luyện ...")
+            log(f"[{nm}] training ...")
             model, auc = train_model(kind, dfs["train"], dfs["select"], args.epochs, size,
                                      args.batch, p1.CFG["lr"], p1.CFG["weight_decay"],
                                      p1.CFG["patience"])
@@ -281,7 +281,7 @@ def main():
     json.dump(res, open(OUT, "w"), indent=1)
     if os.path.exists(OUT + ".partial"):
         os.remove(OUT + ".partial")
-    log(f"tổng kết: {res['summary']}  -> {OUT}  ({res['runtime_sec']:.0f}s)")
+    log(f"summary: {res['summary']}  -> {OUT}  ({res['runtime_sec']:.0f}s)")
 
 
 if __name__ == "__main__":

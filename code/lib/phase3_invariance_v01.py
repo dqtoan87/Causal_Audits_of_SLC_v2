@@ -1,30 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v13 — PHASE 3: Lõi Invariance (V-REx + artifact-CF)
-=============================================================
-Đây là phần biến "causal" thành nội dung kiểm chứng được (design §1,§4).
+Phase 3: Invariance core (V-REx + artifact-CF)
+==============================================
+This part turns "causal" into testable content (design §1,§4).
 
-Mô hình CAUSAL = CausalSlimNet (KIẾN TRÚC y hệt SLIM của Phase 1/2 — V-REx và
-artifact-CF là LOSS lúc train, không phải kiến trúc), huấn luyện với:
+The CAUSAL model = CausalSlimNet (the same architecture as SLIM in Phase 1/2; V-REx and
+artifact-CF are training losses, not architecture), trained with:
 
     L = focal  +  λ_rex · Var_e[ risk_e ]  +  λ_cf · ||p(x) − p(artifact(x))||²
 
-  - V-REx (Krueger 2021): phạt PHƯƠNG SAI của risk giữa 7 site thu nhận
-    (attribution của ISIC 2024) ⇒ ép predictor bất biến qua môi trường ⇒ loại
-    đặc trưng site-specific (spurious thu nhận). ĐÂY là tín hiệu nhân quả thật.
-  - artifact-CF: ép prob bất biến khi thêm artifact thu nhận (vignette/patch/
-    jitter lúc train). Eval ở Phase 2 dùng cả artifact KHÁC (hair/ruler) → không
-    vòng tròn.
+  - V-REx (Krueger 2021): penalises the variance of the risk across the 7 acquisition sites
+    (the ISIC 2024 attribution field) ⇒ forces the predictor to be invariant across
+    environments ⇒ removes site-specific features (acquisition spurious features). This is
+    the actual causal signal.
+  - artifact-CF: forces the prob to be invariant when acquisition artifacts are added
+    (vignette/patch/jitter during training). The Phase 2 eval also uses other artifacts
+    (hair/ruler), so the evaluation is not circular.
 
-Đánh giá (so trực tiếp ERM & SLIM, KHÔNG tự chấm một mình):
-  1. AUC: multi-seed × StratifiedGroupKFold GIỐNG HỆT Phase 1 ⇒ tái dùng preds
-     ERM/SLIM đã lưu để chạy DeLong paired (cùng mẫu OOF).
-  2. Causal XAI: nạp checkpoint CAUSAL (seed42 fold0, cùng split Phase 2) chạy
-     lại Module B của Phase 2 ⇒ bảng 3 chiều ERM / SLIM / CAUSAL.
+Evaluation (compared directly with ERM and SLIM, not scored in isolation):
+  1. AUC: multi-seed × StratifiedGroupKFold identical to Phase 1 ⇒ reuse the saved ERM/SLIM
+     preds to run a paired DeLong test (same OOF samples).
+  2. Causal XAI: load the CAUSAL checkpoint (seed42 fold0, same split as Phase 2) and rerun
+     Phase 2 Module B ⇒ 3-way table ERM / SLIM / CAUSAL.
 
-Vận hành: chạy nền; resume qua phase3_progress.json + preds_causal_*.npz +
-checkpoints; mọi output trong XAI_NEW/.
+Operation: runs in the background; resumes via phase3_progress.json + preds_causal_*.npz +
+checkpoints; all outputs in XAI_NEW/.
 """
 import os, sys, json, time, shutil
 import numpy as np
@@ -52,7 +53,7 @@ CFG3 = dict(
     seeds       = [42, 123, 456],
     n_folds     = 5,
     epochs      = 15,
-    warmup      = 3,        # epoch đầu chỉ focal, sau đó bật V-REx + artifact-CF
+    warmup      = 3,        # first epochs use focal only, then V-REx + artifact-CF are enabled
     patience    = 4,
     lambda_rex  = 2.0,
     lambda_cf   = 0.5,
@@ -61,7 +62,7 @@ CFG3 = dict(
 
 
 # ============================================================
-# Data với nhãn môi trường (env = attribution / site)
+# Data with environment labels (env = attribution / site)
 # ============================================================
 def load_isic_env():
     df = pd.read_csv(ISIC_META_CSV, low_memory=False,
@@ -94,7 +95,7 @@ def focal_per_sample(logits, y, weight, gamma=2.0):
 
 
 def vrex(per_sample_loss, env):
-    """Trả (mean_risk, var_risk) — risk = loss trung bình mỗi môi trường."""
+    """Returns (mean_risk, var_risk); risk = mean loss per environment."""
     risks = []
     for e in torch.unique(env):
         m = (env == e)
@@ -106,7 +107,7 @@ def vrex(per_sample_loss, env):
 
 
 def gpu_artifact(x_norm):
-    """Thêm artifact thu nhận (vignette+jitter+patch) ngay trên batch GPU."""
+    """Add acquisition artifacts (vignette+jitter+patch) directly on the GPU batch."""
     dev = x_norm.device
     mean = MEAN.to(dev); std = STD.to(dev)
     img = x_norm * std + mean
@@ -180,7 +181,7 @@ def train_causal(model, tr_loader, va_loader, cfg, weight, tag):
 
         yt, ys = evaluate_env(model, va_loader)
         if not np.all(np.isfinite(ys)):
-            print(f"      [{tag}] ep{ep+1}: NaN -> bỏ", flush=True); no_imp += 1
+            print(f"      [{tag}] ep{ep+1}: NaN -> skip", flush=True); no_imp += 1
             if no_imp >= cfg["patience"]: break
             continue
         auc = roc_auc_score(yt, ys) if len(np.unique(yt)) > 1 else 0.5
@@ -202,12 +203,12 @@ def train_causal(model, tr_loader, va_loader, cfg, weight, tag):
 
 
 # ============================================================
-# Run multi-seed × fold (mirror Phase 1 split để DeLong paired hợp lệ)
+# Run multi-seed × fold (mirror the Phase 1 split so the paired DeLong test is valid)
 # ============================================================
 def run(cfg):
     df, emap = load_isic_env()
-    print(f"ISIC2024: {len(df)} ảnh, {df['target'].sum()} malignant, "
-          f"{len(emap)} môi trường (site): {list(emap.values())}", flush=True)
+    print(f"ISIC2024: {len(df)} images, {df['target'].sum()} malignant, "
+          f"{len(emap)} environments (site): {list(emap.values())}", flush=True)
 
     prog = json.load(open(PROGRESS3)) if os.path.exists(PROGRESS3) else {"units": {}}
     y = df["target"].values; groups = df["patient_id"].values
@@ -246,7 +247,7 @@ def run(cfg):
                 m = p1.metrics_from_scores(yt, ys)
                 np.savez(p1.preds_path(unit), y_true=yt, y_score=ys,
                          seed=seed, fold=fold, model="causal")
-                # lưu ckpt fold0 (cho XAI); seed42 fold0 = ckpt dùng cho bảng Phase 2
+                # save the fold0 ckpt (for XAI); seed42 fold0 = the ckpt used for the Phase 2 table
                 if fold == 0:
                     torch.save(model.state_dict(),
                                os.path.join(CKPT_DIR, f"p3_causal_s{seed}_f0.pt"))
@@ -269,7 +270,7 @@ def run(cfg):
 
 
 # ============================================================
-# Aggregation: AUC mean±std + DeLong CAUSAL vs ERM/SLIM (preds Phase 1)
+# Aggregation: AUC mean±std + DeLong CAUSAL vs ERM/SLIM (Phase 1 preds)
 # ============================================================
 def _pooled(model_tag, seed, n_folds):
     yts, yss = [], []
@@ -285,16 +286,16 @@ def aggregate(cfg):
     prog = json.load(open(PROGRESS3))
     rows = [v for v in prog["units"].values()]
     if not rows:
-        print("Chưa có kết quả causal."); return
+        print("No causal results yet."); return
     sub = pd.DataFrame(rows)
     print("\n" + "=" * 64)
-    print("PHASE 3 — AUC mô hình CAUSAL (mean±std qua fold×seed)")
+    print("PHASE 3: AUC of the CAUSAL model (mean±std over fold×seed)")
     print("=" * 64)
     for col in ["auc", "sens05", "spec05", "sens_y", "spec_y"]:
         v = sub[col].astype(float).values
         print(f"   {col:8s} = {np.nanmean(v):.4f} ± {np.nanstd(v):.4f}")
 
-    print("\nDeLong (pooled OOF mỗi seed) — CAUSAL vs ERM, CAUSAL vs SLIM:")
+    print("\nDeLong (pooled OOF per seed): CAUSAL vs ERM, CAUSAL vs SLIM:")
     out = {"per_seed": []}
     for seed in cfg["seeds"]:
         pc = _pooled("causal", seed, cfg["n_folds"])
@@ -318,18 +319,18 @@ def aggregate(cfg):
         print(line, flush=True)
         out["per_seed"].append(rec)
     json.dump(out, open(SUMMARY3, "w"), indent=2)
-    print(f"\nĐã lưu: {SUMMARY3}", flush=True)
+    print(f"\nSaved: {SUMMARY3}", flush=True)
 
 
 # ============================================================
-# Causal XAI: nạp ckpt CAUSAL, chạy Module B (Phase 2) -> bảng 3 chiều
+# Causal XAI: load the CAUSAL ckpt, run Module B (Phase 2) -> 3-way table
 # ============================================================
 def run_xai(cfg):
     ckpt = os.path.join(CKPT_DIR, "p2_causal_s42.pt")
     if not os.path.exists(ckpt):
-        print("\n[XAI] chưa có ckpt p2_causal_s42.pt, bỏ qua XAI.", flush=True); return
+        print("\n[XAI] no ckpt p2_causal_s42.pt yet, skipping XAI.", flush=True); return
     print("\n" + "=" * 64)
-    print("PHASE 3 — Causal XAI (Module B): ERM vs SLIM vs CAUSAL")
+    print("PHASE 3: Causal XAI (Module B): ERM vs SLIM vs CAUSAL")
     print("=" * 64, flush=True)
 
     df_tr, df_va = p2.build_split(p2.CFG2)
@@ -344,19 +345,19 @@ def run_xai(cfg):
 
     order = [m for m in ["erm", "slim", "causal"] if m in results]
     print(f"{'metric':<22}" + "".join(f"{m:>20}" for m in order))
-    for key, note in [("deletion_auc", "THẤP tốt (necessity)"),
-                      ("insertion_auc", "CAO tốt (sufficiency)"),
-                      ("artifact_delta_overall", "THẤP tốt (robust)")]:
+    for key, note in [("deletion_auc", "lower is better (necessity)"),
+                      ("insertion_auc", "higher is better (sufficiency)"),
+                      ("artifact_delta_overall", "lower is better (robust)")]:
         row = f"{key:<22}"
         for m in order:
             v, lo, hi = results[m][key]
             row += f"{v:.3f}[{lo:.3f},{hi:.3f}]".rjust(20)
         print(row + f"   <- {note}")
-    print("\nArtifact-Δ theo loại:")
+    print("\nArtifact-Δ by type:")
     for m in order:
         print(f"  {m:7s}: " + "  ".join(
             f"{k}={results[m]['artifact_delta_by_type'][k]:.4f}" for k in p2.ARTIFACTS))
-    print(f"\nĐã cập nhật: {p2.RESULTS_FILE}", flush=True)
+    print(f"\nUpdated: {p2.RESULTS_FILE}", flush=True)
 
 
 def main():

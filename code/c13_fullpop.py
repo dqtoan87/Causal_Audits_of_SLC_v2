@@ -1,35 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C13: FULL-POPULATION Tier-2 analysis (no p_full threshold).
+C13: full-population Tier-2 analysis (no p_full threshold).
 
-Vấn đề: mọi kết quả Tier-2 (C2/C3/C6/C10/C11/C12) đều được tính trên tập ĐÃ LỌC
-  {ảnh malignant thật} ∩ {p_full ≥ 0.10}.
-Đây là một biến cố conditioning PHỤ THUỘC MODEL: tập giữ lại khác nhau giữa các model
-(78/78 cho ERM & Slim, 62/78 cho Inv), nên estimand không phải hiệu ứng quần thể mà là
-hiệu ứng TRONG nhóm mà mỗi model vốn đã chấm trên ngưỡng. Reviewer đòi hỏi (đúng) một
-phân tích không ngưỡng để kiểm tra kết luận có bền vững trước selection conditioning không.
+Problem: the Tier-2 results (C2/C3/C6/C10/C11/C12) are all computed on a filtered set
+  {truly malignant images} ∩ {p_full ≥ 0.10}.
+This is a model-dependent conditioning event: the retained set differs between models
+(78/78 for ERM & Slim, 62/78 for Inv), so the estimand is not a population effect but the
+effect within the group each model already scores above the threshold. A threshold-free
+analysis is needed to check whether the conclusions are robust to selection conditioning.
 
-C13 chạy LẠI toàn bộ can thiệp trên TOÀN BỘ 178 ảnh đánh giá, không lọc, và báo cáo theo
-5 nhóm con:
+C13 reruns all interventions on all 178 evaluation images, with no filtering, and reports by
+5 subgroups:
     all (178) | malignant (78) | benign (100) | malignant & p≥0.1 | malignant & p≥0.7
-trên CẢ HAI thang: xác suất (Δp) và logit (Δlogit), mỗi thang có bản CÓ DẤU và TRỊ TUYỆT ĐỐI.
+on both scales: probability (Δp) and logit (Δlogit), each in a signed and an absolute-value version.
 
-  E[Δ]  trả lời "can thiệp đẩy dự đoán về phía nào" (có thể triệt tiêu nếu dấu trái chiều).
-  E|Δ|  trả lời "can thiệp làm dự đoán xê dịch bao nhiêu" (không triệt tiêu) — đây là dạng
-        dùng cho artifact penalty P(f) ở Section III-E.
+  E[Δ]  answers "which direction does the intervention push the prediction" (can cancel if signs differ).
+  E|Δ|  answers "how much does the intervention move the prediction" (does not cancel). This is the form
+        used for the artifact penalty P(f) in Section III-E.
 
-LƯU Ý VỀ THANG LOGIT NGOÀI NGƯỠNG: logit được clip ở eps=1e-6 (|logit| ≤ 13.8). Với ảnh mà
-model đã chấm p≈0, một thay đổi xác suất nhỏ đến mức vô nghĩa lâm sàng vẫn tạo ra Δlogit lớn.
-Đó chính là lý do ngưỡng 0.1 tồn tại. Vì vậy ở nhóm benign, thang XÁC SUẤT là thang phải đọc,
-và thang logit được báo cáo kèm chỉ để đối chiếu.
+Note on the logit scale off-threshold: the logit is clipped at eps=1e-6 (|logit| ≤ 13.8). For an image the
+model already scores at p≈0, a probability change too small to matter clinically still produces a large Δlogit.
+That is exactly why the 0.1 threshold exists. So for the benign group, the probability scale is the one to read,
+and the logit scale is reported alongside only for comparison.
 
-Edit dùng ĐÚNG cùng RNG convention như C2 (artifact: RandomState(SEED+i)) và C10
-(placebo: RandomState(SEED+i+7)), nên trên tập con {malignant, p≥0.1} kết quả phải TÁI TẠO
-c2/c10 — đây là kiểm tra tự thân của script.
+The edits use exactly the same RNG convention as C2 (artifact: RandomState(SEED+i)) and C10
+(placebo: RandomState(SEED+i+7)), so on the subset {malignant, p≥0.1} the results must reproduce
+c2/c10. This is the script's self-check.
 
 Out -> results/c13_fullpop.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c13_fullpop.py [--n-eval 200] [--boot 2000]
+Run:  .venv/bin/python Causal_XAI_v3/code/c13_fullpop.py [--n-eval 200] [--boot 2000]
 """
 from __future__ import annotations
 
@@ -52,8 +52,8 @@ torch.set_num_threads(min(8, os.cpu_count() or 8))
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c13_fullpop.json")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoints resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the fixed set
 SEED, N_EVAL, BOOT = 42, 200, 2000
 ORDER = ["erm", "slim", "causal"]
 NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
@@ -62,7 +62,7 @@ ART = ["hair_light", "hair", "hair_heavy", "ruler", "patch", "vignette", "jitter
 HELDOUT = ["hair_light", "hair", "hair_heavy", "ruler"]
 COUPLED = ["patch", "vignette", "jitter"]
 CONCEPT = [f"{c}@{k}" for c in ("contrast", "color_var") for k in range(3)]
-PLACEBO = ["flip", "jitter", "hue", "noise"]          # tên placebo (khác artifact 'jitter')
+PLACEBO = ["flip", "jitter", "hue", "noise"]          # placebo names (distinct from the artifact 'jitter')
 TOPDOSE = ["contrast@2", "color_var@2"]
 
 
@@ -71,18 +71,18 @@ def ename(kind, n):
 
 
 def build_all_edits(imgs01):
-    """Edit một lần/ảnh, dùng chung 3 model. Giữ nguyên RNG convention của C2 và C10."""
+    """Edit once per image, shared by the 3 models. Keeps the RNG convention of C2 and C10."""
     edits = []
     for i, x01 in enumerate(imgs01):
         d = {}
-        rng_a = np.random.RandomState(SEED + i)                      # như C2
+        rng_a = np.random.RandomState(SEED + i)                      # as in C2
         for a in ART:
             d[ename("art", a)] = c2m.ARTIFACTS[a](x01, rng_a)
         w, skin, lm = c3m.soft_mask(x01)
         for c in ("contrast", "color_var"):
             for k in range(3):
                 d[ename("cpt", f"{c}@{k}")] = c3m.make_edit(x01, c, c3m.DOSES[k], w, skin, lm)
-        for pnm, fn in c10.PLACEBOS.items():                          # như C10
+        for pnm, fn in c10.PLACEBOS.items():                          # as in C10
             d[ename("pb", pnm)] = fn(x01, w, skin, np.random.RandomState(SEED + i + 7))
         edits.append(d)
     return edits, list(edits[0].keys())
@@ -90,7 +90,7 @@ def build_all_edits(imgs01):
 
 @torch.no_grad()
 def eval_model(model, imgs01, edits, names):
-    """Trả p0 (n,) và pe (n, n_edit) — không lọc gì cả."""
+    """Return p0 (n,) and pe (n, n_edit), with no filtering at all."""
     n = len(imgs01)
     p0 = np.empty(n); pe = np.empty((n, len(names)))
     for i, x01 in enumerate(imgs01):
@@ -114,7 +114,7 @@ def main():
     t0 = time.time()
     print(f"##### C13 full-population Tier-2 {time.strftime('%H:%M:%S')} #####", flush=True)
 
-    imgs01, labels, _pid, _ids = audit_cohort.load()   # tập đánh giá cố định
+    imgs01, labels, _pid, _ids = audit_cohort.load()   # fixed evaluation set
     labels = np.array(labels)
     n = len(imgs01)
     print(f"eval images {n}  malignant {int((labels == 1).sum())}  benign {int((labels == 0).sum())}",
@@ -208,9 +208,9 @@ def main():
                 "concept_mean": cpt_mean, "neutral_means": dict(zip(PLACEBO, neu)),
                 "dissociates": bool(cpt_mean > 0 and max(neu) <= 0)}
         # ---- baseline-confidence dependence of generic edit-sensitivity
-        # Nếu g phụ thuộc p_full (co về biên quyết định) thì g KHÔNG phải hàm của footprint M,
-        # và đó là lời giải thích cơ học cho việc test (T) ở C12 thất bại. Thiết kế đối-liều miễn
-        # nhiễm với nguồn phụ thuộc này vì hai chiều edit xuất phát từ CÙNG ảnh, cùng p_full.
+        # If g depends on p_full (contraction toward the decision boundary), then g is not a function of the footprint M,
+        # and that is the mechanical explanation for why test (T) in C12 fails. The opposite-dose design is immune
+        # to this source of dependence because both edit directions start from the same image, with the same p_full.
         def _pear(a, b):
             a = np.asarray(a, float); b = np.asarray(b, float)
             if a.std() < 1e-12 or b.std() < 1e-12:
@@ -252,7 +252,7 @@ def main():
         print(f"{sk:22s}" + "".join(str(res['subgroups'][m][sk]).rjust(14) for m in ORDER))
 
     print("-" * W)
-    print("B) HELD-OUT ARTIFACT PENALTY  E|Δlogit|  (paper's P(f)) — by subgroup")
+    print("B) HELD-OUT ARTIFACT PENALTY  E|Δlogit|  (paper's P(f)), by subgroup")
     print(hdr)
     for sk in ["all", "malignant", "benign", "malignant_p010", "malignant_p070"]:
         row = ""
@@ -262,7 +262,7 @@ def main():
         print(f"{sk:22s}" + row)
 
     print("-" * W)
-    print("C) HELD-OUT ARTIFACT  E|Δp|  (probability scale — the readable one off-threshold)")
+    print("C) HELD-OUT ARTIFACT  E|Δp|  (probability scale: the readable one off-threshold)")
     print(hdr)
     for sk in ["all", "malignant", "benign", "malignant_p010", "malignant_p070"]:
         row = ""
@@ -272,7 +272,7 @@ def main():
         print(f"{sk:22s}" + row)
 
     print("-" * W)
-    print("D) HAIR (2.4% px) SIGNED Δp and Δlogit — by subgroup")
+    print("D) HAIR (2.4% px) SIGNED Δp and Δlogit, by subgroup")
     for sk in ["all", "malignant", "benign", "malignant_p010"]:
         print(f"  {sk}")
         for m in ORDER:
@@ -291,7 +291,7 @@ def main():
         print(f"  {NAME[m]:5s} " + "  ".join(f"{x:+.1e}" for x in v))
 
     print("-" * W)
-    print("F) CONCEPT SCORE A_raw and A_corr (top dose) — by subgroup")
+    print("F) CONCEPT SCORE A_raw and A_corr (top dose), by subgroup")
     for sk in ["all", "malignant", "benign", "malignant_p010", "malignant_p070"]:
         print(f"  {sk}")
         for m in ORDER:

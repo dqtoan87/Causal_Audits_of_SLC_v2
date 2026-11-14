@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C41 — Tier 1 với thiết kế TRONG-BỆNH-NHÂN (conditional logistic, phân tầng theo patient_id).
+C41: Tier 1 with a within-patient design (conditional logistic, stratified by patient_id).
 
-Vì sao. Backdoor adjustment của C1 chỉ khống chế được nhiễu ĐO ĐƯỢC; E-value chỉ định lượng
-mức phơi nhiễm với nhiễu KHÔNG đo được chứ không loại bỏ nó. Trong ISIC-2024, mỗi bệnh nhân
-đóng góp hàng trăm tile, và 258 bệnh nhân có cả tile lành lẫn ác — mang 392/393 ca ác tính.
-Phân tầng theo bệnh nhân do đó khử TOÀN BỘ nhiễu ở cấp bệnh nhân, đo được hay không, chỉ mất
-đúng 1 ca ác tính. Kiểm tra trên metadata: acquisition site và giới tính hằng số trong mỗi
-bệnh nhân (1042/1042), tuổi hằng số ở 942/1042 — cả ba bị hấp thụ bởi thiết kế. Vị trí giải
-phẫu và ITA thì THAY ĐỔI trong cùng bệnh nhân nên vẫn phải hiệu chỉnh, và script làm điều đó.
+Why. The backdoor adjustment of C1 only controls measured confounding; the E-value only quantifies
+exposure to unmeasured confounding, it does not remove it. In ISIC-2024 each patient contributes
+hundreds of tiles, and 258 patients have both benign and malignant tiles, carrying 392/393 malignant
+cases. Stratifying by patient therefore removes all patient-level confounding, measured or not, at
+the cost of exactly 1 malignant case. Metadata check: acquisition site and sex are constant within
+each patient (1042/1042), age is constant in 942/1042. All three are absorbed by the design.
+Anatomical site and ITA do vary within a patient, so they still need adjustment, and the script does that.
 
-Ước lượng. Conditional logistic likelihood chính xác (đa thức đối xứng sơ cấp), tối ưu bằng
-BFGS với gradient giải tích. Sai số chuẩn là sandwich cụm với BỆNH NHÂN là cụm — ở đây mỗi
-tầng đúng bằng một cụm, nên phương sai cụm là hệ quả trực tiếp của thiết kế chứ không phải
-một hiệu chỉnh thêm. Kèm bootstrap cụm (resample bệnh nhân) làm kiểm chứng.
+Estimation. Exact conditional logistic likelihood (elementary symmetric polynomials), optimised with
+BFGS using the analytic gradient. Standard errors are the cluster sandwich with the patient as the
+cluster. Here each stratum is exactly one cluster, so the cluster variance follows directly from the
+design and is not an extra correction. A cluster bootstrap (resampling patients) is added as a check.
 
-Đọc estimand cho đúng. Đây là ODDS RATIO CÓ ĐIỀU KIỆN TRONG BỆNH NHÂN, KHÁC estimand của
-Bảng I (risk difference chuẩn hoá ở cấp tile trên toàn cohort). Với outcome hiếm thì OR xấp
-xỉ RR, nên so sánh được về HƯỚNG và ĐỘ LỚN TƯƠNG ĐỐI, không phải một ước lượng lại của cùng
-một con số. Giá phải trả: tổ hợp trong bệnh nhân rất mất cân bằng (trung vị 435 tile, 1–2 ca
-ác), nên khoảng tin cậy rộng hơn Bảng I.
+Reading the estimand correctly. This is a within-patient conditional odds ratio, which differs from the
+estimand of Table I (a tile-level standardized risk difference over the whole cohort). With a rare
+outcome the OR approximates the RR, so the two are comparable in direction and relative magnitude,
+not as a re-estimate of the same number. The cost: the within-patient combinations are very
+unbalanced (median 435 tiles, 1 to 2 malignant cases), so the confidence intervals are wider than in Table I.
 
 Out -> results/c41_within_patient.json
-Chạy:  python Causal_XAI_v3/code/c41_within_patient.py [--boot 500] [--data CSV]
+Run:  python Causal_XAI_v3/code/c41_within_patient.py [--boot 500] [--data CSV]
 """
 from __future__ import annotations
 
@@ -38,19 +38,19 @@ import pandas as pd
 from scipy.optimize import minimize
 
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-import c1_tier1_ate as c1   # noqa: E402  (CONCEPTS, compute_ita, đường dẫn dữ liệu)
+import c1_tier1_ate as c1   # noqa: E402  (CONCEPTS, compute_ita, data paths)
 
 BASE = os.path.dirname(HERE)
 RES = os.path.join(BASE, "results")
 OUT = os.path.join(RES, "c41_within_patient.json")
 
 GROUP, OUTCOME = c1.GROUP, c1.OUTCOME
-# Confounder BIẾN THIÊN trong bệnh nhân. Những cái hằng số (age, sex, attribution) bị tầng
-# hấp thụ và sẽ tự triệt tiêu khỏi conditional likelihood, nên không đưa vào.
+# Confounders that vary within a patient. The constant ones (age, sex, attribution) are absorbed by
+# the strata and cancel out of the conditional likelihood, so they are not included.
 WITHIN_CONF = ["anatom_site_general", "ITA_stratum", "age_band"]
-# age_approx được ghi theo bậc 5 năm. Nó bất biến trong 942 bệnh nhân và biến thiên trong 100.
-# Đưa vào V dưới dạng biến giả: ở tầng bất biến cột sẽ bị loại vì không có biến thiên trong tầng,
-# ở tầng biến thiên nó hiệu chỉnh đúng phần biến thiên đó.
+# age_approx is recorded in 5-year steps. It is constant in 942 patients and varies in 100.
+# Included in V as dummies: in constant strata the column drops out because it has no within-stratum
+# variation; in varying strata it adjusts exactly that variation.
 SEED = 42
 
 
@@ -62,10 +62,10 @@ def log(m):
 # Conditional logistic likelihood
 # ----------------------------------------------------------------------------------
 def _esp_and_incl(w, k):
-    """Trả về (e_k, p) với e_k = đa thức đối xứng sơ cấp bậc k của w, và
-    p_i = w_i·e_{k-1}(w bỏ i)/e_k = xác suất unit i nằm trong k ca được chọn.
+    """Return (e_k, p) where e_k = elementary symmetric polynomial of degree k of w, and
+    p_i = w_i·e_{k-1}(w without i)/e_k = probability that unit i is among the k selected cases.
 
-    Dùng DP prefix/suffix nên chi phí O(n·k²), tránh phép chia không ổn định."""
+    Uses prefix/suffix DP, so the cost is O(n·k²) and unstable division is avoided."""
     n = len(w)
     # prefix[j, i] = e_j(w[:i]);  suffix[j, i] = e_j(w[i:])
     pre = np.zeros((k + 1, n + 1)); pre[0, :] = 1.0
@@ -81,7 +81,7 @@ def _esp_and_incl(w, k):
     ek = pre[k, n]
     if not np.isfinite(ek) or ek <= 0:
         return ek, np.zeros(n)
-    # e_{k-1}(w bỏ i) = Σ_j pre[j, i-1]·suf[k-1-j, i+1]
+    # e_{k-1}(w without i) = Σ_j pre[j, i-1]·suf[k-1-j, i+1]
     incl = np.empty(n)
     for i in range(1, n + 1):
         s = 0.0
@@ -92,14 +92,14 @@ def _esp_and_incl(w, k):
 
 
 def clogit_nll(beta, X, y, strata):
-    """-log conditional likelihood và gradient, cộng score theo từng tầng (cho sandwich)."""
+    """-log conditional likelihood and gradient, plus per-stratum scores (for the sandwich)."""
     eta = X @ beta
     nll = 0.0
     grad = np.zeros_like(beta)
     scores = []
     for idx in strata:
         e = eta[idx]
-        e = e - e.max()                      # bất biến: tỉ số thuần nhất bậc k theo w
+        e = e - e.max()                      # invariant: the ratio is homogeneous of degree k in w
         w = np.exp(e)
         yi = y[idx]
         k = int(yi.sum())
@@ -107,7 +107,7 @@ def clogit_nll(beta, X, y, strata):
         if ek <= 0 or not np.isfinite(ek):
             continue
         nll -= float(e[yi == 1].sum() - np.log(ek))
-        g = (X[idx] * (yi - incl)[:, None]).sum(0)   # score của tầng
+        g = (X[idx] * (yi - incl)[:, None]).sum(0)   # stratum score
         grad -= g
         scores.append(g)
     return nll, grad, np.array(scores)
@@ -123,8 +123,8 @@ def fit_clogit(X, y, strata, beta0=None, maxiter=200):
 
 
 def sandwich_se(beta, X, y, strata):
-    """Sai số chuẩn cụm. Mỗi tầng = một bệnh nhân = một cụm độc lập, nên
-    V = H⁻¹ (Σ_s g_s g_sᵀ) H⁻¹ là phương sai cụm theo đúng thiết kế."""
+    """Cluster standard errors. Each stratum = one patient = one independent cluster, so
+    V = H⁻¹ (Σ_s g_s g_sᵀ) H⁻¹ is the cluster variance implied by the design."""
     _, _, S = clogit_nll(beta, X, y, strata)
     eps = 1e-5
     p = len(beta)
@@ -145,11 +145,11 @@ def sandwich_se(beta, X, y, strata):
 
 
 # ----------------------------------------------------------------------------------
-# Chuẩn bị một concept
+# Prepare one concept
 # ----------------------------------------------------------------------------------
 def prepare(df, col, adjust=True):
-    """Cắt tertile trên TOÀN cohort (giống C1), giữ Q3 vs Q1, rồi chỉ giữ những tầng còn
-    cả hai lớp — tầng đồng nhất không đóng góp gì cho conditional likelihood."""
+    """Cut tertiles on the whole cohort (as in C1), keep Q3 vs Q1, then keep only strata that still
+    contain both classes. Homogeneous strata contribute nothing to the conditional likelihood."""
     df = df.copy()
     df["age_band"] = pd.to_numeric(df["age_approx"], errors="coerce")
     x = pd.to_numeric(df[col], errors="coerce")
@@ -182,7 +182,7 @@ def prepare(df, col, adjust=True):
     strata = [np.arange(bounds[i], bounds[i + 1]) for i in range(codes.max() + 1)]
     strata = [s for s in strata if len(s) > 1]
 
-    # bỏ cột không có biến thiên TRONG tầng nào (không định danh được)
+    # drop columns with no variation within any stratum (not identifiable)
     if X.shape[1] > 1:
         var = np.zeros(X.shape[1])
         for s in strata:
@@ -209,11 +209,11 @@ def run_concept(df, cname, col, boot, rng):
     from math import erfc, sqrt
     pval = float(erfc(abs(z) / sqrt(2))) if np.isfinite(z) else float("nan")
 
-    # phiên bản chỉ phân tầng, không hiệu chỉnh site/ITA
+    # stratification-only version, no adjustment for site/ITA
     Xu, yu, su, _ = prepare(df, col, adjust=False)
     bu, _ = fit_clogit(Xu, yu, su)
 
-    # bootstrap cụm: resample BỆNH NHÂN (tức là tầng), giữ nguyên mọi tile của họ
+    # cluster bootstrap: resample patients (i.e. strata), keeping all of their tiles
     bs = []
     if boot:
         for t in range(boot):
@@ -255,12 +255,12 @@ def main():
     ap.add_argument("--boot", type=int, default=500)
     ap.add_argument("--max-rows", type=int, default=0)
     ap.add_argument("--no-age", action="store_true",
-                    help="bỏ age_band khỏi V; dùng để đo phần hiệu chỉnh tuổi đóng góp bao nhiêu, "
-                         "ghi ra c41_within_patient_noage.json")
+                    help="drop age_band from V; used to measure how much the age adjustment contributes, "
+                         "writes c41_within_patient_noage.json")
     ap.add_argument("--drop-indeterminate", action="store_true",
-                    help="loại 114 tổn thương ghi Indeterminate thay vì gộp vào lớp âm; ghi ra c41_within_patient_noindet.json")
+                    help="exclude the 114 lesions labelled Indeterminate instead of merging them into the negative class; writes c41_within_patient_noindet.json")
     ap.add_argument("--max-patients", type=int, default=0,
-                    help="chỉ giữ N bệnh nhân discordant đầu tiên (smoke test)")
+                    help="keep only the first N discordant patients (smoke test)")
     args = ap.parse_args()
     data = args.data or json.load(open(os.path.join(RES, "tier1_ate.json")))["data"]
 
@@ -270,27 +270,27 @@ def main():
     if args.max_rows:
         keep = df.groupby(GROUP, group_keys=False).head(args.max_rows // df[GROUP].nunique() + 1)
         df = pd.concat([keep, df[df[OUTCOME] == 1]]).drop_duplicates("isic_id").reset_index(drop=True)
-        log(f"  smoke test: {len(df):,} dòng")
+        log(f"  smoke test: {len(df):,} rows")
     out_path = OUT
     if args.no_age:
-        # V mất age_band: tuổi vẫn bị hấp thụ ở 942 bệnh nhân bất biến, chỉ 100 bệnh nhân biến
-        # thiên là không được hiệu chỉnh. Đây chính là cấu hình mà con số "giảm bao nhiêu phần
-        # trăm" trong bài so sánh với.
+        # V without age_band: age is still absorbed in the 942 constant-age patients; only the 100
+        # patients with varying age are left unadjusted. This is the configuration against which the
+        # "reduced by how many percent" figure in the paper is compared.
         global WITHIN_CONF
         WITHIN_CONF = [c for c in WITHIN_CONF if c != "age_band"]
         out_path = os.path.join(RES, "c41_within_patient_noage.json")
-        log("  bỏ age_band khỏi V")
+        log("  dropped age_band from V")
     if args.drop_indeterminate:
         n0 = len(df)
         df = df[df["iddx_1"].astype(str) != "Indeterminate"].reset_index(drop=True)
         out_path = os.path.join(RES, "c41_within_patient_noindet.json")
-        log(f"  loại {n0-len(df)} tổn thương Indeterminate; còn {len(df):,} dòng")
+        log(f"  excluded {n0-len(df)} Indeterminate lesions; {len(df):,} rows remain")
     df["ITA_stratum"] = c1.compute_ita(df)
     if args.max_patients:
         gg = df.groupby(GROUP)[OUTCOME].agg(["sum", "count"])
         keep = gg[(gg["sum"] > 0) & (gg["sum"] < gg["count"])].index[: args.max_patients]
         df = df[df[GROUP].isin(keep)].reset_index(drop=True)
-        log(f"  smoke test: {args.max_patients} bệnh nhân discordant, {len(df):,} tile")
+        log(f"  smoke test: {args.max_patients} discordant patients, {len(df):,} tiles")
     g = df.groupby(GROUP)[OUTCOME].agg(["sum", "count"])
     disc = g[(g["sum"] > 0) & (g["sum"] < g["count"])]
     log(f"  tiles={len(df):,} patients={df[GROUP].nunique()} cases={int(df[OUTCOME].sum())}")
@@ -301,27 +301,27 @@ def main():
 
     def snapshot(concepts, status):
         json.dump({"phase": "C41_tier1_within_patient", "status": status,
-                   "note": "Ghi tăng dần trong lúc chạy; file cuối cùng là c41_within_patient.json.",
+                   "note": "Written incrementally during the run; the final file is c41_within_patient.json.",
                    "concepts": concepts}, open(out_path + ".partial", "w"), indent=1)
 
-    # Lượt 1 — điểm ước lượng và sai số chuẩn cụm (sandwich). Đây là suy diễn CHÍNH:
-    # mỗi tầng đúng bằng một bệnh nhân, nên phương sai cụm có sẵn từ chính lần fit này.
-    # Chạy nhanh, nên kết quả cốt lõi có mặt sớm dù bootstrap còn dài.
-    log("PASS 1/2 — điểm ước lượng + sandwich cụm (không bootstrap)")
+    # Pass 1: point estimates and cluster (sandwich) standard errors. This is the main inference:
+    # each stratum is exactly one patient, so the cluster variance comes from this fit itself.
+    # It runs fast, so the core results are available early even though the bootstrap takes long.
+    log("PASS 1/2: point estimates + cluster sandwich (no bootstrap)")
     out = []
     for c in c1.CONCEPTS:
         out.append(run_concept(df, c["name"], c["col"], 0, rng))
         snapshot(out, "pass1_point_estimates")
-    log("PASS 1/2 xong — điểm ước lượng và CI cụm đã nằm trong file .partial")
+    log("PASS 1/2 done: point estimates and cluster CIs are in the .partial file")
 
-    # Lượt 2 — bootstrap cụm làm kiểm chứng cho sandwich. Chậm, và không kết luận nào phụ thuộc nó.
+    # Pass 2: cluster bootstrap as a check on the sandwich. Slow, and no conclusion depends on it.
     if args.boot:
-        log(f"PASS 2/2 — bootstrap cụm {args.boot} lần mỗi concept (kiểm chứng)")
+        log(f"PASS 2/2: cluster bootstrap, {args.boot} replicates per concept (check)")
         for i, c in enumerate(c1.CONCEPTS):
             out[i] = run_concept(df, c["name"], c["col"], args.boot, rng)
             snapshot(out, f"pass2_bootstrap_{i+1}_of_{len(c1.CONCEPTS)}")
 
-    # đối chiếu hướng với Bảng I (estimand khác nhau, chỉ so hướng và độ lớn tương đối)
+    # compare direction with Table I (different estimands; compare only direction and relative magnitude)
     try:
         t1 = {x["concept"]: x for x in json.load(open(os.path.join(RES, "tier1_ate.json")))["concepts"]}
         for o in out:
@@ -330,7 +330,7 @@ def main():
                 if k in ref:
                     o["marginal_rr_table1"] = ref[k]; break
     except Exception as e:
-        log(f"  (không đối chiếu được tier1_ate.json: {e})")
+        log(f"  (could not compare with tier1_ate.json: {e})")
 
     res = {"phase": "C41_tier1_within_patient",
            "data": data,

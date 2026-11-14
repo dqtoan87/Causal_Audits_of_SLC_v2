@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C50 — Phán quyết artifact có phụ thuộc vào HIỆN THỰC NGẪU NHIÊN của chồng lớp không?
+C50: does the artifact verdict depend on the random realisation of the overlay?
 
-Vì sao cần. Toán tử chồng lớp là ngẫu nhiên: vị trí, hướng, độ dài và độ cong của từng sợi
-lông đều rút ngẫu nhiên, hàng thước thì rút hàng đặt. Mọi con số bên mô hình vì thế là hàm của
-MỘT lần rút cụ thể (seed 42). Mục S8 đã kiểm tái lập SỐ HỌC (fp32, cách chia batch) nhưng chưa
-bao giờ kiểm biến thiên do chính can thiệp — đó là một nguồn biến thiên khác hẳn, và lớn hơn.
+Why. The overlay operator is random: the position, direction, length and curvature of each hair
+strand are drawn at random, and the ruler row is drawn row by row. Every model-side number is
+therefore a function of one specific draw (seed 42). Section S8 checked numerical reproducibility
+(fp32, batch splitting) but not the variation due to the intervention itself, which is a different
+and larger source of variation.
 
-Việc này quan trọng vì phán quyết là quy tắc ngưỡng: một ô nằm gần dung sai có thể lật giữa
-"vượt" và "trong dung sai" chỉ vì rút được bộ sợi lông khác. Cách duy nhất để biết là chạy lại
-toàn bộ lưới trên nhiều hiện thực.
+This matters because the verdict is a threshold rule: a cell near the tolerance can flip between
+"exceeds" and "within tolerance" just because a different set of hair strands was drawn. The only
+way to know is to rerun the whole grid over many realisations.
 
-Thiết kế. Giữ nguyên checkpoint, nhóm ảnh, quy tắc, dung sai và số lần bootstrap. Chỉ đổi seed
-sinh chồng lớp. Dùng đúng c2m.precompute_edits với danh sách c30.ART theo thứ tự, nên seed 42
-phải tái lập KHÍT tệp c30_disjoint_audit.json — đó là phép kiểm tính đúng đắn của script này.
+Design. Keep the checkpoints, image group, rule, tolerance and number of bootstrap draws fixed. Change
+only the overlay seed. Uses c2m.precompute_edits with the list c30.ART in order, so seed 42 must
+reproduce c30_disjoint_audit.json exactly; this is the correctness check of the script.
 
-Ảnh gốc không phụ thuộc seed nên p0 chỉ tính một lần cho mỗi checkpoint.
+The original images do not depend on the seed, so p0 is computed once per checkpoint.
 
 Out -> results/c50_overlay_seed.json
-Chạy:  python Causal_XAI_v3/code/c50_overlay_seed.py [--seeds 42,1,2,3,7,11,99]
+Run:  python Causal_XAI_v3/code/c50_overlay_seed.py [--seeds 42,1,2,3,7,11,99]
 """
 from __future__ import annotations
 
@@ -58,15 +59,15 @@ def main():
     t0 = time.time()
 
     imgs, labels, pid, _ids = audit_cohort.load()
-    log(f"nhóm kiểm định: {len(imgs)} ảnh, {len(set(pid))} bệnh nhân, {int(labels.sum())} ác")
+    log(f"audit cohort: {len(imgs)} images, {len(set(pid))} patients, {int(labels.sum())} malignant")
 
-    # Chồng lớp: sinh một lần cho mỗi seed, dùng chung cho cả sáu checkpoint.
+    # Overlay: generated once per seed, shared by all six checkpoints.
     edits = {}
     for s in seeds:
         per, cf = c2m.precompute_edits(imgs, c30.ART, s)
         edits[s] = ({a: [d[a] for d in per] for a in HELD},
                     {a: cf[a] for a in HELD})
-        log(f"  seed {s}: chồng lớp xong, pixel đổi "
+        log(f"  seed {s}: overlays done, altered pixels "
             + " ".join(f"{a}={cf[a]*100:.2f}%" for a in HELD))
 
     subs = [("all", np.ones(len(labels), bool)),
@@ -112,9 +113,9 @@ def main():
                     "lower_bound_min": float(min(los)),
                     "joint_verdicts": sorted(vj), "verdict_stable": bool(len(vj) == 1),
                     "per_seed": rows}
-                log(f"  {bb:4s} {name:5s} {sub:10s} biên độ {min(mags):.4f}–{max(mags):.4f} "
-                    f"({100*(max(mags)-min(mags))/rows[0]['magnitude']:.1f}% của seed 42) "
-                    f"| cận dưới nhỏ nhất {min(los):.4f} | phán quyết {sorted(vj)}")
+                log(f"  {bb:4s} {name:5s} {sub:10s} magnitude {min(mags):.4f} to {max(mags):.4f} "
+                    f"({100*(max(mags)-min(mags))/rows[0]['magnitude']:.1f}% of seed 42) "
+                    f"| smallest lower bound {min(los):.4f} | verdicts {sorted(vj)}")
             del m
             if DEVICE == "cuda":
                 torch.cuda.empty_cache()
@@ -130,8 +131,8 @@ def main():
     res["runtime_sec"] = round(time.time() - t0, 1)
     json.dump(res, open(OUT, "w"), indent=1)
     log(f"saved -> {OUT}")
-    log(f"  {res['summary']['n_verdict_stable']}/{len(cells)} ô có phán quyết bất biến qua "
-        f"{len(seeds)} hiện thực | cận dưới nhỏ nhất {res['summary']['min_lower_bound_over_seeds']:.4f}")
+    log(f"  {res['summary']['n_verdict_stable']}/{len(cells)} cells with a verdict stable across "
+        f"{len(seeds)} realizations | smallest lower bound {res['summary']['min_lower_bound_over_seeds']:.4f}")
 
 
 if __name__ == "__main__":

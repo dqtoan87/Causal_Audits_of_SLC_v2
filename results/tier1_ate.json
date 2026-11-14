@@ -24,7 +24,7 @@
     {
       "concept": "A_asymmetry",
       "column": "tbp_lv_symm_2axis",
-      "dir_hint": "neg (\u0111\u1ed1i x\u1ee9ng cao -> \u00edt \u00e1c)",
+      "dir_hint": "neg (high symmetry -> less malignant)",
       "n": 267462,
       "n_pos": 272,
       "n_treat": 133691,

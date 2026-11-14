@@ -1,27 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""CausalXAI v14 — C35: tách RIÊNG hiệu ứng chọn checkpoint khỏi cỡ tập huấn luyện.
+"""C35: isolate the checkpoint-selection effect from training-set size.
 
-Vì sao cần. C29/C30 dựng split ba phần tách bệnh nhân và đo được biên độ artifact giảm 2.1–5.7 lần.
-Nhưng thiết kế đó đổi HAI thứ cùng lúc: (1) checkpoint không còn chọn trên fold sẽ audit, và
-(2) tập huấn luyện giảm từ 315 xuống 237 ca dương. Không thể quy mức giảm cho riêng (1).
+Why this is needed. C29/C30 build a three-way patient-disjoint split and measure an artifact magnitude 2.1 to 5.7 times smaller.
+But that design changes two things at once: (1) the checkpoint is no longer selected on the audited fold, and
+(2) the training set drops from 315 to 237 positive cases. The reduction cannot be attributed to (1) alone.
 
-Script này giữ (2) cố định và chỉ đổi (1):
+This script holds (2) fixed and changes only (1):
 
-    split       : ĐÚNG split gốc của bài — train = 4 fold (315 ca dương), fold 0 = audit
-    dữ liệu     : giống hệt nhau ở cả hai nhánh
-    seed/lịch   : giống hệt nhau
-    epoch       : cố định 15, KHÔNG early stopping (early stopping cũng đọc fold 0)
+    split       : the paper's original split, train = 4 folds (315 positive cases), fold 0 = audit
+    data        : identical in both arms
+    seed/schedule: identical
+    epochs      : fixed at 15, no early stopping (early stopping also reads fold 0)
 
-    nhánh A "leaky"  : checkpoint = epoch có AUROC cao nhất TRÊN FOLD 0, tức đúng quy tắc gốc
-    nhánh B "blind"  : checkpoint = epoch cuối, không hề tham chiếu fold 0
+    arm A "leaky"  : checkpoint = epoch with the highest AUROC on fold 0, i.e. the original rule
+    arm B "blind"  : checkpoint = final epoch, never references fold 0
 
-Cả hai nhánh dùng chung một lần huấn luyện, nên tham số, thứ tự batch và trạng thái RNG là như
-nhau; khác biệt duy nhất là lấy trạng thái ở epoch nào. Hiệu số biên độ artifact giữa A và B vì
-thế quy được cho đúng bước chọn checkpoint.
+Both arms share a single training run, so parameters, batch order and RNG state are the
+same; the only difference is which epoch's state is taken. The difference in artifact magnitude between A and B
+can therefore be attributed to the checkpoint-selection step itself.
 
-Out -> checkpoints/sel_{leaky,blind}_*.pt và results/c35_selection_isolation.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c35_selection_isolation.py
+Out -> checkpoints/sel_{leaky,blind}_*.pt and results/c35_selection_isolation.json
+Run:  .venv/bin/python Causal_XAI_v3/code/c35_selection_isolation.py
 """
 from __future__ import annotations
 
@@ -52,8 +52,8 @@ BASE = os.path.dirname(HERE)
 CKPT = os.path.join(BASE, "checkpoints"); os.makedirs(CKPT, exist_ok=True)
 OUT = os.path.join(BASE, "results", "c35_selection_isolation.json")
 META = "/mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv"
-SEED, EPOCHS, NUM_WORKERS = 42, 15, 0     # /dev/shm 64 MB -> nạp đơn tiến trình
-CAUSAL_BATCH = 24                          # job causal chạy hai lượt forward
+SEED, EPOCHS, NUM_WORKERS = 42, 15, 0     # /dev/shm 64 MB -> single-process loading
+CAUSAL_BATCH = 24                          # the causal job runs two forward passes
 N_EVAL, BOOT, MARGIN_P = 200, 4000, 0.05
 ART, HELD = c30.ART, c30.HELD
 JOBS = [("erm", "erm", "ERM", "plain"), ("slim", "slim", "Slim", "plain"),
@@ -70,10 +70,10 @@ def add_env(dfs):
 
 
 def train_dual(model, tr_loader, va_loader, weight, kind, tag):
-    """Huấn luyện đúng 15 epoch, trả (state ở epoch tốt nhất trên fold 0, state ở epoch cuối).
+    """Train for exactly 15 epochs, return (state at the best epoch on fold 0, state at the final epoch).
 
-    Sao đúng optimizer/scheduler/loss/AMP/clip của train_one và train_causal, chỉ bỏ early
-    stopping — vì bản thân early stopping cũng là một quyết định đọc fold 0.
+    Copies the optimizer/scheduler/loss/AMP/clip of train_one and train_causal exactly, dropping only early
+    stopping, because early stopping is itself a decision that reads fold 0.
     """
     model = model.to(DEVICE)
     opt = torch.optim.AdamW(model.parameters(), lr=p1.CFG["lr"],
@@ -127,7 +127,7 @@ def train_dual(model, tr_loader, va_loader, weight, kind, tag):
 
 
 def audit(state, kind, imgs, edits, labels, pid):
-    """Tiêu chí artifact trên đúng tập đánh giá Tier-2 của fold 0."""
+    """Artifact criterion on the same Tier-2 evaluation set of fold 0."""
     m = (p1.build_model("erm" if kind == "erm" else "slim", p1.CFG["z_dim"])).to(DEVICE)
     m.load_state_dict(state); m.eval()
     p0 = c30.probs(m, imgs)
@@ -150,14 +150,14 @@ def audit(state, kind, imgs, edits, labels, pid):
 
 def main():
     t0 = time.time()
-    print(f"##### C35 tách riêng hiệu ứng chọn checkpoint {time.strftime('%H:%M:%S')} #####",
+    print(f"##### C35 isolating the checkpoint-selection effect {time.strftime('%H:%M:%S')} #####",
           flush=True)
     df_tr, df_va = p2.build_split({"seed": SEED, "n_folds": 5})
     df_va = df_va.reset_index(drop=True)
     add_env([df_tr, df_va])
-    print("  TRAIN %d ảnh / %d bệnh nhân / %d ca dương   (split gốc, không giảm cỡ)"
+    print("  TRAIN %d images / %d patients / %d positive cases   (original split, size not reduced)"
           % (len(df_tr), df_tr["patient_id"].nunique(), int(df_tr["target"].sum())), flush=True)
-    print("  FOLD0 %d ảnh / %d bệnh nhân / %d ca dương   (vừa audit, vừa là nơi nhánh A chọn)"
+    print("  FOLD0 %d images / %d patients / %d positive cases   (both the audit set and where arm A selects)"
           % (len(df_va), df_va["patient_id"].nunique(), int(df_va["target"].sum())), flush=True)
 
     imgs, labels = p2.load_eval_images(df_va, N_EVAL, SEED)
@@ -165,7 +165,7 @@ def main():
     pos = df_va[df_va["target"] == 1].sample(n=int((labels == 1).sum()), random_state=SEED)
     neg = df_va[df_va["target"] == 0].sample(n=int((labels == 0).sum()), random_state=SEED)
     pid = df_va.loc[np.r_[pos.index.values, neg.index.values], "patient_id"].values
-    print("  EVAL  %d ảnh / %d bệnh nhân (%d ác tính) — cùng bộ ảnh với audit hậu-chọn của bài"
+    print("  EVAL  %d images / %d patients (%d malignant), the same images as the paper's post-selection audit"
           % (len(imgs), len(np.unique(pid)), int((labels == 1).sum())), flush=True)
     edits, change_frac = c2m.precompute_edits(imgs, ART, SEED)
 
@@ -184,9 +184,9 @@ def main():
                     "never reads it. No early stopping, since that also consults fold 0."),
            "models": {}}
 
-    # Huấn luyện ở đây hoàn toàn xác định (p1.set_seed trước mỗi model, không early stopping),
-    # nên khi hai checkpoint đã tồn tại có thể nạp lại thay vì huấn luyện lại 15 epoch. Đường
-    # AUROC theo epoch chỉ sinh ra trong lúc huấn luyện, nên chế độ này lấy lại từ JSON cũ.
+    # Training here is fully deterministic (p1.set_seed before each model, no early stopping),
+    # so when both checkpoints exist they can be reloaded instead of retraining 15 epochs. The
+    # per-epoch AUROC curve is produced only during training, so this mode reads it from the existing JSON.
     reuse = os.environ.get("C35_REUSE_CKPT") == "1"
     prev = {}
     if reuse and os.path.exists(OUT):
@@ -197,13 +197,13 @@ def main():
         f_leaky = os.path.join(CKPT, f"sel_leaky_{name}.pt")
         f_blind = os.path.join(CKPT, f"sel_blind_{name}.pt")
         if reuse and os.path.exists(f_leaky) and os.path.exists(f_blind) and nm in prev:
-            print(f"\n[{name}] nạp lại checkpoint, bỏ qua huấn luyện", flush=True)
+            print(f"\n[{name}] reloading checkpoints, skipping training", flush=True)
             best = torch.load(f_leaky, map_location=DEVICE)
             last = torch.load(f_blind, map_location=DEVICE)
             curve = prev[nm]["auc_curve_on_fold0"]
             best_ep, best_auc = prev[nm]["leaky_epoch"], prev[nm]["leaky_auc"]
         else:
-            print(f"\n[{name}] huấn luyện ({mode}, 15 epoch cố định) ...", flush=True)
+            print(f"\n[{name}] training ({mode}, fixed 15 epochs) ...", flush=True)
             p1.set_seed(SEED)
             ds = p1.ISICImgDataset if mode == "plain" else p3.ISICEnvDataset
             bs = p1.CFG["batch_size"] if mode == "plain" else CAUSAL_BATCH
@@ -228,9 +228,9 @@ def main():
                             "blind": audit(last, kind, imgs, edits, labels, pid)}
 
     print("\n" + "=" * 92)
-    print("HIỆU ỨNG CHỌN CHECKPOINT, cỡ tập huấn luyện giữ nguyên 315 ca dương")
+    print("Checkpoint-selection effect, training-set size held at 315 positive cases")
     print("%-6s%-11s%14s%14s%9s   %s" % ("model", "subgroup", "leaky E|Δp|", "blind E|Δp|",
-                                          "tỉ số", "phán quyết (leaky / blind)"))
+                                          "ratio", "verdict (leaky / blind)"))
     ratios = []
     for nm, v in res["models"].items():
         for sub in ("all", "malignant", "benign"):
@@ -246,7 +246,7 @@ def main():
                       "ratio_malignant": {nm: v["leaky"]["malignant"]["mean"]
                                           / v["blind"]["malignant"]["mean"]
                                           for nm, v in res["models"].items()}}
-    print("\ntỉ số leaky/blind: %.2f đến %.2f | vượt ngưỡng %d/%d ô"
+    print("\nleaky/blind ratio: %.2f to %.2f | exceedance %d/%d cells"
           % (res["summary"]["ratio_min"], res["summary"]["ratio_max"],
              res["summary"]["exceedance"], res["summary"]["n_cells"]))
     json.dump(res, open(OUT, "w"), indent=1)

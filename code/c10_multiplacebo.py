@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C10: DECISIVE test cho phản biện #1 (placebo validity) + #3 (dose).
-Toàn bộ "corrected alignment / retraction" đứng trên 1 placebo (hue). Test:
-  #1c MULTI-PLACEBO: 4 neutral edit khác loại (hue / flip / spatial-jitter / small-noise). Nếu
-      CaCE_placebo HỘI TỤ -> generic edit-sensitivity có thật, correction valid. Nếu PHÂN KỲ ->
-      single-placebo correction KHÔNG valid -> phải rút việc rút (concept tier inconclusive).
-      + corrected alignment A_corr dưới TỪNG placebo: có còn dương [aligned] với mọi placebo?
-  #3  PER-DOSE corrected: A_corr ở dose thấp (isolation sạch) có còn dương không?
-Edit dùng chung mọi model; common set. Out -> results/c10_multiplacebo.json.
+C10: decisive test for placebo validity (a) and dose (b).
+The whole "corrected alignment / retraction" result rests on one placebo (hue). Tests:
+  (a) Multi-placebo: 4 neutral edits of different kinds (hue / flip / spatial-jitter / small-noise).
+      If CaCE_placebo converges, generic edit-sensitivity is real and the correction is valid. If it
+      diverges, the single-placebo correction is not valid, so the retraction must be withdrawn
+      (concept tier inconclusive).
+      + corrected alignment A_corr under each placebo: is it still positive [aligned] for every placebo?
+  (b) Per-dose corrected: is A_corr at low dose (clean isolation) still positive?
+Edits are shared across all models; common set. Out -> results/c10_multiplacebo.json.
 """
 from __future__ import annotations
 import json, os, sys, time
@@ -20,9 +21,9 @@ import c3_cace_concept as c3m
 import c7_extra_controls as c7m
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 OUT = os.path.join(os.path.dirname(HERE), "results", "c10_multiplacebo.json")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
+import audited_models                # noqa: E402  (checkpoints resolved in one place)
 import audit_cohort                  # noqa: E402  (frozen audit cohort)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+CKPTS = audited_models.CKPTS         # absolute paths to the fixed set
 SEED, N_EVAL, BOOT = 42, 200, 2000
 DOSES = c3m.DOSES   # [0.3,0.6,1.0]
 
@@ -49,7 +50,7 @@ PLACEBOS = {"hue": pb_hue, "flip": pb_flip, "jitter": pb_jitter, "noise": pb_noi
 
 
 def proxychg(x0, xe, w0, skin0):
-    """% thay đổi proxy concept của 1 edit (fixed ref) — placebo tốt nếu ~0."""
+    """% change in the concept proxy for one edit (fixed ref). A good placebo gives ~0."""
     a, b = c7m.proxy_fixed(x0, skin0), c7m.proxy_fixed(xe, skin0)
     return {k: abs(b[k] - a[k]) / (abs(a[k]) + 1e-6) for k in a}
 
@@ -137,12 +138,12 @@ def main():
     json.dump(res, open(OUT, "w"), indent=2, default=float)
 
     print("\n" + "=" * 96)
-    print("#1c PLACEBO CaCE (logit) per model — HỘI TỤ hay PHÂN KỲ?")
+    print("(a) Placebo CaCE (logit) per model: converge or diverge?")
     print(f"{'model':8s}" + "".join(f"{p:>16s}" for p in pnames))
     for m in order:
         print(f"{m:8s}" + "".join(f"{res['models'][m]['placebo_cace'][p][0]:>16.2f}" for p in pnames))
     print("-" * 96)
-    print("#1c CORRECTED alignment A_corr under EACH placebo (aligned nếu >0 & CI>0):")
+    print("(a) Corrected alignment A_corr under each placebo (aligned if >0 & CI>0):")
     print(f"{'model':8s}" + "".join(f"{p:>16s}" for p in pnames))
     for m in order:
         row = f"{m:8s}"
@@ -151,16 +152,16 @@ def main():
             row += f"{d['A']:+.2f}[{'Y' if d['aligned'] else ('A' if d['anti'] else '.')}]".rjust(16)
         print(row)
     print("-" * 96)
-    print("#3 A_corr (hue) BY DOSE (dose0=cleanest):")
+    print("(b) A_corr (hue) by dose (dose0=cleanest):")
     for m in order:
         s = " ".join(f"d{k}={res['models'][m]['A_corr_hue_by_dose'][f'dose{k}']['A']:+.2f}"
                      f"[{'Y' if res['models'][m]['A_corr_hue_by_dose'][f'dose{k}']['aligned'] else '.'}]"
                      for k in range(3))
         print(f"  {m:8s} {s}")
     print("=" * 96)
-    print("KẾT LUẬN: nếu placebo_cace HỘI TỤ & A_corr>0[Y] với MỌI placebo & MỌI dose -> correction "
-          "VALID, retraction giữ. Nếu PHÂN KỲ (vd flip≈0, hue lớn) -> correction không valid -> concept "
-          "tier INCONCLUSIVE, phải hạ cấp.")
+    print("Conclusion: if placebo_cace converges & A_corr>0[Y] for every placebo & every dose -> correction "
+          "valid, retraction holds. If it diverges (e.g. flip≈0, hue large) -> correction not valid -> concept "
+          "tier inconclusive, must be downgraded.")
     print(f"Saved -> {OUT}")
 
 

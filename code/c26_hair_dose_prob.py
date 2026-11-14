@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C26 — Đáp ứng liều của can thiệp "hair" trên THANG XÁC SUẤT.
+C26: dose response of the "hair" intervention on the probability scale.
 
-Thang logit không hiển thị được đáp ứng liều vì 93–99% dự đoán của hai liều cao đã
-chạm biên clipping (Section V-B). Script này tính dịch chuyển xác suất CÓ DẤU của ba
-mật độ hair (1.0%, 2.4%, 4.1% pixel bị đổi) trên tập ác tính đã lọc ngưỡng của từng
-model, với khoảng tin cậy bootstrap theo BỆNH NHÂN.
+The logit scale cannot show a dose response because 93 to 99% of predictions at the two high doses
+already hit the clipping bound (Section V-B). This script computes the signed probability shift for
+the three hair densities (1.0%, 2.4%, 4.1% of pixels changed) on each model's thresholded malignant
+set, with patient-level bootstrap confidence intervals.
 
-Đọc dự đoán đã cache (results/c19_preds.npz) nên KHÔNG cần GPU và KHÔNG cần ảnh gốc;
-chỉ cần metadata CSV để dựng lại patient_id của 178 ảnh đánh giá, đúng cách c32/c33 làm.
+It reads cached predictions (results/c19_preds.npz), so it needs neither a GPU nor the raw images;
+it only needs the metadata CSV to rebuild the patient_id of the 178 evaluation images, as c32/c33 do.
 
-Out -> results/c26_hair_dose_prob.json   (nguồn của Fig 3d và mọi số liều trong §V-B,
-       gồm cả tương phản giữa các bước liều và khoảng tin cậy của chúng)
-Chạy:  python Causal_XAI_v3/code/c26_hair_dose_prob.py
+Out -> results/c26_hair_dose_prob.json   (source of Fig 3d and every dose number in §V-B,
+       including the contrasts between dose steps and their confidence intervals)
+Run:  python Causal_XAI_v3/code/c26_hair_dose_prob.py
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
 
 
 def boot_ci(v, groups, n_boot=BOOT, seed=SEED):
-    """Bootstrap cụm: resample BỆNH NHÂN, giữ nguyên mọi ảnh của bệnh nhân được chọn."""
+    """Cluster bootstrap: resample patients, keeping all images of each selected patient."""
     gi = np.unique(groups, return_inverse=True)[1]
     idx = [np.where(gi == k)[0] for k in range(gi.max() + 1)]
     rng = np.random.RandomState(seed)
@@ -47,8 +47,8 @@ def boot_ci(v, groups, n_boot=BOOT, seed=SEED):
 
 
 def main():
-    # Bệnh nhân đọc thẳng từ cache. Dựng lại phân hoạch rồi lấy mẫu sẽ gán mã bệnh nhân KHÔNG
-    # tương ứng với ảnh, làm hỏng mọi khoảng bootstrap theo cụm.
+    # Patients are read directly from the cache. Rebuilding the partition and resampling would assign
+    # patient ids that do not match the images, breaking every cluster bootstrap interval.
     d = np.load(os.path.join(RES, "c19_preds.npz"), allow_pickle=True)
     labels = d["labels"]; names = [str(x) for x in d["names"]]
     pid = np.array([str(x) for x in d["patient_id"]])
@@ -66,8 +66,8 @@ def main():
             v = (pe[:, c] - p0)[sel]
             lo, hi = boot_ci(v, pid[sel])
             rows.append({"mean": float(v.mean()), "ci": [lo, hi]})
-        # tương phản giữa các bước liều: đây là đại lượng §V-B trích dẫn, nên phải
-        # bootstrap trên HIỆU theo từng ảnh chứ không trừ hai trung bình đã bootstrap riêng.
+        # contrasts between dose steps: this is the quantity §V-B cites, so we must
+        # bootstrap the per-image difference, not subtract two separately bootstrapped means.
         steps = []
         for lab, (i, j) in [("1.0->2.4", (0, 1)), ("2.4->4.1", (1, 2))]:
             v = (pe[:, cols[j]] - pe[:, cols[i]])[sel]

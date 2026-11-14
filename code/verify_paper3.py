@@ -121,7 +121,7 @@ if os.path.exists(ISIC_META):
 
 if os.path.exists(TRAIN_LOG):
     lg = open(TRAIN_LOG, encoding="utf-8").read()
-    auc = {k: float(v) for k, v in re.findall(r"\[(dj_\w+)\] lưu, select-AUC=([\d.]+)", lg)}
+    auc = {k: float(v) for k, v in re.findall(r"\[(dj_\w+)\] (?:saved|lưu), select-AUC=([\d.]+)", lg)}
     if auc:
         check("selection AUROC, EfficientNet-B3 trio",
               "%.2f/%.2f/%.2f" % (auc["dj_erm_b3"], auc["dj_slim_b3"], auc["dj_causal_b3"]),

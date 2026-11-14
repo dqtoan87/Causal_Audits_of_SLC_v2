@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v13 — PHASE 2: Causal XAI có nội dung (Module B)
-==========================================================
-Thay các metric tautological của v12 (CF=0, Causal%=100%) bằng các thước đo
-*KHÔNG tối ưu được*, đo trực tiếp ở mức ẢNH, và LUÔN so với baseline ERM:
+Phase 2: Causal XAI with substantive metrics (Module B)
+=======================================================
+Uses metrics that cannot be optimised directly (unlike tautological metrics such as CF=0,
+Causal%=100%). They are measured directly at the image level and always compared with the
+ERM baseline:
 
-  (1) Deletion AUC  (necessity)  — xóa dần pixel quan trọng (theo GradCAM) →
-        prob phải GIẢM nhanh. AUC THẤP = attribution thực sự cần thiết.
-  (2) Insertion AUC (sufficiency)— thêm dần pixel quan trọng vào ảnh nền mờ →
-        prob phải TĂNG nhanh. AUC CAO = attribution đủ để giải thích.
-  (3) Artifact-Δ (robustness)    — thêm artifact thu nhận (hair/ruler/patch/
-        vignette) → |Δ prob|. THẤP = model bỏ qua confounder thu nhận
-        (đây là test debiasing CÓ NỘI DUNG, khác CF-metadata của v12).
+  (1) Deletion AUC  (necessity):  progressively delete important pixels (by GradCAM) ->
+        prob must drop quickly. Low AUC = the attribution is truly necessary.
+  (2) Insertion AUC (sufficiency): progressively insert important pixels into a blurred base ->
+        prob must rise quickly. High AUC = the attribution is sufficient to explain.
+  (3) Artifact-Δ (robustness):    add acquisition artifacts (hair/ruler/patch/
+        vignette) -> |Δ prob|. Low = the model ignores the acquisition confounder
+        (this is a substantive debiasing test, unlike a metadata counterfactual).
 
-So sánh SLIM (khung v13, đã bỏ MoE/ContextMemory) vs ERM. Lưu ý: Phase 2 CHƯA có
-V-REx (Phase 3) nên kỳ vọng SLIM ≈ ERM về artifact-Δ; mục tiêu Phase 2 là DỰNG
-thước đo + lấy số baseline để Phase 3 chứng minh cải thiện.
+Compares SLIM (slim skeleton, no MoE/ContextMemory) with ERM. Note: Phase 2 does not yet use
+V-REx (Phase 3), so SLIM ≈ ERM on artifact-Δ is expected. The goal of Phase 2 is to build
+the metrics and obtain baseline numbers against which Phase 3 shows improvement.
 
-Vận hành: chạy nền được; cache checkpoint + kết quả JSON để chạy tiếp (resume).
-Mọi output trong XAI_NEW/.
+Operation: can run in the background; caches checkpoints and JSON results so it can resume.
+All outputs go to XAI_NEW/.
 """
 import os, sys, json, time
 import numpy as np
@@ -32,7 +33,7 @@ from sklearn.model_selection import StratifiedGroupKFold
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import train_XAI_new_v01 as p1   # tái dùng model/dữ liệu/huấn luyện Phase 1
+import train_XAI_new_v01 as p1   # reuse Phase 1 model/data/training
 
 CKPT_DIR = p1.CKPT_DIR
 RES_DIR  = p1.RES_DIR
@@ -48,23 +49,23 @@ CFG2 = dict(
     seed        = 42,
     n_folds     = 5,
     train_epochs= 12,
-    n_eval      = 120,     # số ảnh đánh giá XAI (cân bằng mal/benign)
-    di_steps    = 21,      # số bước deletion/insertion
-    blur_sigma  = 11,      # baseline mờ cho insertion/deletion
+    n_eval      = 120,     # number of XAI evaluation images (balanced mal/benign)
+    di_steps    = 21,      # number of deletion/insertion steps
+    blur_sigma  = 11,      # blurred baseline for insertion/deletion
     boot_n      = 2000,
     models      = ["erm", "slim"],
 )
 
 
 # ============================================================
-# GradCAM (hook lên backbone.features — dùng chung ERM & SLIM)
+# GradCAM (hook on backbone.features, shared by ERM and SLIM)
 # ============================================================
 class GradCAM:
     def __init__(self, model):
         self.model = model
         self.acts = None
         self.grads = None
-        target = model.backbone.features          # khối conv cuối của EfficientNet
+        target = model.backbone.features          # last conv block of EfficientNet
         target.register_forward_hook(self._fwd)
         target.register_full_backward_hook(self._bwd)
 
@@ -95,9 +96,9 @@ def _gaussian_blur(x, sigma):
 
 @torch.no_grad()
 def deletion_insertion(model, x_norm, cam, steps, sigma):
-    """x_norm: [3,H,W] đã chuẩn hóa. cam: [H,W]. Trả (del_auc, ins_auc)."""
+    """x_norm: [3,H,W], normalised. cam: [H,W]. Returns (del_auc, ins_auc)."""
     H, W = cam.shape
-    order = torch.argsort(cam.flatten(), descending=True)   # quan trọng -> không
+    order = torch.argsort(cam.flatten(), descending=True)   # most to least important
     base = _gaussian_blur(x_norm.unsqueeze(0), sigma).squeeze(0)
     fracs = np.linspace(0, 1, steps)
 
@@ -108,8 +109,8 @@ def deletion_insertion(model, x_norm, cam, steps, sigma):
         if n > 0:
             mask[order[:n]] = 1.0
         mask = mask.view(1, H, W)
-        del_imgs.append(x_norm * (1 - mask) + base * mask)      # xóa pixel quan trọng
-        ins_imgs.append(base * (1 - mask) + x_norm * mask)      # thêm pixel quan trọng
+        del_imgs.append(x_norm * (1 - mask) + base * mask)      # delete important pixels
+        ins_imgs.append(base * (1 - mask) + x_norm * mask)      # insert important pixels
     del_b = torch.stack(del_imgs); ins_b = torch.stack(ins_imgs)
 
     with torch.amp.autocast("cuda", dtype=torch.bfloat16, enabled=(DEVICE == "cuda")):
@@ -119,7 +120,7 @@ def deletion_insertion(model, x_norm, cam, steps, sigma):
 
 
 # ============================================================
-# Artifact interventions (trên ảnh [0,1], rồi chuẩn hóa)
+# Artifact interventions (on the [0,1] image, then normalised)
 # ============================================================
 def _to_norm(x01):
     return (x01 - MEAN.to(x01.device)) / STD.to(x01.device)
@@ -137,7 +138,7 @@ def art_hair(x, rng, n=12):
         for px, py in zip(xs, ys):
             for dy in (-1, 0, 1):
                 yy = np.clip(py + dy, 0, H-1)
-                x[:, yy, px] = 0.05      # sợi lông sẫm
+                x[:, yy, px] = 0.05      # dark hair strand
     return x
 
 
@@ -153,7 +154,7 @@ def art_ruler(x, rng):
 def art_patch(x, rng):
     x = x.clone(); _, H, W = x.shape
     s = H // 6
-    x[0, :s, :s] = 0.9; x[1, :s, :s] = 0.2; x[2, :s, :s] = 0.2   # ô màu góc
+    x[0, :s, :s] = 0.9; x[1, :s, :s] = 0.2; x[2, :s, :s] = 0.2   # coloured corner patch
     return x
 
 
@@ -172,7 +173,7 @@ ARTIFACTS = {"hair": art_hair, "ruler": art_ruler,
 
 @torch.no_grad()
 def artifact_delta(model, x01, rng):
-    """Trả dict {artifact: |Δ prob malignant|}."""
+    """Returns dict {artifact: |Δ prob malignant|}."""
     def prob(img01):
         xn = _to_norm(img01).unsqueeze(0).to(DEVICE)
         with torch.amp.autocast("cuda", dtype=torch.bfloat16, enabled=(DEVICE == "cuda")):
@@ -185,7 +186,7 @@ def artifact_delta(model, x01, rng):
 
 
 # ============================================================
-# Data: split seed 42, train + lấy ảnh eval (raw [0,1])
+# Data: split seed 42, train + fetch eval images (raw [0,1])
 # ============================================================
 def build_split(cfg):
     df = p1.load_isic_df()
@@ -202,9 +203,9 @@ def get_or_train(mname, df_tr, df_va, cfg):
     model = p1.build_model(mname, p1.CFG["z_dim"]).to(DEVICE)
     if os.path.exists(ckpt):
         model.load_state_dict(torch.load(ckpt, map_location=DEVICE))
-        print(f"[ckpt] nạp {ckpt}", flush=True)
+        print(f"[ckpt] loading {ckpt}", flush=True)
         return model
-    print(f"[train] {mname} (chưa có ckpt) ...", flush=True)
+    print(f"[train] {mname} (no ckpt yet) ...", flush=True)
     tr_ds = p1.ISICImgDataset(df_tr, ISIC_IMAGE_DIR, p1.CFG["img_size"], train=True)
     va_ds = p1.ISICImgDataset(df_va, ISIC_IMAGE_DIR, p1.CFG["img_size"], train=False)
     tr_loader = DataLoader(tr_ds, p1.CFG["batch_size"], shuffle=True,
@@ -217,12 +218,12 @@ def get_or_train(mname, df_tr, df_va, cfg):
     p1.set_seed(cfg["seed"])
     model, _ = p1.train_one(model, tr_loader, va_loader, tcfg, w, f"p2_{mname}")
     torch.save(model.state_dict(), ckpt)
-    print(f"[train] lưu {ckpt}", flush=True)
+    print(f"[train] saved {ckpt}", flush=True)
     return model
 
 
 def load_eval_images(df_va, n_eval, seed):
-    """Lấy n_eval ảnh raw [0,1] (cân bằng mal/benign)."""
+    """Fetch n_eval raw [0,1] images (balanced mal/benign)."""
     rng = np.random.RandomState(seed)
     pos = df_va[df_va["target"] == 1]
     neg = df_va[df_va["target"] == 0]
@@ -242,7 +243,7 @@ def load_eval_images(df_va, n_eval, seed):
 
 
 # ============================================================
-# Bootstrap CI cho mean
+# Bootstrap CI for the mean
 # ============================================================
 def boot_mean_ci(vals, n_boot=2000, seed=0):
     vals = np.asarray(vals, dtype=float)
@@ -271,7 +272,7 @@ def evaluate_model(model, imgs01, labels, cfg):
         for k in ARTIFACTS:
             art[k].append(d[k])
         if (i + 1) % 30 == 0:
-            print(f"      ...{i+1}/{len(imgs01)} ảnh ({time.time()-t0:.0f}s)", flush=True)
+            print(f"      ...{i+1}/{len(imgs01)} images ({time.time()-t0:.0f}s)", flush=True)
     res = {}
     res["deletion_auc"] = boot_mean_ci(del_aucs, cfg["boot_n"], cfg["seed"])
     res["insertion_auc"] = boot_mean_ci(ins_aucs, cfg["boot_n"], cfg["seed"])
@@ -299,7 +300,7 @@ def main():
 
     for mname in cfg["models"]:
         if mname in results:
-            print(f"[skip] {mname} (đã có kết quả)", flush=True)
+            print(f"[skip] {mname} (results already exist)", flush=True)
             continue
         print(f"\n=== Model: {mname} ===", flush=True)
         model = get_or_train(mname, df_tr, df_va, cfg)
@@ -313,27 +314,27 @@ def main():
         del model
         torch.cuda.empty_cache()
 
-    # ---- Báo cáo so sánh ----
+    # ---- Comparison report ----
     print("\n" + "=" * 64)
-    print("PHASE 2 — Module B: Causal XAI (so với baseline ERM)")
+    print("PHASE 2, Module B: Causal XAI (vs ERM baseline)")
     print("=" * 64)
     hdr = f"{'metric':<22}" + "".join(f"{m:>16}" for m in cfg["models"])
     print(hdr)
-    for key, better in [("deletion_auc", "THẤP tốt (necessity)"),
-                        ("insertion_auc", "CAO tốt (sufficiency)"),
-                        ("artifact_delta_overall", "THẤP tốt (robust)")]:
+    for key, better in [("deletion_auc", "lower is better (necessity)"),
+                        ("insertion_auc", "higher is better (sufficiency)"),
+                        ("artifact_delta_overall", "lower is better (robust)")]:
         row = f"{key:<22}"
         for m in cfg["models"]:
             if m in results:
                 v, lo, hi = results[m][key]
                 row += f"{v:.3f}[{lo:.3f},{hi:.3f}]".rjust(16)
         print(row + f"   <- {better}")
-    print("\nArtifact-Δ theo loại:")
+    print("\nArtifact-Δ by type:")
     for m in cfg["models"]:
         if m in results:
             print(f"  {m}: " + "  ".join(
                 f"{k}={results[m]['artifact_delta_by_type'][k]:.4f}" for k in ARTIFACTS))
-    print(f"\nĐã lưu: {RESULTS_FILE}")
+    print(f"\nSaved: {RESULTS_FILE}")
     print(f"##### PHASE 2 END {time.strftime('%Y-%m-%d %H:%M:%S')} #####", flush=True)
 
 

@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""CausalXAI v14 — C32: chín ô E|Δp| của tiêu chí artifact, bootstrap CỤM THEO BỆNH NHÂN.
+"""C32: the nine E|Δp| cells of the artifact criterion, with a patient-clustered bootstrap.
 
-Vì sao cần. Bảng III đọc phán quyết ba chiều trên E|Δp| của chín ô (ba model × ba nhóm con).
-C13 gộp 4 edit × N ảnh thành một mẫu rồi bootstrap trên đó, tức coi bốn edit của cùng một ảnh
-là bốn quan sát độc lập; khoảng vì thế hẹp hơn thực tế theo hai bậc: giữa các edit của một ảnh,
-và giữa các ảnh của một bệnh nhân. Script này lấy trung bình bốn edit TRONG mỗi ảnh trước, rồi
-resample theo BỆNH NHÂN, đúng đơn vị mà bài dùng cho mọi đại lượng suy diễn Tier-2 khác.
+Why. Table III reads the three-way verdict on E|Δp| for nine cells (three models × three subgroups).
+C13 pools 4 edits × N images into one sample and bootstraps on it, i.e. it treats the four edits of
+the same image as four independent observations. The interval is therefore too narrow at two levels:
+between the edits of one image, and between the images of one patient. This script first averages
+the four edits within each image, then resamples by patient, the same unit the paper uses for every
+other Tier-2 inferential quantity.
 
-Không cần GPU: đọc lại dự đoán đã lưu ở c19_preds.npz.
+No GPU needed: it rereads the predictions stored in c19_preds.npz.
 
 Out -> results/c32_absdp_patient_ci.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c32_absdp_patient_ci.py
+Run:  .venv/bin/python Causal_XAI_v3/code/c32_absdp_patient_ci.py
 """
 from __future__ import annotations
 
@@ -33,7 +34,7 @@ NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
 
 
 def boot_ci(v, groups, n_boot=BOOT, seed=SEED):
-    """Bootstrap cụm: resample BỆNH NHÂN, giữ nguyên mọi ảnh của bệnh nhân được chọn."""
+    """Cluster bootstrap: resample patients, keeping all images of each selected patient."""
     gi = np.unique(groups, return_inverse=True)[1]
     idx = [np.where(gi == k)[0] for k in range(gi.max() + 1)]
     rng = np.random.RandomState(seed)
@@ -51,8 +52,8 @@ def verdict(lo, hi, margin):
 
 
 def main():
-    # Bệnh nhân đọc thẳng từ cache. Dựng lại phân hoạch rồi lấy mẫu sẽ gán mã bệnh nhân KHÔNG
-    # tương ứng với ảnh, làm hỏng mọi khoảng bootstrap theo cụm.
+    # Patients are read directly from the cache. Rebuilding the partition and resampling would assign
+    # patient ids that do not match the images, breaking every cluster bootstrap interval.
     d = np.load(os.path.join(RES, "c19_preds.npz"), allow_pickle=True)
     labels = d["labels"]; names = [str(x) for x in d["names"]]
     pid = np.array([str(x) for x in d["patient_id"]])

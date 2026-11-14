@@ -1,31 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — PHASE C3: CaCE CONCEPT (editing-only counterfactual cho concept lâm sàng).
+Phase C3: CaCE concept (editing-only counterfactual for clinical concepts).
 
-Đo tác động NHÂN QUẢ của việc TĂNG một concept lâm sàng (đo được, biên tập-được) lên xác suất ác
-tính của classifier — bằng can thiệp editing-only trong VÙNG TỔN THƯƠNG. Khác C2 (artifact = phải
-≈0), ở C3 concept là cơ chế bệnh THẬT (C1 cho ATE > 0) ⇒ model nhân-quả-trung-thực phải cho
-**CaCE > 0 và đơn điệu theo liều**. Xem `CausalXAI_v14_DESIGN.md` §5.2(B).
+Measures the causal effect of increasing a clinical concept (measurable and editable) on the
+classifier's malignancy probability, using an editing-only intervention inside the lesion region.
+Unlike C2 (artifacts, which must give ≈0), in C3 the concept is a real disease mechanism (C1 gives
+ATE > 0), so a causally faithful model must give **CaCE > 0, monotonic in dose**. See the design
+notes, §5.2(B).
 
-Concept biên tập-được (map vào concept C1-SIGNIFICANT, đều ATE dương):
-  - contrast   ↔ tbp_lv_deltaLBnorm  : đẩy màu tổn thương XA màu da nền (tăng tương phản).
-  - color_var  ↔ tbp_lv_norm_color/color_std : khuếch đại độ lệch màu trong tổn thương (đa sắc).
-  - size       ↔ tbp_lv_areaMM2      : phóng to vùng trung tâm (zoom) -> tổn thương lớn hơn.
+Editable concepts (mapped to C1-significant concepts, all with positive ATE):
+  - contrast   ↔ tbp_lv_deltaLBnorm  : push the lesion colour away from the background skin (more contrast).
+  - color_var  ↔ tbp_lv_norm_color/color_std : amplify colour deviation inside the lesion (multicolour).
+  - size       ↔ tbp_lv_areaMM2      : enlarge the central region (zoom) -> larger lesion.
 
-THIẾT KẾ (kế thừa C2):
-  - soft lesion-mask = vùng khác màu DA NỀN (viền ngoài) -> không cần segmentation ngoài.
-  - Edit MỘT LẦN per ảnh, dùng chung 3 model. Dose-response (3 mức/concept) -> kiểm đơn điệu.
-  - CaCE có dấu (prob + logit scale, chống calibration). Đo trên ảnh malignant p_full ≥ floor.
-  - MANIPULATION-CHECK (DESIGN §5.4): proxy concept phải đổi ĐÚNG chiều & đủ biên độ; báo rò chéo.
+Design (inherited from C2):
+  - soft lesion mask = region whose colour differs from the background skin (outer border) -> no
+    external segmentation needed.
+  - Edit each image once, shared by all 3 models. Dose-response (3 levels per concept) -> monotonicity check.
+  - Signed CaCE (prob + logit scale, robust to calibration). Measured on malignant images with p_full ≥ floor.
+  - Manipulation check (design notes §5.4): the concept proxy must change in the right direction and
+    by enough; cross-leakage is reported.
   - Falsification: identity -> CaCE = 0.
 
-ESTIMAND: CaCE_C(f) = E_x[ f(edit_{C↑}(x)) − f(x) ] (kỳ vọng > 0 nếu model dùng concept causal).
+ESTIMAND: CaCE_C(f) = E_x[ f(edit_{C↑}(x)) − f(x) ] (expected > 0 if the model uses the causal concept).
 
-Nạp 3 ckpt cache (p2_{erm,slim,causal}_s42.pt). Không train lại. Cần GPU.
+Loads the 3 cached checkpoints (p2_{erm,slim,causal}_s42.pt). No retraining. Needs a GPU.
 Out -> Causal_XAI_v3/results/tier2_cace_concept.json.
 
-Chạy:
+Run:
   .venv/bin/python Causal_XAI_v3/code/c3_cace_concept.py
   .venv/bin/python Causal_XAI_v3/code/c3_cace_concept.py --n-eval 200
 """
@@ -41,7 +44,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-# v3: the upstream training modules are vendored under code/lib together with the three
+# The upstream training modules are vendored under code/lib together with the three
 # primary EfficientNet-B3 checkpoints, so this tree is self-contained apart from the raw
 # image data. Override with the CAUSALXAI_LIB environment variable if they are moved.
 XAI_OLD = os.environ.get(
@@ -55,13 +58,14 @@ OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT_JSON = os.path.join(OUT_DIR, "tier2_cace_concept.json")
 P_FLOOR = 0.10
 SEED = 42
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoint paths resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the frozen checkpoint set
 
-# Concept -> map C1 + dose (3 mức). Mọi concept C1-ATE dương -> kỳ vọng CaCE dương.
-DOSES = [0.3, 0.6, 1.0]           # gain cho contrast/color_var
-# size BỊ LOẠI: manipulation-check cho thấy can thiệp size (zoom & dilation) KHÔNG tăng proxy diện
-# tích sạch (tổn thương chạm viền -> nhiễm ước lượng da nền). morphology cần generative -> future work.
+# Concept -> C1 map + dose (3 levels). Every concept has positive C1 ATE -> CaCE expected positive.
+DOSES = [0.3, 0.6, 1.0]           # gain for contrast/color_var
+# size is excluded: the manipulation check showed that size interventions (zoom and dilation) do not
+# cleanly increase the area proxy (lesions touching the border contaminate the skin estimate).
+# Morphology needs a generative model -> future work.
 CONCEPTS = {
     "contrast":  {"c1": "contrast_LB (ATE+)", "doses": DOSES},
     "color_var": {"c1": "C_color/C_colorstd (ATE+)", "doses": DOSES},
@@ -69,40 +73,40 @@ CONCEPTS = {
 
 
 # ---------------------------------------------------------------------------------------
-# Soft lesion mask + concept edits (ảnh [0,1], [3,H,W])
+# Soft lesion mask + concept edits (image in [0,1], [3,H,W])
 # ---------------------------------------------------------------------------------------
 def soft_mask(x01, border=0.15, scale=0.22):
-    """w[H,W]∈[0,1]: mức "thuộc tổn thương" = khác màu DA NỀN (viền ngoài). Trả (w, skin[3], les_mean[3])."""
+    """w[H,W]∈[0,1]: degree of "belonging to the lesion" = colour differs from the background skin (outer border). Returns (w, skin[3], les_mean[3])."""
     C, H, W = x01.shape
     bh, bw = max(1, int(H * border)), max(1, int(W * border))
     ring = torch.zeros(H, W, dtype=torch.bool)
     ring[:bh, :] = True; ring[-bh:, :] = True; ring[:, :bw] = True; ring[:, -bw:] = True
-    skin = x01[:, ring].mean(1)                              # màu da nền
-    dist = (x01 - skin.view(C, 1, 1)).pow(2).sum(0).sqrt()   # khoảng cách màu -> [H,W]
+    skin = x01[:, ring].mean(1)                              # background skin colour
+    dist = (x01 - skin.view(C, 1, 1)).pow(2).sum(0).sqrt()   # colour distance -> [H,W]
     w = torch.clamp(dist / scale, 0, 1)
     den = w.sum().clamp_min(1e-6)
-    les_mean = (x01 * w.unsqueeze(0)).sum((1, 2)) / den      # màu trung bình tổn thương
+    les_mean = (x01 * w.unsqueeze(0)).sum((1, 2)) / den      # mean lesion colour
     return w, skin, les_mean
 
 
 def edit_contrast(x01, w, skin, les_mean, g):
-    """Đẩy tổn thương XA màu da nền -> tăng deltaLB (tương phản lesion-vs-skin)."""
+    """Push the lesion away from the background skin colour -> higher deltaLB (lesion-vs-skin contrast)."""
     d = (x01 - skin.view(-1, 1, 1)) * g
     return torch.clamp(x01 + w.unsqueeze(0) * d, 0, 1)
 
 
 def edit_color_var(x01, w, skin, les_mean, g):
-    """Khuếch đại lệch màu QUANH trung bình tổn thương -> tăng đa sắc (color variance)."""
+    """Amplify colour deviation around the lesion mean -> more multicolour (color variance)."""
     d = (x01 - les_mean.view(-1, 1, 1)) * g
     return torch.clamp(x01 + w.unsqueeze(0) * d, 0, 1)
 
 
 def edit_size(x01, w, les_mean, radius):
-    """Giãn nở (dilation) soft-mask bán kính `radius` px, tô màu tổn thương vào VÀNH MỚI
-    -> tăng diện tích tổn thương trực tiếp (can thiệp hình học, leak thấp)."""
+    """Dilate the soft mask by `radius` px and paint the lesion colour into the new ring
+    -> directly increases lesion area (geometric intervention, low leakage)."""
     r = int(radius)
     wd = F.max_pool2d(w[None, None], kernel_size=2 * r + 1, stride=1, padding=r)[0, 0]
-    ring = torch.clamp(wd - w, 0, 1)                  # vùng mới thêm
+    ring = torch.clamp(wd - w, 0, 1)                  # newly added region
     out = x01 + ring.unsqueeze(0) * (les_mean.view(-1, 1, 1) - x01)
     return out.clamp(0, 1)
 
@@ -118,10 +122,10 @@ def make_edit(x01, concept, dose, w, skin, les_mean):
 
 
 # ---------------------------------------------------------------------------------------
-# Manipulation-check proxies (đo concept trực tiếp trên ảnh, dùng cùng mask gốc)
+# Manipulation-check proxies (measure the concept directly on the image, with the same original mask)
 # ---------------------------------------------------------------------------------------
 def proxies(x01, w, skin):
-    """Trả dict proxy: contrast=||les_mean-skin||; color_var=sqrt(var màu trong lesion); size=Σw."""
+    """Returns a proxy dict: contrast=||les_mean-skin||; color_var=sqrt(colour var inside lesion); size=Σw."""
     den = w.sum().clamp_min(1e-6)
     les_mean = (x01 * w.unsqueeze(0)).sum((1, 2)) / den
     contrast = float((les_mean - skin).pow(2).sum().sqrt())
@@ -143,9 +147,9 @@ def model_prob(model, x01_batch):
 
 
 def precompute(imgs01):
-    """Per ảnh: mask + edits {concept_dose -> tensor} + manipulation-check proxy deltas."""
+    """Per image: mask + edits {concept_dose -> tensor} + manipulation-check proxy deltas."""
     edits, names = [], []
-    # tên cột: f"{concept}@{k}" với k=0,1,2 (mức liều)
+    # column name: f"{concept}@{k}" with k=0,1,2 (dose level)
     for concept, meta in CONCEPTS.items():
         for k in range(len(meta["doses"])):
             names.append(f"{concept}@{k}")
@@ -159,15 +163,15 @@ def precompute(imgs01):
                 e = make_edit(x01, concept, dose, w, skin, les_mean)
                 nm = f"{concept}@{k}"
                 d[nm] = e
-                # manipulation-check (size: dùng mask mới vì hình học đổi)
+                # manipulation check (size: use the new mask because the geometry changes)
                 wp = w if concept != "size" else soft_mask(e)[0]
                 sp = skin if concept != "size" else soft_mask(e)[1]
                 px = proxies(e, wp, sp)
                 rel = (px[concept] - base_px[concept]) / (abs(base_px[concept]) + 1e-6)
-                mani[nm]["intended"].append(rel)                  # concept đích đổi (kỳ vọng >0)
+                mani[nm]["intended"].append(rel)                  # change in the target concept (expected >0)
                 others = [c for c in CONCEPTS if c != concept]
                 leak = np.mean([abs(px[c] - base_px[c]) / (abs(base_px[c]) + 1e-6) for c in others])
-                mani[nm]["leak"].append(leak)                     # rò sang concept khác
+                mani[nm]["leak"].append(leak)                     # leakage into other concepts
         edits.append(d)
     mani_summary = {n: {"intended": float(np.mean(mani[n]["intended"])),
                         "leak": float(np.mean(mani[n]["leak"]))} for n in names}
@@ -204,13 +208,13 @@ def main():
     cfg = dict(p_floor=args.p_floor)
     os.makedirs(OUT_DIR, exist_ok=True)
 
-    print(f"##### PHASE C3 — CaCE concept {time.strftime('%H:%M:%S')} (dev={DEVICE}) #####", flush=True)
+    print(f"##### PHASE C3: CaCE concept {time.strftime('%H:%M:%S')} (dev={DEVICE}) #####", flush=True)
     df_tr, df_va = p2.build_split({"seed": SEED, "n_folds": 5})
     imgs01, labels = p2.load_eval_images(df_va, args.n_eval, SEED)
-    print(f"eval: {len(imgs01)} ảnh (malignant thật={int(sum(labels))})", flush=True)
+    print(f"eval: {len(imgs01)} images (truly malignant={int(sum(labels))})", flush=True)
 
     edits, names, mani = precompute(imgs01)
-    print("manipulation-check (intended Δ% concept đích / leak Δ% concept khác):")
+    print("manipulation-check (intended Δ% target concept / leak Δ% other concepts):")
     for n in names:
         print(f"   {n:14s} intended={100*mani[n]['intended']:+6.1f}%  leak={100*mani[n]['leak']:5.1f}%", flush=True)
 
@@ -218,7 +222,7 @@ def main():
     for name, fn in CKPTS.items():
         path = fn
         if not os.path.exists(path):
-            print(f"[skip] thiếu {path}"); continue
+            print(f"[skip] missing {path}"); continue
         model = p1.build_model("erm" if name == "erm" else "slim", p1.CFG["z_dim"]).to(DEVICE)
         model.load_state_dict(torch.load(path, map_location=DEVICE))
         t0 = time.time()
@@ -229,7 +233,7 @@ def main():
             lm, llo, lhi = p2.boot_mean_ci(dl[n], args.boot_n, SEED)
             per[n] = dict(cace_dp=m, cace_dp_ci=[lo, hi], cace_logit=lm, cace_logit_ci=[llo, lhi],
                           n=len(dp[n]))
-        # đơn điệu theo liều + dấu kỳ vọng (>0) ở liều cao nhất, theo từng concept
+        # monotonic in dose + expected sign (>0) at the highest dose, per concept
         concept_eval = {}
         for concept, meta in CONCEPTS.items():
             ks = [f"{concept}@{k}" for k in range(len(meta["doses"]))]
@@ -239,10 +243,10 @@ def main():
                 cace_by_dose=vals,
                 monotonic_pos=bool(vals[0] <= vals[1] <= vals[2]),
                 top_logit=top["cace_logit"], top_ci=top["cace_logit_ci"],
-                aligned_pos=bool(top["cace_logit_ci"][0] > 0),   # dương & CI không chứa 0 = khớp C1
+                aligned_pos=bool(top["cace_logit_ci"][0] > 0),   # positive and CI excludes 0 = consistent with C1
             )
         results[name] = dict(n_kept=kept, pred_mal_prob=p0m, per_dose=per, per_concept=concept_eval)
-        print(f"[{name}] xong ({time.time()-t0:.0f}s, n_kept={kept}, p_mal={p0m:.3f})", flush=True)
+        print(f"[{name}] done ({time.time()-t0:.0f}s, n_kept={kept}, p_mal={p0m:.3f})", flush=True)
         del model
         if DEVICE == "cuda":
             torch.cuda.empty_cache()
@@ -261,7 +265,7 @@ def main():
 
     order = [m for m in ["erm", "slim", "causal"] if m in results]
     print("\n" + "=" * 96)
-    print("CaCE CONCEPT: kỳ vọng CaCE > 0 & đơn điệu (concept C1-ATE dương). aligned = CI(top)>0.")
+    print("CaCE CONCEPT: expect CaCE > 0 and monotonic (concepts with positive C1 ATE). aligned = CI(top)>0.")
     print("=" * 96)
     print(f"{'concept':12s}{'C1-map':24s}" + "".join(f"{m:>20s}" for m in order))
     print(f"{'':36s}" + "".join(f"{'top CaCE_logit mono':>20s}" for m in order))
@@ -277,9 +281,9 @@ def main():
     print("-" * 96)
     print(f"{'pred_mal_prob':36s}" + "".join(f"{results[m]['pred_mal_prob']:.3f}".rjust(20) for m in order))
     print("=" * 96)
-    print("Đọc: top CaCE_logit ở liều cao nhất; ↑=đơn điệu theo liều; ✓=dương & CI không chứa 0 "
-          "(model PHẢN ỨNG ĐÚNG với concept causal của C1). ✗=không khớp (model bỏ qua/ngược concept bệnh).")
-    print(f"\nĐã lưu: {args.out}")
+    print("Reading: top CaCE_logit at the highest dose; ↑=monotonic in dose; ✓=positive and CI excludes 0 "
+          "(model responds correctly to the C1 causal concept). ✗=not consistent (model ignores or reverses the disease concept).")
+    print(f"\nSaved: {args.out}")
 
 
 if __name__ == "__main__":

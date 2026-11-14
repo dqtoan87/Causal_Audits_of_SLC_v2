@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C8: train trio ERM/Slim/Inv trên BACKBONE THỨ 2 (ResNet50) — đáp #12 (generalize
-qua kiến trúc). CÙNG split (seed 42) + cùng loss/regularizer như backbone gốc, chỉ đổi backbone.
-Inv = Slim + V-REx(site attribution) + artifact-CF (tái dùng phase3.train_causal). Undersample 20:1
-=> train ~6-7k ảnh => nhanh. Out -> Causal_XAI_v3/checkpoints/{erm,slim,causal}_r50.pt.
+C8: train the ERM/Slim/Inv trio on a second backbone (ResNet50), to test generalisation across
+architectures. Same split (seed 42) and same loss/regularizer as the original backbone; only the
+backbone changes. Inv = Slim + V-REx(site attribution) + artifact-CF (reuses phase3.train_causal).
+Undersample 20:1 => train ~6-7k images => fast. Out -> Causal_XAI_v3/checkpoints/{erm,slim,causal}_r50.pt.
 
-Chạy (nền, num_workers thấp tránh OOM máy chung):
+Run (in background, low num_workers to avoid OOM on a shared machine):
   setsid nohup .venv/bin/python Causal_XAI_v3/code/c8_backbone2_train.py > Causal_XAI_v3/logs/c8.log 2>&1 &
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ import torch.nn as nn
 import torchvision.models as tvm
 from torch.utils.data import DataLoader
 
-# v3: the upstream training modules are vendored under code/lib together with the three
+# The upstream training modules are vendored under code/lib together with the three
 # primary EfficientNet-B3 checkpoints, so this tree is self-contained apart from the raw
 # image data. Override with the CAUSALXAI_LIB environment variable if they are moved.
 XAI_OLD = os.environ.get(
@@ -33,11 +33,11 @@ CKPT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 os.makedirs(CKPT_DIR, exist_ok=True)
 SEED = 42
 EPOCHS = 12
-NUM_WORKERS = 4          # thấp -> tránh OOM máy dùng chung
+NUM_WORKERS = 4          # low -> avoids OOM on a shared machine
 META = "/mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv"
 
 
-# ---- ResNet50 backbone (feat 2048), giữ NGUYÊN cấu trúc head như EfficientNet trio ----
+# ---- ResNet50 backbone (feat 2048), head structure kept identical to the EfficientNet trio ----
 def _bb_r50():
     bb = tvm.resnet50(weights="IMAGENET1K_V2")
     bb.fc = nn.Identity()

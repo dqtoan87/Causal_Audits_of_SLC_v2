@@ -1,26 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C15: kiểm định GIẢ ĐỊNH ĐỐI XỨNG của thiết kế đối-liều, và tính bất biến
-theo calibration của CaCE trên output space.
+C15: test of the symmetry assumption of the opposite-dose design, and of the calibration
+invariance of CaCE on the output space.
 
-Reviewer nêu hai chỗ paper nói mạnh hơn bằng chứng:
+Two places where the claims would go beyond the evidence:
 
- (1) "thiết kế đối-liều triệt tiêu số hạng độ-tự-tin CHÍNH XÁC". Nếu
-         ΔL₊ = −α₊·L₀ + h(+δ)   và   ΔL₋ = −α₋·L₀ + h(−δ)
-     thì  ΔL₊ − ΔL₋ = (α₋ − α₊)·L₀ + h(+δ) − h(−δ).
-     Số hạng độ-tự-tin chỉ triệt tiêu khi α₊ = α₋ — một điều kiện KIỂM ĐỊNH ĐƯỢC, chưa được kiểm.
-     C15 ước lượng α₊, α₋ và kiểm H₀: α₊ = α₋ bằng bootstrap ghép cặp theo ảnh.
+ (1) "the opposite-dose design cancels the confidence term exactly". If
+         ΔL₊ = −α₊·L₀ + h(+δ)   and   ΔL₋ = −α₋·L₀ + h(−δ)
+     then  ΔL₊ − ΔL₋ = (α₋ − α₊)·L₀ + h(+δ) − h(−δ).
+     The confidence term cancels only when α₊ = α₋. This condition is testable and must be tested.
+     C15 estimates α₊, α₋ and tests H₀: α₊ = α₋ with a paired bootstrap over images.
 
- (2) Cơ chế "co về biên quyết định" mới chỉ đo trên NEUTRAL edit; chưa chứng minh concept edit
-     cũng tuân theo cùng phân rã. C15 ước lượng α cho CẢ concept edit (hai chiều, hai liều).
+ (2) The "shrinkage toward the decision boundary" mechanism is measured only on neutral edits; it is
+     not shown that concept edits follow the same decomposition. C15 estimates α for concept edits
+     too (both directions, two doses).
 
-Ngoài ra C15 định lượng phát biểu "CaCE trên output space KHÔNG bất biến theo calibration":
-temperature scaling p_T = σ(logit(p)/T) làm MỌI đại lượng thang logit co lại đúng hệ số 1/T, nên
-so sánh CHÉO MODEL bị nhân bởi T_i/T_j. T được khớp trên chính validation fold của C14.
+C15 also quantifies the statement "CaCE on the output space is not calibration-invariant":
+temperature scaling p_T = σ(logit(p)/T) shrinks every logit-scale quantity by exactly 1/T, so
+cross-model comparisons are multiplied by T_i/T_j. T is fitted on the same validation fold as C14.
 
 Out -> results/c15_symmetry.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c15_symmetry.py
+Run:  .venv/bin/python Causal_XAI_v3/code/c15_symmetry.py
 """
 from __future__ import annotations
 
@@ -42,8 +43,8 @@ torch.set_num_threads(min(8, os.cpu_count() or 8))
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c15_symmetry.json")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoints resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the fixed set
 SEED, N_EVAL, BOOT = 42, 200, 2000
 ORDER = ["erm", "slim", "causal"]
 NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
@@ -52,7 +53,7 @@ PLACEBO = ["flip", "jitter", "hue", "noise"]
 
 
 def build_edits(imgs01):
-    """Mỗi ảnh: concept ↑ và concept ↓ (khớp mean|Δ| bằng bisection, đúng công thức C12) + 4 placebo."""
+    """Per image: concept up and concept down (mean|Δ| matched by bisection, same formula as C12) + 4 placebos."""
     edits, names = [], None
     for i, x in enumerate(imgs01):
         w, skin, lm = c3m.soft_mask(x)
@@ -84,7 +85,7 @@ def eval_model(model, imgs01, edits, names):
 
 
 def ols_slope(x, y):
-    """Trả (slope, intercept, R2) của y ~ a + s·x."""
+    """Return (slope, intercept, R2) of y ~ a + s·x."""
     s, a = np.polyfit(x, y, 1)
     pred = a + s * x
     r2 = 1.0 - ((y - pred) ** 2).sum() / max(((y - y.mean()) ** 2).sum(), 1e-12)
@@ -92,7 +93,7 @@ def ols_slope(x, y):
 
 
 def boot_slope_diff(x, y1, y2, n_boot, seed):
-    """Bootstrap ghép cặp theo ảnh cho hiệu hai hệ số dốc (α cho edit ↑ và ↓)."""
+    """Paired bootstrap over images for the difference of two slopes (α for the up and down edits)."""
     rng = np.random.RandomState(seed); n = len(x); out = np.empty(n_boot)
     for b in range(n_boot):
         idx = rng.randint(0, n, n)
@@ -103,7 +104,7 @@ def boot_slope_diff(x, y1, y2, n_boot, seed):
 
 
 def fit_temperature(prob, y, lo=0.05, hi=20.0, iters=60):
-    """Khớp T tối thiểu hoá NLL của σ(logit(p)/T) bằng tìm kiếm tam phân."""
+    """Fit T minimising the NLL of σ(logit(p)/T) by ternary search."""
     L = c3m.logit(prob)
 
     def nll(T):
@@ -150,14 +151,14 @@ def main():
         L0 = c3m.logit(p0); dL = c3m.logit(pe) - L0[:, None]; dP = pe - p0[:, None]
         mr = {"p0_mean": float(p0.mean()), "slopes": {}, "symmetry": {}, "prob_scale": {}}
 
-        # --- (2) hệ số co cho MỌI edit, kể cả concept
+        # --- (2) shrinkage coefficient for every edit, including concept edits
         for j, nm in enumerate(names):
             s, a, r2 = ols_slope(L0, dL[:, j])
-            mr["slopes"][nm] = {"alpha": -s, "intercept": a, "r2": r2}   # alpha = -slope (co dương)
+            mr["slopes"][nm] = {"alpha": -s, "intercept": a, "r2": r2}   # alpha = -slope (positive shrinkage)
             sp, ap_, r2p = ols_slope(p0, dP[:, j])
             mr["prob_scale"][nm] = {"slope_p": sp, "r2": r2p}
 
-        # --- (1) kiểm H0: alpha_+ = alpha_-
+        # --- (1) test H0: alpha_+ = alpha_-
         for t in TARGETS:
             ju, jd = names.index(f"{t}|up"), names.index(f"{t}|dn")
             au = mr["slopes"][f"{t}|up"]["alpha"]; ad = mr["slopes"][f"{t}|dn"]["alpha"]
@@ -174,7 +175,7 @@ def main():
         res["models"][m] = mr
         print(f"[{m}] done ({time.time()-t0:.0f}s)", flush=True)
 
-    # --- (3) temperature scaling trên validation fold của C14
+    # --- (3) temperature scaling on the validation fold of C14
     temps = {}
     try:
         Y = np.load(os.path.join(RES, "c14_labels.npy")).astype(float)
@@ -213,7 +214,7 @@ def main():
                   f"diff={s['boot_diff_mean']:+.3f} [{s['boot_diff_ci'][0]:+.3f},{s['boot_diff_ci'][1]:+.3f}] "
                   f"{v:9s} resid/effect={s['residual_over_effect']:.2f}")
     print("-" * W)
-    print("C) TEMPERATURE SCALING — output-space CaCE is not calibration-invariant")
+    print("C) Temperature scaling: output-space CaCE is not calibration-invariant")
     if res["temperature"]:
         for m in ORDER:
             t = res["temperature"][m]

@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C47 — Kiểm tra giả định TỈ SỐ CHÊNH CHUNG của mô hình logistic có điều kiện ở C41.
+C47: test of the common odds ratio assumption of the conditional logistic model in C41.
 
-Vì sao cần. C41 buộc một beta_k duy nhất cho MỌI tầng thông tin. Refit nửa mẫu (C43) chỉ nói
-về độ ỔN ĐỊNH của ước lượng, không nói gì về ĐIỀU TIẾT: hai nửa ngẫu nhiên vẫn có thể giống
-nhau trong khi hiệu ứng khác hẳn giữa nam và nữ, hay giữa các vị trí giải phẫu. Muốn kiểm
-tra điều tiết thì phải đưa số hạng TƯƠNG TÁC vào chính hàm hợp lý.
+Why. C41 imposes a single beta_k across all information strata. The half-sample refit (C43) speaks
+only to the stability of the estimate, not to effect modification: two random halves can look alike
+while the effect differs sharply between men and women, or between anatomical sites. Testing effect
+modification requires putting interaction terms into the likelihood itself.
 
-Điểm mấu chốt về định danh. Trong mô hình có điều kiện, HIỆU ỨNG CHÍNH của một biến hằng số
-trong bệnh nhân (giới tính, tuổi) bị tầng triệt tiêu — nhưng TƯƠNG TÁC của nó với phơi nhiễm
-thì KHÔNG, vì phơi nhiễm biến thiên trong tầng nên tích x_ij * S_i cũng biến thiên. Vì vậy
-điều tiết theo đặc trưng bệnh nhân là ước lượng được, dù hiệu ứng chính thì không.
+Key point on identification. In a conditional model, the main effect of a variable that is constant
+within a patient (sex, age) is cancelled by the stratum, but its interaction with the exposure is
+not, because the exposure varies within the stratum, so the product x_ij * S_i also varies. Effect
+modification by patient characteristics is therefore estimable, even though the main effect is not.
 
     logit Pr(Y_ij=1 | ...) = a_i + beta*x_ij + delta*(x_ij * S_ij) + gamma' V_ij
 
-delta là log của tỉ số các tỉ số chênh giữa hai nhóm. delta = 0 nghĩa là tỉ số chênh chung
-đúng trên trục đó. Báo cáo delta, khoảng tin cậy sandwich cụm, và tỉ số chênh riêng của từng
-nhóm suy ra từ (beta, beta+delta).
+delta is the log of the ratio of odds ratios between the two groups. delta = 0 means the common odds
+ratio holds on that axis. Reports delta, the cluster sandwich confidence interval, and each group's
+own odds ratio derived from (beta, beta+delta).
 
-Bốn trục điều tiết:
-  sex          — hằng số trong bệnh nhân (1042/1042), chỉ ước lượng được qua tương tác
-  age_ge60     — gần như hằng số trong bệnh nhân (942/1042)
-  ITA_stratum  — sắc độ da, BIẾN THIÊN trong bệnh nhân; nhị phân hoá ở trung vị
-  site_limb    — vị trí giải phẫu, biến thiên trong bệnh nhân; chi so với thân/đầu
+Four modification axes:
+  sex          : constant within patient (1042/1042), estimable only through the interaction
+  age_ge60     : almost constant within patient (942/1042)
+  ITA_stratum  : skin tone, varies within patient; dichotomised at the median
+  site_limb    : anatomical site, varies within patient; limb vs trunk/head
 
 Out -> results/c47_heterogeneity.json
-Chạy:  python Causal_XAI_v3/code/c47_heterogeneity.py
+Run:  python Causal_XAI_v3/code/c47_heterogeneity.py
 """
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ def log(m):
 
 
 def modifiers(d):
-    """Trả các trục điều tiết nhị phân, cùng nhãn hai nhóm."""
+    """Return the binary modification axes, with the labels of the two groups."""
     out = {}
     sx = d["sex"].astype(str).str.lower()
     out["sex_male"] = (sx == "male").to_numpy().astype(float), ("female", "male")
@@ -74,7 +74,7 @@ def modifiers(d):
 
 
 def build(df, col, mod_key=None):
-    """Ma trận thiết kế của C41, tuỳ chọn thêm cột tương tác x * S ở vị trí 1."""
+    """Design matrix of C41, optionally with an interaction column x * S at position 1."""
     df = df.copy()
     df["age_band"] = pd.to_numeric(df["age_approx"], errors="coerce")
     x = pd.to_numeric(df[col], errors="coerce")
@@ -97,8 +97,8 @@ def build(df, col, mod_key=None):
         S, names = modifiers(d)[mod_key]
         cols.append(pd.Series(d["_T"].to_numpy() * S, name="TxS"))
         labels.append("TxS")
-        # hiệu ứng chính của S chỉ đưa vào khi S biến thiên TRONG tầng; nếu hằng số thì tầng
-        # đã hấp thụ và cột sẽ bị loại ở bước kiểm biến thiên bên dưới.
+        # the main effect of S is included only when S varies within the stratum; if constant, the stratum
+        # has absorbed it and the column is dropped at the variation check below.
         cols.append(pd.Series(S, name="S")); labels.append("S")
     cat = d[c41.WITHIN_CONF].astype("object").fillna("missing")
     du = pd.get_dummies(cat, prefix=c41.WITHIN_CONF, drop_first=True).astype(float)
@@ -157,7 +157,7 @@ def main():
         base = build(df, col, None)
         Xb, yb, sb, _lab, _S, _d = base
         bb, seb, _r = fit(Xb, yb, sb)
-        log(f"{cname}: OR chung = {np.exp(bb[0]):.3f}  (tầng={len(sb)}, ca={int(yb.sum())})")
+        log(f"{cname}: common OR = {np.exp(bb[0]):.3f}  (strata={len(sb)}, cases={int(yb.sum())})")
         entry = {"column": col, "common_or": float(np.exp(bb[0])),
                  "common_log_or": float(bb[0]), "n_strata": int(len(sb)),
                  "n_cases": int(yb.sum()), "axes": {}}
@@ -182,7 +182,7 @@ def main():
             b0, d0 = float(beta[0]), float(beta[j])
             s0, sd = float(se[0]), float(se[j])
             z = d0 / sd if np.isfinite(sd) and sd > 0 else np.nan
-            # đếm ca theo nhóm điều tiết, để thấy trục nào có đủ thông tin
+            # count cases per modification group, to see which axis carries enough information
             n1 = int(((S == 1) & (y == 1)).sum()); n0 = int(((S == 0) & (y == 1)).sum())
             entry["axes"][key] = {
                 "or_group0": float(np.exp(b0)), "or_group1": float(np.exp(b0 + d0)),
@@ -196,8 +196,8 @@ def main():
                 "converged": bool(r.success)}
             a = entry["axes"][key]
             log(f"  {key:10s} OR {a['or_group0']:.2f} vs {a['or_group1']:.2f} | "
-                f"tỉ số {a['ratio_of_ors']:.2f} {a['ci_ratio_of_ors']} p={a['p']:.3f} "
-                f"| ca {n0}/{n1}")
+                f"ratio {a['ratio_of_ors']:.2f} {a['ci_ratio_of_ors']} p={a['p']:.3f} "
+                f"| cases {n0}/{n1}")
         res["concepts"][cname] = entry
 
     res["runtime_sec"] = round(time.time() - t0, 1)

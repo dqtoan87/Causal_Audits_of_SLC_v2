@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C42 — Positive control: chứng minh tiêu chí artifact CÓ vùng chấp nhận.
+C42: positive control, showing that the artifact criterion has an acceptance region.
 
-Vấn đề. Trong toàn bộ bài, không ô nào đạt `equivalence`. Một tiêu chí chỉ biết bác bỏ thì
-chưa chứng minh được là nó PHÂN BIỆT được. Phép kiểm identity edit trả về đúng 0 chỉ xác nhận
-đường ống, không xác nhận lực phân biệt trên can thiệp thật.
+Problem. Across the whole paper, no cell reaches `equivalence`. A criterion that can only reject
+has not been shown to discriminate. The identity-edit check returning exactly 0 only validates the
+pipeline, not the discriminating power on real interventions.
 
-Thiết kế. Hạ liều hair xuống dưới mức đang dùng trong bài và chạy đúng tiêu chí ba nhánh trên
-đúng cohort patient-disjoint của Bảng 2. Nếu ở liều đủ nhỏ có ô đạt `equivalence`, và verdict
-chuyển dần exceedance khi liều tăng, thì tiêu chí vừa có vùng chấp nhận vừa bám cường độ can
-thiệp. Điều đó biến dose-response từ một mô tả thành một HIỆU CHUẨN của chính tiêu chí.
+Design. Lower the hair dose below the levels used in the paper and run the same three-way criterion on
+the same patient-disjoint cohort as Table 2. If some cell reaches `equivalence` at a small enough dose, and the verdict
+moves gradually to exceedance as the dose increases, then the criterion both has an acceptance region and tracks
+intervention strength. That turns the dose-response from a description into a calibration of the criterion itself.
 
-Thang liều. Hàm _hair(x, rng, n, alpha) nhận số sợi n và độ mờ alpha. Ba liều của bài là
-(6, 0.40), (14, 0.60), (24, 0.75), tương ứng 1.0%, 2.4% và 4.1% pixel bị đổi. Ta thêm ba liều
-thấp hơn hẳn ở phía dưới.
+Dose ladder. The function _hair(x, rng, n, alpha) takes the number of strands n and the opacity alpha. The paper's three doses are
+(6, 0.40), (14, 0.60), (24, 0.75), corresponding to 1.0%, 2.4% and 4.1% of pixels changed. We add three
+clearly lower doses below them.
 
 Out -> results/c42_positive_control.json
-Chạy:  python code/c42_positive_control.py [--boot 4000]
+Run:  python code/c42_positive_control.py [--boot 4000]
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ import c2_cace_artifact as c2m      # noqa: E402
 import c29_disjoint_train as c29    # noqa: E402
 import c30_disjoint_audit as c30    # noqa: E402
 import c3_cace_concept as c3m       # noqa: E402
-import audit_cohort               # noqa: E402  (danh sách ảnh audit cố định)
+import audit_cohort               # noqa: E402  (fixed list of audit images)
 
 p2, DEVICE = c3m.p2, c3m.DEVICE
 BASE = os.path.dirname(HERE)
@@ -46,13 +46,13 @@ OUT = os.path.join(RES, "c42_positive_control.json")
 SEED, N_EVAL = c30.SEED, c30.N_EVAL
 MARGIN_P = c30.MARGIN_P
 
-# thang liều: ba mức mới ở dưới, rồi ba mức của bài
+# dose ladder: three new levels below, then the paper's three levels
 LADDER = [("hair_x1", 1, 0.15), ("hair_x2", 2, 0.25), ("hair_x3", 3, 0.35),
           ("hair_light", 6, 0.40), ("hair", 14, 0.60), ("hair_heavy", 24, 0.75)]
 
 
 def register_doses():
-    """Thêm ba liều thấp vào bảng ARTIFACTS. Ba liều còn lại đã có sẵn và giữ nguyên định nghĩa."""
+    """Add the three low doses to the ARTIFACTS table. The other three already exist and keep their definitions."""
     for name, n, a in LADDER:
         if name in c2m.ARTIFACTS:
             continue
@@ -69,14 +69,14 @@ def main():
     print(f"##### C42 positive control {time.strftime('%H:%M:%S')} #####", flush=True)
     register_doses()
     names = [n for n, _, _ in LADDER] + ["ruler", "identity"]
-    HELD = ["hair_light", "hair", "hair_heavy", "ruler"]   # đúng tập của Bảng 2
+    HELD = ["hair_light", "hair", "hair_heavy", "ruler"]   # the same set as Table 2
 
-    imgs, labels, pid, _ = audit_cohort.load()   # danh sách cố định, không dựng lại phân hoạch
-    print(f"audit cohort: {len(imgs)} ảnh / {len(np.unique(pid))} bệnh nhân "
-          f"({int((labels==1).sum())} ác tính)", flush=True)
+    imgs, labels, pid, _ = audit_cohort.load()   # fixed list, the partition is not rebuilt
+    print(f"audit cohort: {len(imgs)} images / {len(np.unique(pid))} patients "
+          f"({int((labels==1).sum())} malignant)", flush=True)
 
     edits, change_frac = c2m.precompute_edits(imgs, names, SEED)
-    print("pixel bị đổi theo liều: " +
+    print("pixels changed by dose: " +
           "  ".join(f"{n}={100*change_frac[n]:.2f}%" for n in names), flush=True)
 
     trio = dict(c30.TRIO) if args.models == "all" else {"b3": c30.TRIO["b3"]}
@@ -100,7 +100,7 @@ def main():
         for ck, kind, nm in models:
             f = os.path.join(CKPT, ck + ".pt")
             if not os.path.exists(f):
-                print(f"  [{ck}] thiếu checkpoint, bỏ qua", flush=True); continue
+                print(f"  [{ck}] missing checkpoint, skipping", flush=True); continue
             m = c30.make_model(kind).to(DEVICE)
             m.load_state_dict(torch.load(f, map_location=DEVICE)); m.eval()
             p0 = c30.probs(m, imgs)
@@ -118,7 +118,7 @@ def main():
                     print(f"{bb:9s}{nm:6s}{a:11s}{100*change_frac[a]:7.2f}{sub:>11s}"
                           f"{absdp[msk].mean():9.4f}{f'[{lo:.4f}, {hi:.4f}]':>22s}{v:>16s}",
                           flush=True)
-            # đại lượng của Bảng 2: trung bình |Δp| trên BỐN edit held-out
+            # the Table 2 quantity: mean |Δp| over the four held-out edits
             agg = np.mean([np.abs(c30.probs(m, [edits[i][a] for i in range(len(imgs))]) - p0)
                            for a in HELD], 0)
             cells["_heldout_aggregate"] = {}
@@ -129,14 +129,14 @@ def main():
                                                     "ci": [lo, hi],
                                                     "verdict": c30.verdict(lo, hi, MARGIN_P)}
             print(f"{bb:9s}{nm:6s}{'AGG(4 held-out)':21s}"
-                  f"{agg.mean():9.4f}   <- đại lượng của Bảng 2", flush=True)
+                  f"{agg.mean():9.4f}   <- Table 2 quantity", flush=True)
             del m
             if DEVICE == "cuda":
                 torch.cuda.empty_cache()
             res["models"].setdefault(bb, {})[nm] = cells
             json.dump(res, open(OUT + ".partial", "w"), indent=1)
 
-    # tổng kết: tiêu chí có vùng chấp nhận không, và chuyển pha ở đâu
+    # summary: does the criterion have an acceptance region, and where is the transition
     summ = {"equivalence_cells": [], "indeterminate_cells": [], "n_cells": 0}
     for bb, mm in res["models"].items():
         for nm, cells in mm.items():
@@ -155,10 +155,10 @@ def main():
         os.remove(OUT + ".partial")
 
     print("=" * W)
-    print(f"ô đạt equivalence : {len(summ['equivalence_cells'])} / {summ['n_cells']}")
-    print(f"ô indeterminate   : {len(summ['indeterminate_cells'])}")
-    print("tiêu chí CÓ vùng chấp nhận" if summ["criterion_has_acceptance_region"]
-          else "tiêu chí KHÔNG đạt equivalence ở bất kỳ liều nào đã thử")
+    print(f"cells at equivalence : {len(summ['equivalence_cells'])} / {summ['n_cells']}")
+    print(f"cells indeterminate  : {len(summ['indeterminate_cells'])}")
+    print("the criterion has an acceptance region" if summ["criterion_has_acceptance_region"]
+          else "the criterion does not reach equivalence at any dose tried")
     print(f"saved -> {OUT}  ({res['runtime_sec']}s)")
 
 

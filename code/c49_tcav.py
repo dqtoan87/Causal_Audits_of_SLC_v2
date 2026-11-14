@@ -1,39 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C49 — TCAV trên CÙNG sáu checkpoint, CÙNG hai khái niệm, CÙNG nhóm ảnh kiểm định.
+C49: TCAV on the same six checkpoints, the same two concepts, and the same audit image set.
 
-Vì sao. Đóng góp thứ ba của bài nói ước lượng tử placebo KHÔNG định danh được thành phần khái
-niệm trong lớp can thiệp đã dựng. Một người phản biện có quyền hỏi: vậy phương pháp quy gán
-khái niệm đang dùng phổ biến trả về gì trên đúng dữ liệu này? Nếu chúng trả về câu trả lời tự
-tin ở chỗ khung của bài báo động là không định danh được, thì đó chính là điều khung này thêm
-vào — và phải đo, không được lập luận suông.
+Why. The paper's third contribution states that the placebo-subtracted estimator does not identify the
+concept component within the constructed intervention class. A natural question follows: what do the
+widely used concept-attribution methods return on exactly this data? If they return a confident answer
+where the paper's framework reports non-identification, that is precisely what this framework adds,
+and it must be measured, not just argued.
 
-TCAV (Kim et al. 2018) đo đạo hàm có hướng của logit theo một hướng khái niệm trong không gian
-kích hoạt. Nó KHÔNG can thiệp lên khái niệm; nó đọc độ nhạy kết hợp dọc một hướng tuyến tính.
+TCAV (Kim et al. 2018) measures the directional derivative of the logit along a concept direction in
+activation space. It does not intervene on the concept; it reads the joint sensitivity along a linear direction.
 
-Giao thức, giữ đúng bản gốc:
-  1. CAV: hồi quy logistic tuyến tính tách kích hoạt của ảnh ĐÃ SỬA khái niệm khỏi ảnh GỐC,
-     ở lớp đặc trưng gộp. Vector pháp tuyến v_C là hướng khái niệm. Như bản gốc, huấn luyện
-     N_CAV lần trên các nửa mẫu ngẫu nhiên khác nhau để có PHÂN BỐ điểm TCAV chứ không phải
-     một điểm duy nhất.
-  2. Đạo hàm có hướng: S_i = ∇_a logit_malignant(a_i) · v_C tại kích hoạt của ảnh gốc i.
-  3. Điểm TCAV = tỉ lệ ảnh có S_i > 0.
-  4. Kiểm định ý nghĩa: N_RAND CAV NGẪU NHIÊN từ nhãn hoán vị, cùng cách huấn luyện. Khái niệm
-     có ý nghĩa khi t-test HAI MẪU giữa N_CAV điểm khái niệm và N_RAND điểm ngẫu nhiên bác bỏ
-     ở mức 0,05 — đúng phép kiểm bản gốc dùng.
+Protocol, following the original:
+  1. CAV: a linear logistic regression separates activations of concept-edited images from original images,
+     at the pooled feature layer. The normal vector v_C is the concept direction. As in the original, it is
+     trained N_CAV times on different random half-samples to obtain a distribution of TCAV scores rather than
+     a single score.
+  2. Directional derivative: S_i = ∇_a logit_malignant(a_i) · v_C at the activation of original image i.
+  3. TCAV score = fraction of images with S_i > 0.
+  4. Significance test: N_RAND random CAVs from permuted labels, trained the same way. A concept is
+     significant when a two-sample t-test between the N_CAV concept scores and the N_RAND random scores rejects
+     at level 0.05, the same test the original uses.
 
-     Một lưu ý về null này, phải báo cáo chứ không giấu: gradient ở lớp đặc trưng gần như cùng
-     hướng trên mọi ảnh, nên một hướng ngẫu nhiên cho tích vô hướng cùng dấu ở gần hết ảnh, và
-     điểm TCAV ngẫu nhiên dồn về 0 hoặc 1 chứ không tụ quanh 0,5. Trung bình null vẫn quanh
-     0,5 nhưng phương sai rất lớn, nên phép kiểm này có LỰC THẤP ở đây.
+     A note on this null, to be reported rather than hidden: the gradient at the feature layer points in nearly
+     the same direction for every image, so a random direction gives a dot product of the same sign on almost
+     all images, and random TCAV scores pile up at 0 or 1 instead of clustering around 0.5. The null mean is
+     still around 0.5 but its variance is very large, so this test has low power here.
 
-Điểm cần nhấn khi đọc kết quả: dùng CHÍNH các phép sửa khái niệm của bài để dựng CAV là cách
-đối xử THUẬN LỢI NHẤT có thể cho TCAV — hướng khái niệm được lấy đúng từ can thiệp mà bài thực
-hiện, nên không thể trách CAV là không đại diện cho khái niệm.
+Point to keep in mind when reading the results: building the CAV from the paper's own concept edits is the
+most favourable treatment possible for TCAV. The concept direction is taken directly from the intervention the
+paper performs, so the CAV cannot be faulted for failing to represent the concept.
 
 Out -> results/c49_tcav.json
-Chạy:  python Causal_XAI_v3/code/c49_tcav.py
+Run:  python Causal_XAI_v3/code/c49_tcav.py
 """
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ OUT = os.path.join(RES, "c49_tcav.json")
 
 SEED, N_CAV, N_RAND = 42, 20, 20
 CONCEPTS = ["contrast", "color_var"]
-DOSE = c3m.DOSES[-1]          # liều đỉnh, đúng liều tầng khái niệm của bài dùng
+DOSE = c3m.DOSES[-1]          # peak dose, the same dose the paper's concept tier uses
 MODELS = [("erm", "dj_erm_b3.pt", "EfficientNet-B3 ERM"),
           ("slim", "dj_slim_b3.pt", "EfficientNet-B3 Slim"),
           ("slim", "dj_causal_b3.pt", "EfficientNet-B3 Inv"),
@@ -74,14 +74,14 @@ def log(m):
 
 
 def backbone_of(model, kind):
-    """Lớp đặc trưng gộp: nơi TCAV chuẩn đặt CAV."""
+    """Pooled feature layer: where standard TCAV places the CAV."""
     if kind in ("erm", "slim"):
         return model.backbone
     return model.backbone
 
 
 def head_of(model, kind):
-    """Phần từ đặc trưng gộp tới logit."""
+    """The part from the pooled features to the logit."""
     if kind == "erm":
         return model.head
     if kind == "slim":
@@ -103,7 +103,7 @@ def activations(model, kind, batch):
 
 
 def grads(model, kind, batch):
-    """∇_a logit_malignant tại kích hoạt của từng ảnh gốc."""
+    """∇_a logit_malignant at the activation of each original image."""
     bb, hd = backbone_of(model, kind), head_of(model, kind)
     out = []
     for i in range(0, len(batch), 16):
@@ -112,7 +112,7 @@ def grads(model, kind, batch):
             a = bb(x).float()
         a = a.detach().requires_grad_(True)
         z = hd(a).float()
-        s = (z[:, 1] - z[:, 0]).sum()          # logit lớp ác tính
+        s = (z[:, 1] - z[:, 0]).sum()          # malignant-class logit
         g, = torch.autograd.grad(s, a)
         out.append(g.cpu().numpy())
     return np.concatenate(out)
@@ -122,9 +122,9 @@ def main():
     t0 = time.time()
     rng = np.random.RandomState(SEED)
     imgs01, labels, pid, ids = audit_cohort.load()
-    log(f"nhóm kiểm định: {len(imgs01)} ảnh, {len(set(pid))} bệnh nhân")
+    log(f"audit set: {len(imgs01)} images, {len(set(pid))} patients")
 
-    # ảnh đã sửa khái niệm ở liều đỉnh — chính các phép sửa của Section III-D
+    # concept-edited images at the peak dose, the same edits as Section III-D
     edited = {}
     for c in CONCEPTS:
         eb = []
@@ -132,7 +132,7 @@ def main():
             w, skin, lm = c3m.soft_mask(x)
             eb.append(c3m.make_edit(x, c, DOSE, w, skin, lm))
         edited[c] = eb
-        log(f"  dựng {len(eb)} ảnh đã sửa cho khái niệm {c}")
+        log(f"  built {len(eb)} edited images for concept {c}")
 
     res = {"n_images": len(imgs01), "n_patients": int(len(set(pid))), "dose": float(DOSE),
            "n_random_cavs": N_RAND, "seed": SEED,
@@ -147,7 +147,7 @@ def main():
     for kind, fn, label in MODELS:
         path = os.path.join(CKPT, fn)
         if not os.path.exists(path):
-            log(f"BỎ QUA {label}: thiếu {fn}"); continue
+            log(f"SKIP {label}: missing {fn}"); continue
         m = c30.make_model(kind).to(DEVICE)
         m.load_state_dict(torch.load(path, map_location=DEVICE)); m.eval()
         A0 = activations(m, kind, imgs01)
@@ -186,7 +186,7 @@ def main():
                 f"TCAV={scores.mean():.3f}±{scores.std(ddof=1):.3f} "
                 f"[{scores.min():.2f},{scores.max():.2f}]  "
                 f"null={null.mean():.3f}±{null.std(ddof=1):.3f}  p={p:.2e}  "
-                f"có ý nghĩa={e['significant']}")
+                f"significant={e['significant']}")
         res["models"][fn.replace(".pt", "")] = entry
         del m
         if DEVICE == "cuda":
@@ -203,7 +203,7 @@ def main():
                                         max(e["null_sd"] for e in allc)]}
     res["runtime_sec"] = round(time.time() - t0, 1)
     json.dump(res, open(OUT, "w"), indent=1)
-    log(f"saved -> {OUT}  ({res['summary']['n_significant']}/{res['summary']['n_cells']} ô có ý nghĩa)")
+    log(f"saved -> {OUT}  ({res['summary']['n_significant']}/{res['summary']['n_cells']} cells significant)")
 
 
 if __name__ == "__main__":

@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""CausalXAI v14 — C25: chạy màn hình hợp lệ (A1)-(A3) trên TOÀN BỘ 178 ảnh của mẫu primary.
+"""C25: run the validity screen (A1)-(A3) on all 178 images of the primary sample.
 
-Vì sao cần. C12 dựng thư viện control và đo footprint/neutrality trong vòng lặp `for ii in mal`,
-tức chỉ trên 78 ảnh ÁC TÍNH. Kết luận "0 trong 19 control hợp lệ" do đó được điều kiện hoá trên
-một tập con do nhãn xác định, trong khi mẫu primary của bài là 178 ảnh không ngưỡng.
+Why. C12 builds the control library and measures footprint/neutrality inside the loop `for ii in mal`,
+i.e. only on the 78 malignant images. The conclusion "0 of 19 controls valid" is therefore conditioned
+on a label-defined subset, while the paper's primary sample is 178 unthresholded images.
 
-Màn hình (A1) cân bằng footprint, (A2) trung tính proxy và (A3) overlap chỉ dùng ẢNH và EDIT, không
-dùng output của model, nên nó chạy được trên cả 178 ảnh mà không cần GPU. Script này lặp lại đúng
-phép tính của C12 trên toàn mẫu và so sánh với bản 78 ảnh.
+The screen, (A1) footprint balance, (A2) proxy neutrality and (A3) overlap, uses only images and
+edits, not model outputs, so it runs on all 178 images without a GPU. This script repeats the exact
+C12 computation on the full sample and compares it with the 78-image version.
 
-KHÔNG tính lại các đại lượng phụ thuộc model (CaCE, control-library range, test T): những thứ đó
-vẫn cần tập chung 62 ảnh và một lượt chạy model riêng.
+It does not recompute model-dependent quantities (CaCE, control-library range, test T): those still
+need the common set of 62 images and a separate model run.
 
 Out -> results/c25_screen_full.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c25_screen_full_sample.py [--subset mal|all]
+Run:  .venv/bin/python Causal_XAI_v3/code/c25_screen_full_sample.py [--subset mal|all]
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import c12_matched_control as c12   # noqa: E402
-import audit_cohort                # noqa: E402  (cohort đánh giá cố định)
+import audit_cohort                # noqa: E402  (fixed evaluation cohort)
 
 c3m, c7m, c10, p2 = c12.c3m, c12.c7m, c12.c10, c12.p2
 RES = os.path.join(os.path.dirname(HERE), "results")
@@ -36,7 +36,7 @@ OUT_ALL = os.path.join(RES, "c25_screen_full.json")
 OUT_MAL = os.path.join(RES, "c25_screen_mal.json")
 SEED = c12.SEED
 
-# bốn lược đồ ngưỡng của Bảng B1: (tên, |SMD| tối đa, |Δproxy| tuyệt đối, tỉ lệ proxy, overlap)
+# the four threshold schemes of Table B1: (name, max |SMD|, absolute |Δproxy|, proxy ratio, overlap)
 SCHEMES = [("strict", 0.05, 0.05, 0.10, 0.95),
            ("main", 0.10, 0.10, 0.15, 0.95),
            ("relaxed", 0.20, 0.20, 0.30, 0.90),
@@ -62,9 +62,9 @@ def spearman(x, y):
 
 
 def build_design(imgs01, order):
-    """Dựng edit và đo footprint/neutrality/overlap trên các ảnh có chỉ số trong `order`.
+    """Build edits and measure footprint/neutrality/overlap on the images indexed by `order`.
 
-    Sao đúng logic của C12 main(), chỉ đổi tập ảnh được lặp. Không có bước nào dùng model.
+    Replicates the logic of C12 main() exactly; only the set of iterated images changes. No step uses the model.
     """
     t0 = time.time()
     TARGETS, MATCHED, UNMATCHED = c12.TARGETS, c12.MATCHED, c12.UNMATCHED
@@ -95,7 +95,7 @@ def build_design(imgs01, order):
             d[t] = c3m.make_edit(x, cname, c3m.DOSES[int(k)], w, skin, lm)
         for p in UNMATCHED:
             d[f"u:{p}"] = c10.PLACEBOS[p](x, w, skin, np.random.RandomState(SEED + int(ii) + 7))
-        for t in TARGETS:                                        # y hệt C12 main()
+        for t in TARGETS:                                        # identical to C12 main()
             tgt_mag = float(c12.dpix(x, d[t]).mean())
             for c, e in c12.struct_controls(x, d[t] - x, w, SEED + int(ii)).items():
                 d[f"{t}|{c}"] = e
@@ -112,7 +112,7 @@ def build_design(imgs01, order):
                     e, s_, m_, ok = c12.match_strength(fn, lo, hi, x, tgt_mag)
                 d[f"{t}|{c}"] = e
                 POS[f"{t}|{c}"].append(bool(ok)); STR[f"{t}|{c}"].append(float(s_))
-        for t in TARGETS:                                        # đối liều, bisection trên |g'|
+        for t in TARGETS:                                        # opposite dose, bisection on |g'|
             cname, k = t.split("@")
             e, gp, mm_, ok = c12.match_strength(
                 lambda gp: c3m.make_edit(x, cname, -gp, w, skin, lm), 0.0, 1.0, x,
@@ -162,7 +162,7 @@ def build_design(imgs01, order):
 
 
 def screen(design, tol_smd, tol_abs, tol_ratio, tol_pos):
-    """Đếm số control thoả cả ba điều kiện, theo từng concept target."""
+    """Count the controls that satisfy all three conditions, per concept target."""
     out = {}
     for t, cells in design.items():
         n_bal = n_neu = n_valid = 0
@@ -184,8 +184,8 @@ def main():
     t0 = time.time()
     print(f"##### C25 screen on {a.subset} {time.strftime('%H:%M:%S')} #####", flush=True)
 
-    # Đọc cohort đã đóng băng, giống c12. Dựng lại phân hoạch ở đây sẽ cho một tập 183 ảnh KHÁC
-    # với tập mà mọi phân tích khác dùng, nên chú thích "trên 183 ảnh đánh giá" sẽ không còn đúng.
+    # Read the frozen cohort, as c12 does. Rebuilding the partition here would give a different
+    # 183-image set from the one every other analysis uses, so the note "on 183 evaluation images" would no longer hold.
     imgs01, labels, _pid, _ids = audit_cohort.load()
     labels = np.array(labels)
     order = np.where(labels == 1)[0] if a.subset == "mal" else np.arange(len(labels))
@@ -218,8 +218,8 @@ def main():
         ys = [abs(v["proxy_ratio"]) for v in cells.values()]
         rho = spearman(xs, ys)
         res.setdefault("spearman", {})[t] = float(rho)
-        # Khoảng tin cậy Fisher-z cho rho hạng. Với n=19 nó RẤT rộng, và đó chính là lý do
-        # bài đọc DẤU HIỆU đơn điệu chứ không đọc giá trị hệ số.
+        # Fisher-z confidence interval for the rank rho. With n=19 it is very wide, which is why
+        # the paper reads the sign of the monotone trend, not the value of the coefficient.
         n_c = len(cells)
         if n_c > 4 and abs(rho) < 1:
             z, se = np.arctanh(rho), 1.06 / np.sqrt(n_c - 3)

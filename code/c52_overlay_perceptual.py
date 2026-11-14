@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C52 — Chồng lớp tổng hợp làm ảnh dịch đi bao nhiêu, so với thang nào?
+C52: how far does the synthetic overlay move the image, and against what scale?
 
-Vì sao. Giả định gánh nặng nhất của tầng artifact là chuyển giao từ T_U sang do(U), và bài không
-kiểm được nó vì nhóm dữ liệu không có chú giải artifact. Nhưng có một phần CÓ kiểm được mà không
-cần chú giải nào: **độ lớn của can thiệp trên chính bức ảnh**. Nếu chồng lớp là một thay đổi nhỏ
-về mặt tri giác mà mô hình lại phản ứng khổng lồ, thì phản ứng đó không thể quy cho "ảnh bị phá".
+Why. The heaviest assumption of the artifact tier is the transfer from T_U to do(U), and the paper cannot
+test it because the cohort has no artifact annotations. But one part can be tested without any
+annotation: **the size of the intervention on the image itself**. If the overlay is a perceptually small change
+and the model still reacts strongly, that reaction cannot be attributed to "the image being destroyed".
 
-Thang đo phải TỰ CUNG CẤP, không mượn khoảng giá trị từ tài liệu khác. Vì vậy đo ba đại lượng
-trên cùng một thước và so với nhau:
-    (a) khoảng cách ảnh gốc <-> ảnh có chồng lớp giữ lại (lông, thước)
-    (b) khoảng cách ảnh gốc <-> ảnh có chỉnh sửa quang học TOÀN CỤC (vignette, jitter),
-        vốn đổi 68-96% pixel nhưng mô hình gần như không phản ứng
-    (c) khoảng cách giữa HAI TỔN THƯƠNG KHÁC NHAU trong cùng nhóm — thang tự nhiên của bộ ảnh
+The scale must be self-supplied, not borrowed from value ranges in other literature. So three quantities are measured
+with the same ruler and compared with each other:
+    (a) distance between original image <-> image with a held-out overlay (hair, ruler)
+    (b) distance between original image <-> image with a global photometric edit (vignette, jitter),
+        which changes 68-96% of pixels yet the model barely reacts
+    (c) distance between two different lesions in the same cohort: the natural scale of the image set
 
-Hai thước, một sâu một nông, để kết luận không phụ thuộc lựa chọn thước:
-    - đặc trưng ResNet-50 huấn luyện trên ImageNet, ĐỘC LẬP với mọi checkpoint được kiểm định
-      (đây là thứ mà các thước tri giác học được xấp xỉ: khoảng cách trong không gian đặc trưng sâu)
-    - CIELAB ΔE76 trung bình trên từng pixel, thuần hình ảnh, không có mạng nào
+Two rulers, one deep and one shallow, so the conclusion does not depend on the choice of ruler:
+    - ResNet-50 features trained on ImageNet, independent of every audited checkpoint
+      (this is what learned perceptual metrics approximate: distance in a deep feature space)
+    - CIELAB ΔE76 averaged over pixels, purely image-based, with no network
 
-Điều này KHÔNG chứng minh chồng lớp giống artifact thật. Nó chỉ định lượng được rằng can thiệp
-là nhỏ trên thang của chính bộ ảnh — đúng một nửa của câu hỏi chuyển giao, và là nửa duy nhất
-trả lời được mà không có ảnh ghép cặp.
+This does not show that the overlay resembles a real artifact. It only quantifies that the intervention
+is small on the scale of the image set itself. That is exactly one half of the transfer question, and the only half
+that can be answered without paired images.
 
 Out -> results/c52_overlay_perceptual.json
-Chạy:  python Causal_XAI_v3/code/c52_overlay_perceptual.py
+Run:  python Causal_XAI_v3/code/c52_overlay_perceptual.py
 """
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def feats(net, batch):
 
 
 def lab_de(a, b):
-    """ΔE76 trung bình trên pixel giữa hai ảnh [0,1]."""
+    """Mean per-pixel ΔE76 between two [0,1] images."""
     return float((c12.rgb2lab(b) - c12.rgb2lab(a)).pow(2).sum(0).sqrt().mean())
 
 
@@ -76,12 +76,12 @@ def main():
     t0 = time.time()
     imgs, labels, pid, _ = audit_cohort.load()
     n = len(imgs)
-    log(f"nhóm kiểm định: {n} ảnh")
+    log(f"audit set: {n} images")
 
     per, cf = c2m.precompute_edits(imgs, c30.ART, SEED)
-    log("chồng lớp xong; % pixel đổi: " + " ".join(f"{a}={cf[a]*100:.2f}" for a in HELD + GLOBAL))
+    log("overlays done; % pixels changed: " + " ".join(f"{a}={cf[a]*100:.2f}" for a in HELD + GLOBAL))
 
-    # Trích đặc trưng bằng ResNet-50 ImageNet — KHÔNG phải checkpoint được kiểm định.
+    # Extract features with an ImageNet ResNet-50, not an audited checkpoint.
     bb = tvm.resnet50(weights="IMAGENET1K_V2")
     bb.fc = torch.nn.Identity()
     bb = bb.to(DEVICE).eval()
@@ -107,10 +107,10 @@ def main():
             "feature_distance_iqr": [float(np.percentile(d_feat, 25)), float(np.percentile(d_feat, 75))],
             "lab_de_median": float(np.median(d_lab)),
             "pixel_change_frac": float(cf[a])}
-        log(f"  {a:12s} đặc trưng {np.median(d_feat):.4f}  ΔE {np.median(d_lab):5.2f}  "
+        log(f"  {a:12s} feature {np.median(d_feat):.4f}  ΔE {np.median(d_lab):5.2f}  "
             f"pixel {cf[a]*100:5.2f}%")
 
-    # Thang tự nhiên: khoảng cách giữa hai tổn thương KHÁC NHAU trong cùng nhóm.
+    # Natural scale: distance between two different lesions in the same cohort.
     rng = np.random.RandomState(SEED)
     i1 = rng.randint(0, n, N_PAIR); i2 = rng.randint(0, n, N_PAIR)
     keep = i1 != i2
@@ -122,7 +122,7 @@ def main():
         "feature_distance_median": float(np.median(dp_feat)),
         "feature_distance_iqr": [float(np.percentile(dp_feat, 25)), float(np.percentile(dp_feat, 75))],
         "lab_de_median": float(np.median(dp_lab))}
-    log(f"  {'giữa 2 tổn thương':12s} đặc trưng {np.median(dp_feat):.4f}  ΔE {np.median(dp_lab):5.2f}")
+    log(f"  {'between lesions':12s} feature {np.median(dp_feat):.4f}  ΔE {np.median(dp_lab):5.2f}")
 
     ref_f = res["between_lesion"]["feature_distance_median"]
     ref_l = res["between_lesion"]["lab_de_median"]

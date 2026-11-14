@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C7: extra controls đáp phản biện #4, #7, #8, #11.
+C7: extra controls for size, placebo, effective independence and outliers.
 
-#11 SIZE RESCUE: size intervention (dilation+paint) đúng, chỉ proxy đo SAI (recompute skin ref bị
-   nhiễm). Sửa: đo proxy bằng THAM CHIẾU DA GỐC (skin0) cố định. Nếu manipulation-check pass → đưa
-   size lại thành concept thứ 3 (ATE+ ở C1/C5).
-#4  PLACEBO EDIT: sign-balanced contrast (±1 per pixel) → cùng độ nhiễu cục bộ/biên như contrast edit
-   nhưng NET concept ≈ 0. Model faithful phải cho CaCE_placebo ≈ 0 (không phản ứng edit-artifact).
-#8  EFFECTIVE INDEPENDENCE: tương quan per-image CaCE_contrast vs CaCE_color (cao → ~1 phép đo).
-#7  OUTLIER: jackknife SE + max single-image influence cho concept CaCE.
+(a) Size rescue: the size intervention (dilation+paint) is correct; only the proxy is measured
+   wrongly (the recomputed skin ref is contaminated). Fix: measure the proxy against the fixed
+   original skin reference (skin0). If the manipulation check passes, size is restored as the third
+   concept (ATE+ in C1/C5).
+(b) Placebo edit: sign-balanced contrast (±1 per pixel), giving the same local/boundary noise as the
+   contrast edit but net concept ≈ 0. A faithful model must give CaCE_placebo ≈ 0 (no response to
+   the edit artifact).
+(c) Effective independence: per-image correlation of CaCE_contrast vs CaCE_color (high means ~1 measurement).
+(d) Outlier: jackknife SE + max single-image influence for concept CaCE.
 
-Tái dùng c3_cace_concept (soft_mask, edit_contrast/color/size, model_prob, logit). Edit dùng CHUNG
-mọi model. CaCE trên COMMON set (ảnh cả 3 model p_full≥0.1). Out -> results/c7_controls.json.
+Reuses c3_cace_concept (soft_mask, edit_contrast/color/size, model_prob, logit). Edits are shared
+across all models. CaCE on the common set (images with p_full≥0.1 for all 3 models). Out -> results/c7_controls.json.
 """
 from __future__ import annotations
 import json, os, sys, time
@@ -24,8 +26,8 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import c3_cace_concept as c3m
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 OUT = os.path.join(os.path.dirname(HERE), "results", "c7_controls.json")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoints resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the fixed set
 SEED, N_EVAL, BOOT = 42, 200, 2000
 SIZE_RADII = [4, 8, 14]
 GAIN = c3m.DOSES[2]      # top dose cho contrast/color/placebo
@@ -33,7 +35,7 @@ SCALE = 0.22
 
 
 def proxy_fixed(x01, skin0):
-    """Đo concept proxy với THAM CHIẾU DA GỐC skin0 (recompute membership trên ảnh đã edit)."""
+    """Measure the concept proxy against the original skin reference skin0 (membership recomputed on the edited image)."""
     C = x01.shape[0]
     dist = (x01 - skin0.view(C, 1, 1)).pow(2).sum(0).sqrt()
     w = torch.clamp(dist / SCALE, 0, 1)
@@ -45,11 +47,11 @@ def proxy_fixed(x01, skin0):
 
 
 def edit_placebo(x01, w, skin, g, rng):
-    """Placebo MƯỢT, TRUNG TÍNH: xoay vector lệch-màu (x-skin) theo hoán vị kênh vòng (R->G->B->R).
-    Bảo toàn CHÍNH XÁC ||x-skin|| từng pixel -> contrast & color-variance & size proxy GIỮ NGUYÊN; chỉ
-    đổi hue (mượt, không nhiễu tần-số-cao). Model faithful (phản ứng concept) phải cho CaCE ≈ 0."""
+    """Smooth, neutral placebo: rotate the colour-deviation vector (x-skin) by a cyclic channel permutation (R->G->B->R).
+    Preserves ||x-skin|| exactly per pixel, so the contrast, colour-variance and size proxies stay unchanged; only
+    the hue changes (smoothly, no high-frequency noise). A faithful model (responding to the concept) must give CaCE ≈ 0."""
     d = x01 - skin.view(-1, 1, 1)
-    d_rot = d[[2, 0, 1], :, :]                 # hoán vị vòng kênh -> bảo toàn norm từng pixel
+    d_rot = d[[2, 0, 1], :, :]                 # cyclic channel permutation -> preserves the per-pixel norm
     return torch.clamp(x01 + w.unsqueeze(0) * (d_rot - d), 0, 1)
 
 
@@ -127,13 +129,13 @@ def main():
         sz = [boot_ci(DL[m][f"size{k}"][common]) for k in range(3)]
         ct = boot_ci(DL[m]["contrast"][common]); co = boot_ci(DL[m]["color_var"][common])
         pl = boot_ci(DL[m]["placebo"][common])
-        # #8 correlation contrast vs color per-image (common)
+        # (c) correlation contrast vs color per-image (common)
         r = float(np.corrcoef(DL[m]["contrast"][common], DL[m]["color_var"][common])[0, 1])
-        # #7 jackknife on contrast & color
+        # (d) jackknife on contrast & color
         jc_se, jc_max = jackknife_se(DL[m]["contrast"][common])
         jo_se, jo_max = jackknife_se(DL[m]["color_var"][common])
         A3 = float(np.mean([ct[0], co[0], sz[2][0]]))    # 3-concept alignment (all ATE+)
-        # #4 PLACEBO-CORRECTED: concept-edit MINUS neutral-edit (per image) -> trừ edit-sensitivity chung
+        # (b) placebo-corrected: concept edit minus neutral edit (per image) -> removes the common edit-sensitivity
         cc = boot_ci((DL[m]["contrast"] - DL[m]["placebo"])[common])
         cco = boot_ci((DL[m]["color_var"] - DL[m]["placebo"])[common])
         A_corr = float(np.mean([cc[0], cco[0]]))
@@ -161,15 +163,15 @@ def main():
         print(f"{m:7s}{s:>22s}{('↑' if d['size_monotonic'] else '·'):>6s}{pl:>20s}"
               f"{('YES' if d['placebo_null'] else 'no'):>6s}{d['corr_contrast_color']:>12.2f}{d['A3_three_concept']:>+8.3f}")
     print("=" * 90)
-    print("\n★ PLACEBO-CORRECTED (concept-edit − neutral-edit; trừ edit-sensitivity chung):")
+    print("\n★ Placebo-corrected (concept-edit − neutral-edit; removes the common edit-sensitivity):")
     for m in order:
         d = res["models"][m]
         cc, cco = d["contrast_corr"], d["color_corr"]
         flag = "✓ALIGNED" if d["corr_aligned"] else ("✗anti" if d["corr_anti"] else "·n.s.")
         print(f"  {m:7s} contrast={cc[0]:+.2f}[{cc[1]:+.2f},{cc[2]:+.2f}] color={cco[0]:+.2f}"
               f"[{cco[1]:+.2f},{cco[2]:+.2f}]  A_corr={d['A_placebo_corrected']:+.3f} {flag}")
-    print("size: dấu kỳ vọng + (ATE+ ở C1). placebo: ≈0 = model KHÔNG phản ứng edit-artifact (tốt). "
-          "corr cao = 2 concept đo gần như 1 thứ. A3 = alignment 3 concept (contrast+color+size).")
+    print("size: expected sign + (ATE+ in C1). placebo: ≈0 = the model does not respond to the edit artifact (good). "
+          "high corr = the 2 concepts measure almost the same thing. A3 = alignment of 3 concepts (contrast+color+size).")
     print("jackknife SE / max-influence (contrast | color):")
     for m in order:
         d = res["models"][m]

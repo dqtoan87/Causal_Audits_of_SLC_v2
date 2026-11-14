@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C19: đo lại TỪ PREDICTIONS GỐC hai con số mà các file kết quả cũ không lưu.
+C19: recompute from the raw predictions two numbers that no result file stores.
 
-(1) Tỉ lệ (image, edit, model) predictions chạm ngưỡng clipping của clipped logit
-    ℓ_eps(p), eps = 1e-6  ->  |ℓ| = 13.8155. Bài đang trích "27.8%" mà không có nguồn kiểm được.
-    Script báo cáo tỉ lệ theo nhiều định nghĩa tập hợp để con số đưa vào bài được nói rõ là của tập nào.
+(1) Fraction of (image, edit, model) predictions that hit the clipping threshold of the clipped logit
+    ℓ_eps(p), eps = 1e-6  ->  |ℓ| = 13.8155. The paper cites "27.8%" without a checkable source.
+    The script reports the fraction under several set definitions, so the number in the paper states
+    which set it refers to.
 
-(2) MDE (minimum detectable effect) cho ĐÚNG contrast mà Section V-E lập luận: hiệu theo từng ảnh
-    giữa concept edit và placebo, tức là đại lượng nằm dưới A_corr — chứ không phải MDE của một
-    edit đơn lẻ so với baseline (đó là thứ c11 lưu). Tính trên tập chung 62 ảnh, công thức của bài:
+(2) MDE (minimum detectable effect) for the exact contrast argued in Section V-E: the per-image
+    difference between the concept edit and the placebo, i.e. the quantity underlying A_corr, not the
+    MDE of a single edit against baseline (that is what c11 stores). Computed on the common set of
+    62 images, with the paper's formula:
     MDE = 2.8 · SD / sqrt(n).
 
-Tái lập đúng pipeline của c13: cùng split, cùng 178 ảnh, cùng bộ edit, cùng model_prob.
+Reproduces the c13 pipeline exactly: same split, same 178 images, same edit set, same model_prob.
 Out -> results/c19_saturation_mde.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c19_saturation_mde.py
+Run:  .venv/bin/python Causal_XAI_v3/code/c19_saturation_mde.py
 """
 from __future__ import annotations
 
@@ -34,8 +36,8 @@ import c13_fullpop as c13           # noqa: E402
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c19_saturation_mde.json")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoints resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the fixed set
 SEED, N_EVAL = 42, 200
 ORDER = ["erm", "slim", "causal"]
 NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
@@ -44,7 +46,7 @@ BOUND = float(np.log((1 - EPS) / EPS))     # 13.8155
 
 
 def saturated(p):
-    """True nếu xác suất nằm ngoài (eps, 1-eps), tức clipped logit bị chặn."""
+    """True if the probability lies outside (eps, 1-eps), i.e. the clipped logit is clamped."""
     return (np.asarray(p) <= EPS) | (np.asarray(p) >= 1 - EPS)
 
 
@@ -53,7 +55,7 @@ def main():
     print(f"##### C19 saturation + MDE {time.strftime('%H:%M:%S')} #####", flush=True)
     print(f"clipping bound |l_eps| = {BOUND:.4f}", flush=True)
 
-    imgs01, labels, _pid, _ids = audit_cohort.load()   # tập đánh giá cố định
+    imgs01, labels, _pid, _ids = audit_cohort.load()   # fixed evaluation set
     labels = np.array(labels); n = len(imgs01)
     print(f"eval images {n}  malignant {int((labels==1).sum())}  benign {int((labels==0).sum())}",
           flush=True)
@@ -80,7 +82,7 @@ def main():
                     "the per-image concept-minus-placebo difference, the quantity underlying A_corr."),
            "saturation": {}, "mde_paired_contrast": {}}
 
-    # ---------- (1) tỉ lệ bão hoà ----------
+    # ---------- (1) saturation fraction ----------
     print("=" * 96)
     print("A) SATURATION OF THE CLIPPED-LOGIT BOUND")
     print(f"{'set':46s}{'n preds':>12s}{'saturated':>12s}{'fraction':>11s}")
@@ -102,7 +104,7 @@ def main():
         res["saturation"][k] = {"n": int(v.size), "n_saturated": int(v.sum()), "fraction": frac}
         print(f"{k:46s}{v.size:12d}{int(v.sum()):12d}{100*frac:10.1f}%")
 
-    # theo loại edit, gộp 3 model
+    # by edit type, pooled over the 3 models
     print("-" * 96)
     print("   by edit (pooled over the three models):")
     by_edit = {}
@@ -112,7 +114,7 @@ def main():
         print(f"     {nm:24s}{100*v.mean():8.1f}%")
     res["saturation_by_edit"] = by_edit
 
-    # ---------- (2) MDE trên contrast concept − placebo ----------
+    # ---------- (2) MDE on the concept − placebo contrast ----------
     print("=" * 96)
     print("B) MDE = 2.8*SD/sqrt(n) ON THE PER-IMAGE CONCEPT-MINUS-PLACEBO DIFFERENCE (common set)")
     mal = np.where(labels == 1)[0]

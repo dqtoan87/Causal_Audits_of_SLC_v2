@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C20: đo lại TỪ PREDICTIONS GỐC hai con số tái lập số học mà bài đang trích
-nhưng không có file kết quả nào lưu:
+C20: recompute from the raw predictions two numerical-reproducibility numbers that the paper cites
+but that no result file stores:
 
-  (a) fp32 recomputation  — chạy lại cùng ảnh, cùng edit, nhưng tắt bf16 autocast;
-  (b) batch composition   — chạy lại với kích thước/thành phần batch khác.
+  (a) fp32 recomputation: rerun the same images and edits with bf16 autocast turned off;
+  (b) batch composition: rerun with a different batch size and composition.
 
-Đại lượng so sánh là held-out artifact aggregate E|Δℓ_eps| (gộp 4 edit hair_light/hair/hair_heavy/
-ruler, lấy trị tuyệt đối theo ẢNH trước rồi mới trung bình), trên chính tập mà Table II dùng:
-ảnh malignant với p_full >= 0.1 của từng model.
+The compared quantity is the held-out artifact aggregate E|Δℓ_eps| (pooling the 4 edits
+hair_light/hair/hair_heavy/ruler, taking the absolute value per image first and then averaging), on
+the same set that Table II uses: malignant images with p_full >= 0.1 for each model.
 
 Out -> results/c20_numerical_repro.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c20_numerical_repro.py
+Run:  .venv/bin/python Causal_XAI_v3/code/c20_numerical_repro.py
 """
 from __future__ import annotations
 
@@ -31,9 +31,9 @@ import c13_fullpop as c13           # noqa: E402
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c20_numerical_repro.json")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
+import audited_models                # noqa: E402  (checkpoints resolved in one place)
 import audit_cohort                  # noqa: E402  (frozen audit cohort)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+CKPTS = audited_models.CKPTS         # absolute paths to the fixed set
 SEED, N_EVAL = 42, 200
 ORDER = ["erm", "slim", "causal"]
 NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
@@ -42,7 +42,7 @@ HELDOUT = ["art:hair_light", "art:hair", "art:hair_heavy", "art:ruler"]
 
 @torch.no_grad()
 def probs(model, batch, use_bf16):
-    """model_prob của c3 nhưng cho phép tắt autocast (fp32)."""
+    """model_prob from c3, but with autocast optionally turned off (fp32)."""
     xn = p2._to_norm(batch).to(DEVICE)
     with torch.amp.autocast("cuda", dtype=torch.bfloat16,
                             enabled=(use_bf16 and DEVICE == "cuda")):
@@ -50,8 +50,8 @@ def probs(model, batch, use_bf16):
 
 
 def run(model, imgs01, edits, names, use_bf16, mode):
-    """mode='per_image' tái lập c13 (1 batch = baseline + mọi edit của MỘT ảnh);
-       mode='chunk32'  gom mọi (ảnh, edit) rồi chia batch cố định 32 -> thành phần batch khác hẳn."""
+    """mode='per_image' reproduces c13 (1 batch = baseline + every edit of one image);
+       mode='chunk32'  pools all (image, edit) pairs and splits them into fixed batches of 32, so batch composition is entirely different."""
     n, k = len(imgs01), len(names)
     p0 = np.zeros(n); pe = np.zeros((n, k))
     if mode == "per_image":
@@ -75,7 +75,7 @@ def run(model, imgs01, edits, names, use_bf16, mode):
 
 
 def aggregate(p0, pe, names, keep):
-    """E|Δℓ| gộp 4 held-out edit: |.| theo ảnh trước, rồi trung bình (như Section III-E)."""
+    """E|Δℓ| pooled over the 4 held-out edits: |.| per image first, then the mean (as in Section III-E)."""
     cols = [names.index(h) for h in HELDOUT]
     L0 = c3m.logit(p0[keep])
     per = [np.abs(c3m.logit(pe[keep, c]) - L0) for c in cols]
@@ -108,7 +108,7 @@ def main():
         model.eval()
         for cname, bf16, mode in configs:
             p0, pe = run(model, imgs01, edits, names, bf16, mode)
-            if cname == "bf16_per_image":                       # tập giữ lại cố định theo cấu hình tham chiếu
+            if cname == "bf16_per_image":                       # held-out set fixed by the reference configuration
                 keeps[m] = (labels == 1) & (p0 >= 0.1)
             agg[cname][m] = aggregate(p0, pe, names, keeps[m])
             print(f"  [{NAME[m]:5s}] {cname:16s} n={int(keeps[m].sum()):3d}  "
@@ -122,12 +122,12 @@ def main():
     res["n_kept"] = {m: int(keeps[m].sum()) for m in ORDER}
 
     print("=" * 92)
-    print("HELD-OUT ARTIFACT AGGREGATE E|dlogit| — bài trích: bf16 9.36 / 15.39 / 10.92")
+    print("Held-out artifact aggregate E|dlogit|. Paper cites: bf16 9.36 / 15.39 / 10.92")
     print(f"{'config':20s}{'ERM':>12s}{'Slim':>12s}{'Inv':>12s}")
     for cname, _, _ in configs:
         print(f"{cname:20s}" + "".join(f"{agg[cname][m]:12.2f}" for m in ORDER))
     print("-" * 92)
-    print("thay đổi so với bf16_per_image (bài: fp32 →9.48/15.05/10.87; batch →9.43/15.19/11.00)")
+    print("change relative to bf16_per_image (paper: fp32 →9.48/15.05/10.87; batch →9.43/15.19/11.00)")
     for cname, _, _ in configs[1:]:
         d = {m: 100 * (agg[cname][m] - agg["bf16_per_image"][m]) / agg["bf16_per_image"][m]
              for m in ORDER}

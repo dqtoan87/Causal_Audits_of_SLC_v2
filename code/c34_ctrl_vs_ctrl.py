@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""CausalXAI v14 — C34: phép thử control-versus-control của test (T), tính đầy đủ và lưu lại.
+"""C34: the control-versus-control check of test (T), computed in full and saved.
 
-Test (T) nói: nếu hai control đều hợp lệ thì hiệu CaCE giữa chúng phải không phân biệt được với 0,
-vì cả hai được cho là chỉ đo phản ứng chung với dấu chân nhiễu loạn. C12 chỉ ghép cặp giữa các
-control HỢP LỆ; vì không control nào hợp lệ, C12 tạo được 0 hoặc 1 cặp và không lưu chi tiết.
-Bài lại báo cáo một số đếm trên toàn bộ các cặp lập được, nên số đó không có nguồn kiểm chứng.
+Test (T) states: if two controls are both valid, the CaCE difference between them must be
+indistinguishable from 0, since both are taken to measure only the common response to the
+perturbation footprint. C12 pairs only valid controls; since no control is valid, C12 forms 0 or 1
+pairs and saves no details. The paper reports a count over all formable pairs, so that number needs
+a checkable source.
 
-Script này lập ĐẦY ĐỦ mọi cặp trong tập control được màn hình xếp là TRUNG TÍNH (A2) cho hai
-target ở liều cao, tính hiệu CaCE giữa hai control trên tập chung 62 ảnh, và bootstrap theo
-BỆNH NHÂN. Chỉ dựng các control cần thiết nên nhẹ hơn C12 nhiều lần.
+This script forms every pair among the controls the screen classifies as neutral (A2) for the two
+targets at high dose, computes the CaCE difference between the two controls on the common set of
+62 images, and bootstraps by patient. It builds only the controls it needs, so it is many times
+lighter than C12.
 
 Out -> results/c34_ctrl_vs_ctrl.json
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c34_ctrl_vs_ctrl.py
+Run:  .venv/bin/python Causal_XAI_v3/code/c34_ctrl_vs_ctrl.py
 """
 from __future__ import annotations
 
@@ -36,9 +38,9 @@ OUT = os.path.join(BASE, "results", "c34_ctrl_vs_ctrl.json")
 BOOT = 20000
 NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
 TOP = ["contrast@2", "color_var@2", "contrast@0", "color_var@0"]
-# Cặp chỉ lập được ở nơi có từ hai control CÙNG trung tính (A2) VÀ đạt overlap (A3) trên cùng
-# target. Danh sách dưới đây đọc thẳng từ màn hình của C12, giới hạn trong các họ khớp dấu chân;
-# placebo chưa hiệu chuẩn (u:hue, u:noise) không khớp dấu chân nên không phải ứng viên của (T).
+# Pairs can only be formed where at least two controls are both neutral (A2) and pass overlap (A3) on
+# the same target. The list below is read directly from the C12 screen, restricted to footprint-matched
+# families; the uncalibrated placebos (u:hue, u:noise) are not footprint-matched, so they are not candidates for (T).
 # Derived from c25_screen_mal.json (main scheme, malignant images, calibrated "_m" families):
 # (A2) absolute <= 0.10 and ratio <= 0.15, (A3) overlap >= 0.95. rotax_m fails (A2) at contrast@0
 # (ratio 0.163), and pixperm_m fails (A3) at contrast@2 on the malignant images (0.92).
@@ -66,7 +68,7 @@ def boot_ci(v, groups, n_boot=BOOT, seed=9):
 def main():
     t0 = time.time()
     print(f"##### C34 control-vs-control {time.strftime('%H:%M:%S')} #####", flush=True)
-    imgs01, labels, _pid, _ids = audit_cohort.load()   # tập đánh giá cố định
+    imgs01, labels, _pid, _ids = audit_cohort.load()   # fixed evaluation set
     labels = np.array(labels); mal = np.where(labels == 1)[0]
     pid = _pid
     pid_mal = pid[mal]
@@ -91,7 +93,7 @@ def main():
                 d[f"{t}|{c}"] = e
         edits.append(d)
         if (len(edits)) % 20 == 0:
-            print("   ... %d/%d ảnh (%.0fs)" % (len(edits), len(mal), time.time() - t0), flush=True)
+            print("   ... %d/%d images (%.0fs)" % (len(edits), len(mal), time.time() - t0), flush=True)
     print("edits xong (%.0fs)" % (time.time() - t0), flush=True)
 
     P0, DL = {}, {}
@@ -114,7 +116,7 @@ def main():
 
     common = (P0["erm"] >= 0.1) & (P0["slim"] >= 0.1) & (P0["causal"] >= 0.1)
     pid_c = pid_mal[common]
-    print("tập chung n=%d / %d bệnh nhân" % (int(common.sum()), len(np.unique(pid_c))), flush=True)
+    print("common set n=%d / %d patients" % (int(common.sum()), len(np.unique(pid_c))), flush=True)
 
     res = {"n_common": int(common.sum()), "n_patients_common": int(len(np.unique(pid_c))),
            "boot": BOOT, "neutral_sets": NEUTRAL,
@@ -143,10 +145,10 @@ def main():
         "max_abs_diff": max(abs(p["diff"]) for p in P),
         "exceptions_patient": [f"{p['model']} {p['target']} {p['a']}-{p['b']}"
                                for p in P if not p["excludes_zero_patient"]]}
-    print("\n%d so sánh | loại trừ 0: %d (ảnh) %d (bệnh nhân) | |hiệu| lớn nhất %.2f"
+    print("\n%d comparisons | excluding 0: %d (image) %d (patient) | max |diff| %.2f"
           % (len(P), res["summary"]["excluding_zero_image"],
              res["summary"]["excluding_zero_patient"], res["summary"]["max_abs_diff"]), flush=True)
-    print("ngoại lệ (bệnh nhân):", res["summary"]["exceptions_patient"], flush=True)
+    print("exceptions (patient):", res["summary"]["exceptions_patient"], flush=True)
     json.dump(res, open(OUT, "w"), indent=1)
     print("saved ->", OUT, "(%.0fs)" % (time.time() - t0), flush=True)
 

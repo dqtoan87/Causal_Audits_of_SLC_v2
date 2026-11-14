@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Hình: edit-sensitivity tổng quát là một co rút phụ thuộc trạng thái model.
+Figure: generic edit-sensitivity is a shrinkage that depends on the model state.
 
-Mỗi panel là một model. Trục hoành là logit ở ảnh chưa sửa, trục tung là thay đổi logit do một
-edit trung tính gây ra. Bốn loại edit trung tính vẽ chồng, mỗi loại một đường hồi quy. Nếu edit
-chỉ cộng một lượng cố định thì các đường phải nằm ngang. Chúng dốc xuống, và độ dốc khác nhau
-theo loại edit, đó chính là số hạng mà phép trừ placebo không khử được.
+Each panel is one model. The x-axis is the logit on the unedited image, the y-axis is the logit change
+caused by a neutral edit. The four neutral edit types are overlaid, each with its own regression line.
+If an edit only added a fixed amount, the lines would be horizontal. They slope downward, and the
+slope differs by edit type: that is exactly the term that placebo subtraction cannot remove.
 
-Đọc results/c19_preds.npz (đã cache) nên không cần GPU.
+Reads results/c19_preds.npz (cached), so no GPU is needed.
 Out -> paper/figures/fig_shrinkage.{png,tiff}
 """
 from __future__ import annotations
@@ -76,7 +76,7 @@ def main():
     fig.savefig(png, dpi=DPI, facecolor="white")
     fig.savefig(tif, dpi=DPI, facecolor="white", pil_kwargs={"compression": "tiff_lzw"})
     w, h = fig.get_size_inches()
-    print(f"saved -> {png} và {tif}   {w:.1f} x {h:.1f} in @ {DPI} dpi "
+    print(f"saved -> {png} and {tif}   {w:.1f} x {h:.1f} in @ {DPI} dpi "
           f"({int(w*DPI)} x {int(h*DPI)} px)")
 
 

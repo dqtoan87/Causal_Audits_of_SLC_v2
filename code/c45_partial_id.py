@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C45 — Footprint matching có chọn đúng control không?
+C45: does footprint matching select the right controls?
 
-Mệnh đề độ chệch ở Section III-D đòi control khớp hệ số co của concept edit. Đó là thuộc tính
-của HÀM PHẢN ỨNG, không phải của nhiễu loạn, nên kiểm trực tiếp được: khớp cùng dạng cho mọi
-control rồi hỏi hệ số của concept edit có nằm trong miền các control quét qua không.
+The bias statement in Section III-D requires the control to match the shrinkage coefficient of the
+concept edit. That is a property of the response function, not of the perturbation, so it can be
+checked directly: fit the same form for every control, then ask whether the concept edit's
+coefficient lies within the range the controls span.
 
-Phép kiểm chỉ có lực khi tập control đủ lớn. Với một phần tử thì min = max và "không bọc được"
-là tất yếu, không phải phát hiện. Script vì thế báo cáo ba tập LỒNG NHAU và số phần tử của mỗi
-tập, để người đọc thấy kết luận phụ thuộc lực của phép kiểm ra sao:
+The check has power only when the control set is large enough. With one element, min = max and
+"not bracketed" is inevitable, not a finding. The script therefore reports three nested sets and
+the size of each, so the reader sees how the conclusion depends on the power of the check:
 
-    A1+A3   cân bằng footprint và overlap   -> tập rất nhỏ, phép kiểm gần như vô lực
-    A3      chỉ overlap
-    tất cả  toàn bộ thư viện
+    A1+A3   footprint balance and overlap   -> very small set, the check has almost no power
+    A3      overlap only
+    all     the whole library
 
-Kèm |SMD| của các control tạo ra biên, để đối chiếu với ngưỡng cân bằng 0.10.
+Also reports the |SMD| of the controls that form the edges, for comparison with the 0.10 balance threshold.
 
-Đọc results/c12_preds.npz nên không cần GPU.
+Reads results/c12_preds.npz, so no GPU is needed.
 Out -> results/c45_bracketing.json
 """
 from __future__ import annotations
@@ -47,7 +48,7 @@ def logit(p):
 
 
 def ols(y, x):
-    """Δℓ = −α·L₀ + β. Trả (α, β, R²)."""
+    """Δℓ = −α·L₀ + β. Return (α, β, R²)."""
     b, a = np.polyfit(x, y, 1)
     r2 = 1 - np.var(y - (b * x + a)) / np.var(y) if np.var(y) > 0 else float("nan")
     return -b, a, r2
@@ -88,8 +89,8 @@ def main():
                     "construction."),
            "targets": {}}
 
-    print(f"{len(pid)} ảnh / {len(set(pid))} bệnh nhân\n")
-    print("%-14s %-18s %4s  %s" % ("target", "tập control", "|C|", "bọc α/β theo model"))
+    print(f"{len(pid)} images / {len(set(pid))} patients\n")
+    print("%-14s %-18s %4s  %s" % ("target", "control set", "|C|", "α/β bracketed by model"))
     for t in TARGETS:
         D = {k: v for k, v in scr.get(t, {}).items()
              if isinstance(v, dict) and "max_abs_smd" in v}
@@ -140,7 +141,7 @@ def main():
     res["summary"] = summ
     json.dump(res, open(OUT, "w"), indent=1)
     for lab, v in summ.items():
-        print("%-6s |C| %s  bọc %2d/12  |SMD| biên %s"
+        print("%-6s |C| %s  bracketed %2d/12  edge |SMD| %s"
               % (lab, v["set_size_range"], v["cells_bracketed"],
                  [round(x, 2) for x in v["edge_control_smd_range"]] if v["edge_control_smd_range"] else "n/a"))
     print("saved ->", OUT)

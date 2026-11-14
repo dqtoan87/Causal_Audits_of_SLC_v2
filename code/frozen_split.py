@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Phân hoạch ba phần CỐ ĐỊNH, lưu theo isic_id.
+Fixed three-way partition, stored by isic_id.
 
-Vì sao. `StratifiedGroupKFold` cho fold khác nhau giữa các phiên bản sklearn dù cùng seed. Trên
-máy này, dựng lại phân hoạch cho train 553 bệnh nhân / 232 dương và audit 199 / 83, trong khi lần
-huấn luyện gốc lưu 574 / 237 và 202 / 78. Hệ quả nặng hơn một chút lệch số: checkpoint được huấn
-luyện dưới phân hoạch cũ, mà thành viên fold cũ KHÔNG được lưu ở đâu cả, nên không còn cách nào
-kiểm chứng rằng cohort audit dựng lại thật sự tách bệnh nhân khỏi tập huấn luyện. Tuyên bố trung
-tâm của audit phụ thuộc đúng vào tính tách đó.
+Why. `StratifiedGroupKFold` gives different folds across sklearn versions even with the same seed.
+On this machine, rebuilding the partition gives train 553 patients / 232 positive and audit 199 / 83,
+while the original training run stored 574 / 237 and 202 / 78. The consequence is worse than a
+mismatch in counts: the checkpoints were trained under the original partition, whose fold membership
+was not stored anywhere, so there is no way to verify that a rebuilt audit cohort is truly
+patient-disjoint from the training set. The central claim of the audit depends on exactly that
+disjointness.
 
-Cách chữa. Dựng phân hoạch một lần, ghi ba danh sách isic_id vào `results/frozen_split.json`, rồi
-mọi thứ về sau đọc từ file. Huấn luyện phải chạy lại dưới phân hoạch này thì checkpoint mới ghép
-được với cohort audit một cách kiểm chứng được.
+Fix. Build the partition once, write the three isic_id lists to `results/frozen_split.json`, and
+read everything from that file afterwards. Training must be rerun under this partition so that the
+checkpoints can be matched to the audit cohort in a verifiable way.
 
-Dùng:
+Usage:
     import frozen_split
     df_tr, df_se, df_au = frozen_split.load()
 
-Dựng lại (chỉ khi cố ý đổi phân hoạch, và khi đó PHẢI huấn luyện lại):
+Rebuild (only when you deliberately change the partition; training must then be rerun):
     python code/frozen_split.py --rebuild
 """
 from __future__ import annotations
@@ -42,7 +43,7 @@ SEED, N_FOLDS = 42, 5
 
 
 def _build():
-    """Đúng logic gốc: fold0 = audit, fold1 = select, phần còn lại = train, rồi undersample."""
+    """Original logic: fold0 = audit, fold1 = select, the rest = train, then undersample."""
     df = p1.load_isic_df()
     sgkf = StratifiedGroupKFold(n_splits=N_FOLDS, shuffle=True, random_state=SEED)
     folds = [va for _, va in sgkf.split(df, df["target"].values, df["patient_id"].values)]
@@ -56,14 +57,14 @@ def _build():
 
 def _check(df_tr, df_se, df_au):
     S = [set(d["patient_id"].astype(str)) for d in (df_tr, df_se, df_au)]
-    assert not (S[0] & S[1]), "rò rỉ bệnh nhân train/select"
-    assert not (S[0] & S[2]), "rò rỉ bệnh nhân train/audit"
-    assert not (S[1] & S[2]), "rò rỉ bệnh nhân select/audit"
+    assert not (S[0] & S[1]), "patient leakage train/select"
+    assert not (S[0] & S[2]), "patient leakage train/audit"
+    assert not (S[1] & S[2]), "patient leakage select/audit"
 
 
 def load(rebuild=False):
-    """Trả (df_tr, df_se, df_au) dựng từ manifest. Bất biến tách bệnh nhân được khẳng định lại
-    mỗi lần nạp, nên nếu manifest hỏng thì hỏng ồn ào chứ không âm thầm."""
+    """Return (df_tr, df_se, df_au) built from the manifest. The patient-disjointness invariant is
+    re-asserted on every load, so a broken manifest fails loudly rather than silently."""
     if rebuild or not os.path.exists(MANIFEST):
         df_tr, df_se, df_au = _build()
         _check(df_tr, df_se, df_au)
@@ -79,7 +80,7 @@ def load(rebuild=False):
                    "train": list(df_tr["isic_id"]), "select": list(df_se["isic_id"]),
                    "audit": list(df_au["isic_id"])},
                   open(MANIFEST, "w"), indent=1)
-        print(f"[frozen_split] dựng mới và ghi {MANIFEST}", flush=True)
+        print(f"[frozen_split] building and writing {MANIFEST}", flush=True)
 
     m = json.load(open(MANIFEST))
     df = p1.load_isic_df()
@@ -88,7 +89,7 @@ def load(rebuild=False):
     for part in ("train", "select", "audit"):
         ids = m[part]
         missing = [i for i in ids if i not in by_id.index]
-        assert not missing, f"{len(missing)} isic_id trong manifest không có trong metadata"
+        assert not missing, f"{len(missing)} isic_id in the manifest are missing from the metadata"
         out.append(by_id.loc[ids].reset_index())
     _check(*out)
     return tuple(out)
@@ -102,7 +103,7 @@ def main():
     for nm, d in [("train", df_tr), ("select", df_se), ("audit", df_au)]:
         print("  %-7s n=%5d  patients=%4d  pos=%3d"
               % (nm, len(d), d["patient_id"].nunique(), int(d["target"].sum())))
-    print("bất biến tách bệnh nhân: OK")
+    print("patient-disjointness invariant: OK")
     print("manifest:", MANIFEST)
 
 

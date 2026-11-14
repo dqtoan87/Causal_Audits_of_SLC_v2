@@ -1,36 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — PHASE C2: CaCE ARTIFACT (negative control, editing-only counterfactual).
+Phase C2: CaCE artifact (negative control, editing-only counterfactual).
 
-Đo tác động NHÂN QUẢ của việc CHÈN một artifact thu nhận (hair/ruler/patch/vignette/jitter) lên
-xác suất ác tính của classifier — bằng can thiệp editing-only (do(U=present) trên CHÍNH ảnh đó,
-giữ nguyên mọi thứ khác). Artifact KHÔNG phải nguyên nhân của bệnh ⇒ model nhân-quả-trung-thực
-phải cho **CaCE_U ≈ 0**. CaCE_U lớn = model bám shortcut. Xem `CausalXAI_v14_DESIGN.md` §5.2(A).
+Measures the causal effect of inserting an acquisition artifact (hair/ruler/patch/vignette/jitter)
+on the classifier's malignancy probability. It uses an editing-only intervention: do(U=present) on
+the same image, with everything else held fixed. Artifacts are not causes of the disease, so a
+causally faithful model must give **CaCE_U ≈ 0**. A large CaCE_U means the model relies on a
+shortcut. See the design notes, §5.2(A).
 
-ESTIMAND (DESIGN §5.3):
-    CaCE_U(f) = E_x[ f(add_U(x)) − f(x) ]                       # prob-scale, CÓ DẤU
-    CaCE_logit(f) = E_x[ logit f(add_U(x)) − logit f(x) ]       # logit-scale (CHỐNG calibration,
-                                                                 #  bài học v13 B4)
+ESTIMAND (design notes §5.3):
+    CaCE_U(f) = E_x[ f(add_U(x)) − f(x) ]                       # prob scale, signed
+    CaCE_logit(f) = E_x[ logit f(add_U(x)) − logit f(x) ]       # logit scale (robust to
+                                                                 #  calibration differences)
 
-★ TÍNH HONEST (chống metric-coupling đã giết v13):
-  - artifact-CF lúc TRAIN CAUSAL dùng {vignette, jitter, patch} ⇒ 3 cái này COUPLED (in-distribution,
-    KHÔNG dùng làm bằng chứng sạch cho CAUSAL).
-  - {hair, ruler} = HELD-OUT (CAUSAL chưa từng train để bất biến) ⇒ bằng chứng SẠCH.
-  - Với ERM/SLIM: mọi artifact đều non-tautological (chưa từng có artifact-CF).
-  Mỗi artifact gắn nhãn coupled/held-out; cross-model claim CHỈ dựa held-out.
+Honesty (guard against metric coupling):
+  - The artifact CF used when training CAUSAL covers {vignette, jitter, patch}. These three are
+    coupled (in-distribution) and are not clean evidence for CAUSAL.
+  - {hair, ruler} are held out (CAUSAL was never trained to be invariant to them): clean evidence.
+  - For ERM/SLIM every artifact is non-tautological (they never saw an artifact CF).
+  Each artifact is labelled coupled or held-out; cross-model claims rely on held-out only.
 
-THIẾT KẾ:
-  - Edit MỘT LẦN per ảnh (rng deterministic theo index) → DÙNG CHUNG cho cả 3 model ⇒ can thiệp
-    giống hệt, loại nhiễu rng khỏi so sánh model.
-  - Đo trên ảnh malignant thật có p_full ≥ floor (quyết định lâm sàng quan trọng) + báo cáo ALL.
-  - Falsification: identity-edit phải cho CaCE = 0 (sanity pipeline). placebo.
-  - Bootstrap CI; "faithful" = CI(CaCE_logit) chứa 0 (không đổi prediction = tốt cho negative control).
+Design:
+  - Edit each image once (rng deterministic by index) and share the edit across all 3 models.
+    The intervention is identical, which removes rng noise from the model comparison.
+  - Measure on truly malignant images with p_full ≥ floor (the clinically important decision),
+    and also report all images.
+  - Falsification: the identity edit must give CaCE = 0 (pipeline sanity check). Placebo.
+  - Bootstrap CI; "faithful" = CI(CaCE_logit) contains 0 (no prediction change is good for a
+    negative control).
 
-Nạp 3 ckpt cache ở code/lib/checkpoints (p2_{erm,slim,causal}_s42.pt). Không train lại.
-Out -> Causal_XAI_v3/results/tier2_cace_artifact.json. Chạy nhanh (~1-3 phút), cần GPU.
+Loads the 3 cached checkpoints in code/lib/checkpoints (p2_{erm,slim,causal}_s42.pt). No retraining.
+Out -> Causal_XAI_v3/results/tier2_cace_artifact.json. Fast (~1-3 min), needs a GPU.
 
-Chạy:
+Run:
   .venv/bin/python Causal_XAI_v3/code/c2_cace_artifact.py
   .venv/bin/python Causal_XAI_v3/code/c2_cace_artifact.py --n-eval 240
 """
@@ -45,8 +48,8 @@ import time
 import numpy as np
 import torch
 
-# --- nạp hạ tầng huấn luyện (vendored: code/lib) -----------------------------
-# v3: the upstream training modules are vendored under code/lib together with the three
+# --- load the training infrastructure (vendored: code/lib) -------------------
+# The upstream training modules are vendored under code/lib together with the three
 # primary EfficientNet-B3 checkpoints, so this tree is self-contained apart from the raw
 # image data. Override with the CAUSALXAI_LIB environment variable if they are moved.
 XAI_OLD = os.environ.get(
@@ -61,20 +64,21 @@ OUT_JSON = os.path.join(OUT_DIR, "tier2_cace_artifact.json")
 
 P_FLOOR = 0.10
 SEED = 42
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoint paths resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the frozen checkpoint set
 
-# Nhãn coupling (artifact-CF train CAUSAL = vignette+jitter+patch; xem phase3 gpu_artifact)
+# Coupling labels (artifact CF used to train CAUSAL = vignette+jitter+patch; see phase3 gpu_artifact)
 COUPLING = {"hair_light": "held-out", "hair": "held-out", "hair_heavy": "held-out",
             "ruler": "held-out",
             "patch": "train-coupled", "vignette": "train-coupled", "jitter": "train-coupled"}
 
 
-# --- HELD-OUT artifacts: REALISTIC (mảnh + alpha-blend bán trong suốt), tránh phá hủy ảnh -------
-# (Bản thô của phase2 vẽ nét đen ĐẶC đè lên tổn thương -> off-manifold, CaCE phản ánh "phá ảnh"
-#  chứ không phải shortcut. Bản này mô phỏng lông/thước thật: mảnh 1px, bán trong suốt.)
+# --- Held-out artifacts: realistic (thin + semi-transparent alpha blend), avoid destroying the image ---
+# (The crude phase2 version draws solid black strokes over the lesion -> off-manifold, so CaCE
+#  reflects "image destruction" rather than a shortcut. This version mimics real hair/rulers:
+#  thin 1px, semi-transparent.)
 def _hair(x, rng, n, alpha, dark=0.10):
-    """n sợi lông cong mảnh 1px, alpha-blend (bán trong suốt) — như dermoscopy thật."""
+    """n thin curved 1px hairs, alpha-blended (semi-transparent), as in real dermoscopy."""
     x = x.clone(); _, H, W = x.shape
     for _ in range(n):
         x0, y0 = rng.randint(0, W), rng.randint(0, H)
@@ -91,44 +95,44 @@ def _hair(x, rng, n, alpha, dark=0.10):
     return x
 
 
-# Dose-response: 3 mức lông -> kiểm |CaCE| đơn điệu (dấu hiệu nhân quả kinh điển)
+# Dose-response: 3 hair levels -> check that |CaCE| is monotonic (a classic causal signature)
 def art_hair_light(x, rng): return _hair(x, rng, n=6, alpha=0.4)
 def art_hair(x, rng):       return _hair(x, rng, n=14, alpha=0.6)
 def art_hair_heavy(x, rng): return _hair(x, rng, n=24, alpha=0.75)
 
 
 def art_ruler(x, rng, alpha=0.7, dark=0.0):
-    """Thước mảnh bán trong suốt ở RÌA DƯỚI (vùng da nền, không đè trung tâm tổn thương)."""
+    """Thin semi-transparent ruler at the bottom edge (background skin, not over the lesion centre)."""
     x = x.clone(); _, H, W = x.shape
     y = rng.randint(int(0.75 * H), max(int(0.75 * H) + 1, H - 3))
     x[:, y:y + 2, :] = alpha * dark + (1 - alpha) * x[:, y:y + 2, :]
-    for tx in range(0, W, 18):                      # vạch chia mảnh
+    for tx in range(0, W, 18):                      # thin tick marks
         yt0, yt1 = max(0, y - 4), y + 4
         x[:, yt0:yt1, tx:tx + 1] = alpha * dark + (1 - alpha) * x[:, yt0:yt1, tx:tx + 1]
     return x
 
 
 def art_jitter(x, rng):
-    """Brightness/contrast jitter — KHỚP gpu_artifact lúc train CAUSAL (coupled artifact)."""
+    """Brightness/contrast jitter. Matches gpu_artifact used when training CAUSAL (coupled artifact)."""
     bright = (rng.rand() - 0.5) * 0.3
     contrast = 0.7 + 0.6 * rng.rand()
     return torch.clamp((x - 0.5) * contrast + 0.5 + bright, 0, 1)
 
 
 def art_identity(x, rng):
-    """Falsification: không đổi gì -> CaCE phải = 0."""
+    """Falsification: change nothing -> CaCE must be 0."""
     return x.clone()
 
 
-# Tập can thiệp: held-out REALISTIC (sạch, có dose-response lông) + coupled KHỚP-TRAIN + identity
+# Intervention set: realistic held-out (clean, with hair dose-response) + train-matched coupled + identity
 ARTIFACTS = {
-    "hair_light": art_hair_light, "hair": art_hair, "hair_heavy": art_hair_heavy,  # HELD-OUT dose
-    "ruler": art_ruler,                                   # HELD-OUT
-    "patch": p2.art_patch, "vignette": p2.art_vignette,   # coupled (khớp train CAUSAL)
+    "hair_light": art_hair_light, "hair": art_hair, "hair_heavy": art_hair_heavy,  # held-out dose
+    "ruler": art_ruler,                                   # held-out
+    "patch": p2.art_patch, "vignette": p2.art_vignette,   # coupled (matches CAUSAL training)
     "jitter": art_jitter,                                  # coupled
     "identity": art_identity,                              # sanity (CaCE≈0)
 }
-HAIR_DOSE = ["hair_light", "hair", "hair_heavy"]          # để kiểm đơn điệu
+HAIR_DOSE = ["hair_light", "hair", "hair_heavy"]          # for the monotonicity check
 
 
 def logit(p, eps=1e-6):
@@ -138,20 +142,20 @@ def logit(p, eps=1e-6):
 
 @torch.no_grad()
 def model_prob(model, x01_batch):
-    """x01_batch: [B,3,H,W] in [0,1]. Trả prob malignant [B]."""
+    """x01_batch: [B,3,H,W] in [0,1]. Returns malignant prob [B]."""
     xn = p2._to_norm(x01_batch).to(DEVICE)
     with torch.amp.autocast("cuda", dtype=torch.bfloat16, enabled=(DEVICE == "cuda")):
         return torch.softmax(model(xn), 1)[:, 1].float().cpu().numpy()
 
 
 def precompute_edits(imgs01, art_names, seed, thr=0.02):
-    """Edit MỘT LẦN per ảnh (rng deterministic theo index) -> dùng chung mọi model.
-    Trả (edits, change_frac): edits=list[dict art->tensor]; change_frac[a]=% pixel đổi >thr (minh
-    bạch độ phá hủy/off-manifold, DESIGN §5.4)."""
+    """Edit each image once (rng deterministic by index) -> shared by all models.
+    Returns (edits, change_frac): edits=list[dict art->tensor]; change_frac[a]=% of pixels changed
+    by more than thr (reports how destructive/off-manifold the edit is, design notes §5.4)."""
     edits = []
     cf = {a: [] for a in art_names}
     for i, x01 in enumerate(imgs01):
-        rng = np.random.RandomState(seed + i)   # cố định per ảnh
+        rng = np.random.RandomState(seed + i)   # fixed per image
         d = {}
         for a in art_names:
             e = ARTIFACTS[a](x01, rng)
@@ -164,10 +168,10 @@ def precompute_edits(imgs01, art_names, seed, thr=0.02):
 
 def eval_model(model, imgs01, labels, edits, art_names, cfg):
     model.eval()
-    # batch [orig, edit_a1, edit_a2, ...] per ảnh -> 1 forward/ảnh
+    # batch [orig, edit_a1, edit_a2, ...] per image -> 1 forward pass per image
     p0_all = np.empty(len(imgs01))
-    dp = {a: [] for a in art_names}      # Δp có dấu, theo ảnh giữ lại
-    dl = {a: [] for a in art_names}      # Δlogit có dấu
+    dp = {a: [] for a in art_names}      # signed Δp, per kept image
+    dl = {a: [] for a in art_names}      # signed Δlogit
     keep_mask = []
     for i, (x01, lab) in enumerate(zip(imgs01, labels)):
         batch = torch.stack([x01] + [edits[i][a] for a in art_names])
@@ -194,7 +198,7 @@ def summarize(dp, dl, art_names, bn, seed):
         p_mean, p_lo, p_hi = p2.boot_mean_ci(v_p, bn, seed)
         l_mean, l_lo, l_hi = p2.boot_mean_ci(v_l, bn, seed)
         ap_mean, ap_lo, ap_hi = p2.boot_mean_ci(np.abs(v_p), bn, seed)
-        faithful = bool(l_lo <= 0 <= l_hi)        # CI logit chứa 0 = không đổi prediction = tốt
+        faithful = bool(l_lo <= 0 <= l_hi)        # logit CI contains 0 = no prediction change = good
         out[a] = dict(
             coupling=COUPLING.get(a, "n/a"),
             cace_dp=p_mean, cace_dp_ci=[p_lo, p_hi],
@@ -206,7 +210,7 @@ def summarize(dp, dl, art_names, bn, seed):
 
 
 def aggregate_group(dp, dl, names, bn, seed):
-    """Gộp |Δlogit| & |Δp| trên một nhóm artifact (vd held-out) -> chỉ số tổng hợp."""
+    """Pool |Δlogit| and |Δp| over a group of artifacts (e.g. held-out) -> summary metric."""
     allp = np.concatenate([np.abs(dp[a]) for a in names]) if names else np.array([])
     alll = np.concatenate([np.abs(dl[a]) for a in names]) if names else np.array([])
     mp = p2.boot_mean_ci(allp, bn, seed)
@@ -225,23 +229,23 @@ def main():
     cfg = dict(seed=SEED, p_floor=args.p_floor, boot_n=args.boot_n)
     os.makedirs(OUT_DIR, exist_ok=True)
 
-    print(f"##### PHASE C2 — CaCE artifact {time.strftime('%H:%M:%S')} (dev={DEVICE}) #####", flush=True)
+    print(f"##### PHASE C2: CaCE artifact {time.strftime('%H:%M:%S')} (dev={DEVICE}) #####", flush=True)
     df_tr, df_va = p2.build_split({"seed": SEED, "n_folds": 5})
     imgs01, labels = p2.load_eval_images(df_va, args.n_eval, SEED)
     n_mal = int(sum(labels))
-    print(f"eval: {len(imgs01)} ảnh (malignant thật={n_mal})", flush=True)
+    print(f"eval: {len(imgs01)} images (truly malignant={n_mal})", flush=True)
 
     art_names = list(ARTIFACTS.keys())
     held = [a for a in art_names if COUPLING.get(a) == "held-out"]
     coup = [a for a in art_names if COUPLING.get(a) == "train-coupled"]
     edits, change_frac = precompute_edits(imgs01, art_names, SEED)
-    print(f"can thiệp: held-out={held} | coupled={coup} | sanity=['identity']", flush=True)
-    print("  %pixel đổi: " + " ".join(f"{a}={100*change_frac[a]:.1f}%" for a in art_names), flush=True)
+    print(f"interventions: held-out={held} | coupled={coup} | sanity=['identity']", flush=True)
+    print("  %pixels changed: " + " ".join(f"{a}={100*change_frac[a]:.1f}%" for a in art_names), flush=True)
 
     results = {}
     for name, path in CKPTS.items():
         if not os.path.exists(path):
-            print(f"[skip] thiếu {path}"); continue
+            print(f"[skip] missing {path}"); continue
         model = p1.build_model("erm" if name == "erm" else "slim", p1.CFG["z_dim"]).to(DEVICE)
         model.load_state_dict(torch.load(path, map_location=DEVICE))
         t0 = time.time()
@@ -258,7 +262,7 @@ def main():
                 abs(per_art["hair_light"]["cace_logit"]) <= abs(per_art["hair"]["cace_logit"])
                 <= abs(per_art["hair_heavy"]["cace_logit"])),
         )
-        print(f"[{name}] xong ({time.time()-t0:.0f}s, n_kept={results[name]['n_kept']}, "
+        print(f"[{name}] done ({time.time()-t0:.0f}s, n_kept={results[name]['n_kept']}, "
               f"p_mal={results[name]['pred_mal_prob']:.3f})", flush=True)
         del model
         if DEVICE == "cuda":
@@ -275,11 +279,11 @@ def main():
     )
     json.dump(out, open(args.out, "w"), indent=2, default=float)
 
-    # ---- bảng tóm tắt ----
+    # ---- summary table ----
     order = [m for m in ["erm", "slim", "causal"] if m in results]
     print("\n" + "=" * 96)
-    print("CaCE ARTIFACT (negative control): faithful = |CaCE|≈0 (CI logit chứa 0). "
-          "★ bằng chứng SẠCH = HELD-OUT (hair/ruler)")
+    print("CaCE ARTIFACT (negative control): faithful = |CaCE|≈0 (logit CI contains 0). "
+          "Clean evidence = held-out (hair/ruler)")
     print("=" * 96)
     print(f"{'artifact':12s}{'coupling':14s}" + "".join(f"{m:>22s}" for m in order))
     print(f"{'':26s}" + "".join(f"{'CaCE_logit [CI] faith':>22s}" for m in order))
@@ -303,10 +307,11 @@ def main():
     print(f"{'hair dose monotonic':26s}" + "".join(
         f"{'YES' if results[m]['hair_dose_monotonic'] else 'no':>22s}" for m in order))
     print("=" * 96)
-    print("Đọc: CaCE_logit > 0 = artifact ĐẨY prediction về ác (shortcut). faith ✓ = CI chứa 0 "
-          "(model bỏ qua artifact = nhân-quả-trung-thực). So sánh model CHỈ dùng dòng HELD-OUT; "
-          "dòng coupled chỉ in-distribution (CAUSAL đã train né). identity phải ≈0.")
-    print(f"\nĐã lưu: {args.out}")
+    print("Reading: CaCE_logit > 0 = the artifact pushes the prediction toward malignant (shortcut). "
+          "faith ✓ = CI contains 0 (model ignores the artifact = causally faithful). Compare models "
+          "on the held-out rows only; coupled rows are in-distribution only (CAUSAL was trained to "
+          "avoid them). identity must be ≈0.")
+    print(f"\nSaved: {args.out}")
 
 
 if __name__ == "__main__":

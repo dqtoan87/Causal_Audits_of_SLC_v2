@@ -1,29 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v13 — PHASE 1: Statistical-Integrity Harness
-======================================================
-Mục tiêu (theo CausalXAI_v13_DESIGN.md §7):
-  - Đo hiệu năng chẩn đoán với THỐNG KÊ NGHIÊM, thay cho "một split, không CI" của v12.
-  - Multi-seed × StratifiedGroupKFold (group = patient_id) trên ISIC 2024.
-  - Hai mô hình so sánh trên CÙNG fold:
-        * ERM      = EfficientNet-B3 + linear head (baseline trung thực).
-        * SLIM     = backbone -> proj_c(256) -> disease_head  (bộ khung v13, CHƯA có
-                     V-REx/causal loss — phần đó là Phase 3). Mục đích: chứng minh kiến
-                     trúc tinh gọn (đã bỏ MoE/ContextMemory) không thua ERM.
-  - Báo cáo: AUC, balanced-acc, sensitivity/specificity (@0.5 và @Youden) với
-        bootstrap 95% CI, và kiểm định DeLong (paired) cho hiệu AUC giữa hai mô hình.
+Phase 1: Statistical-Integrity Harness
+======================================
+Goals (design notes §7):
+  - Measure diagnostic performance with rigorous statistics, not a single split without CI.
+  - Multi-seed × StratifiedGroupKFold (group = patient_id) on ISIC 2024.
+  - Two models compared on the same folds:
+        * ERM      = EfficientNet-B3 + linear head (honest baseline).
+        * SLIM     = backbone -> proj_c(256) -> disease_head  (slim skeleton, without the
+                     V-REx/causal loss, which is Phase 3). Purpose: show that the lean
+                     architecture (no MoE/ContextMemory) is not worse than ERM.
+  - Reports: AUC, balanced-acc, sensitivity/specificity (@0.5 and @Youden) with
+        bootstrap 95% CI, and a paired DeLong test for the AUC difference between the two models.
 
-Tính năng vận hành (theo yêu cầu):
-  - Chạy nền được (nohup / background), tắt IDE vẫn chạy.
-  - RESUME: mỗi unit (model, seed, fold) lưu predictions + ghi vào progress.json;
-        chạy lại sẽ BỎ QUA unit đã xong. Có thể dừng/chạy tiếp bất cứ lúc nào.
-  - Mọi output nằm trong XAI_NEW/ (checkpoints/, results/, logs/), không lẫn bản cũ.
+Operational features:
+  - Can run in the background (nohup / background); keeps running after the IDE is closed.
+  - Resume: each unit (model, seed, fold) saves predictions and is recorded in progress.json;
+        a rerun skips finished units. It can be stopped and resumed at any time.
+  - All outputs live in XAI_NEW/ (checkpoints/, results/, logs/), kept separate from other runs.
 
-Cách dùng:
-  python train_XAI_new_v01.py                 # chạy đủ (resume tự động)
-  python train_XAI_new_v01.py --seeds 42 123  # tùy chọn seed
-  python train_XAI_new_v01.py --aggregate     # chỉ tổng hợp lại từ kết quả đã lưu
+Usage:
+  python train_XAI_new_v01.py                 # full run (automatic resume)
+  python train_XAI_new_v01.py --seeds 42 123  # choose seeds
+  python train_XAI_new_v01.py --aggregate     # only re-aggregate from saved results
 """
 
 import os, sys, json, time, argparse, random
@@ -48,7 +48,7 @@ except Exception:
     _HAS_SGKF = False
 
 # ============================================================
-# Paths & directories (mọi thứ trong XAI_NEW/)
+# Paths & directories (everything under XAI_NEW/)
 # ============================================================
 HERE = os.path.dirname(os.path.abspath(__file__))
 CKPT_DIR = os.path.join(HERE, "checkpoints")
@@ -69,7 +69,7 @@ ISIC_META_CSV  = os.path.join(DATA_ROOT, "data_ISIC2024/train-metadata.csv")
 # Config (override qua argparse)
 # ============================================================
 CFG = dict(
-    seeds        = [42, 123, 456],   # mở rộng 5 seed khi muốn chặt hơn
+    seeds        = [42, 123, 456],   # extend to 5 seeds for tighter estimates
     n_folds      = 5,
     epochs       = 15,
     patience     = 4,
@@ -79,11 +79,11 @@ CFG = dict(
     img_size     = 224,
     z_dim        = 256,
     focal_gamma  = 2.0,
-    train_neg_ratio = 20,   # undersample negatives trong TRAIN fold (neg:pos)
-    val_neg_ratio   = 50,   # undersample negatives trong VAL fold (giữ toàn bộ positives)
+    train_neg_ratio = 20,   # undersample negatives in the TRAIN fold (neg:pos)
+    val_neg_ratio   = 50,   # undersample negatives in the VAL fold (keep all positives)
     num_workers  = 8,
     models       = ["erm", "slim"],
-    save_ckpt    = False,   # chỉ cần preds cho thống kê; bật nếu muốn tái dùng weight
+    save_ckpt    = False,   # only preds are needed for the statistics; enable to reuse the weights
     boot_n       = 2000,
 )
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -121,7 +121,7 @@ def center_crop_resize(image, target_size):
 
 
 class ISICImgDataset(Dataset):
-    """Trả (img, label). Phase 1 chỉ dùng ảnh + nhãn."""
+    """Returns (img, label). Phase 1 uses only the image and label."""
     def __init__(self, df, image_dir, img_size, train=False):
         self.df = df.reset_index(drop=True)
         self.image_dir = image_dir
@@ -154,7 +154,7 @@ def load_isic_df():
 
 
 def undersample(df, ratio, seed):
-    """Giữ toàn bộ positives, lấy mẫu negatives = ratio × n_pos."""
+    """Keep all positives, sample negatives = ratio × n_pos."""
     pos = df[df["target"] == 1]
     neg = df[df["target"] == 0]
     n_neg = min(len(neg), len(pos) * ratio)
@@ -180,7 +180,7 @@ class ImageOnlyNet(nn.Module):     # ERM baseline
         return self.head(self.backbone(x))
 
 
-class CausalSlimNet(nn.Module):    # v13 skeleton (no MoE / no ContextMemory)
+class CausalSlimNet(nn.Module):    # slim skeleton (no MoE / no ContextMemory)
     def __init__(self, z_dim=256):
         super().__init__()
         self.backbone = _backbone()
@@ -220,7 +220,7 @@ def train_one(model, train_loader, val_loader, cfg, class_weight, tag):
                             weight_decay=cfg["weight_decay"])
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=cfg["epochs"])
     crit = FocalLoss(cfg["focal_gamma"], weight=class_weight.to(DEVICE))
-    use_amp = (DEVICE == "cuda")   # bf16 trên A100: tránh overflow NaN của fp16
+    use_amp = (DEVICE == "cuda")   # bf16 on A100: avoids fp16 overflow NaN
 
     best_auc, best_state, no_improve = -1.0, None, 0
     for ep in range(cfg["epochs"]):
@@ -239,7 +239,7 @@ def train_one(model, train_loader, val_loader, cfg, class_weight, tag):
 
         yt, ys = evaluate(model, val_loader)
         if not np.all(np.isfinite(ys)):
-            print(f"      [{tag}] ep{ep+1}: scores NaN/inf -> bỏ epoch", flush=True)
+            print(f"      [{tag}] ep{ep+1}: scores NaN/inf -> skip epoch", flush=True)
             no_improve += 1
             if no_improve >= cfg["patience"]:
                 break
@@ -372,7 +372,7 @@ def _fast_delong(preds_sorted_T, m):
 
 
 def delong_test(y_true, s1, s2):
-    """Trả (auc1, auc2, p_value 2 phía) cho H0: AUC1 == AUC2 trên cùng mẫu."""
+    """Returns (auc1, auc2, two-sided p_value) for H0: AUC1 == AUC2 on the same samples."""
     y_true = np.asarray(y_true); s1 = np.asarray(s1); s2 = np.asarray(s2)
     m = int(y_true.sum())
     if m == 0 or m == len(y_true):
@@ -416,7 +416,7 @@ def preds_path(unit_key):
 # ============================================================
 def run(cfg):
     print("=" * 64)
-    print("CausalXAI v13 — PHASE 1 harness")
+    print("PHASE 1 harness")
     print(f"Device={DEVICE}  seeds={cfg['seeds']}  folds={cfg['n_folds']}  "
           f"models={cfg['models']}  SGKF={_HAS_SGKF}")
     print("=" * 64, flush=True)
@@ -441,7 +441,7 @@ def run(cfg):
         for fold, (tr_idx, va_idx) in enumerate(split_iter):
             df_tr_full = df.iloc[tr_idx]
             df_va_full = df.iloc[va_idx]
-            # undersample (deterministic theo seed/fold) — GIỐNG NHAU cho mọi model
+            # undersample (deterministic by seed/fold), identical for every model
             us_seed = seed * 100 + fold
             df_tr = undersample(df_tr_full, cfg["train_neg_ratio"], us_seed)
             df_va = undersample(df_va_full, cfg["val_neg_ratio"], us_seed + 1)
@@ -449,7 +449,7 @@ def run(cfg):
             for mname in cfg["models"]:
                 unit_key = f"{mname}_s{seed}_f{fold}"
                 if unit_key in prog["units"] and os.path.exists(preds_path(unit_key)):
-                    print(f"[skip] {unit_key} (đã xong)", flush=True)
+                    print(f"[skip] {unit_key} (already done)", flush=True)
                     continue
 
                 print(f"\n[run ] {unit_key}  train={len(df_tr)} "
@@ -466,7 +466,7 @@ def run(cfg):
                     va_loader = DataLoader(va_ds, cfg["batch_size"], shuffle=False,
                                            num_workers=cfg["num_workers"], pin_memory=True)
 
-                    # class weight từ train
+                    # class weight from train
                     n_pos = int(df_tr["target"].sum()); n_neg = len(df_tr) - n_pos
                     w = torch.tensor([1.0, n_neg / max(n_pos, 1)], dtype=torch.float32)
 
@@ -477,7 +477,7 @@ def run(cfg):
                     mins = (time.time() - t0) / 60
 
                     if not np.all(np.isfinite(ys)):
-                        print(f"[FAIL] {unit_key}: scores chứa NaN/inf -> bỏ unit này", flush=True)
+                        print(f"[FAIL] {unit_key}: scores contain NaN/inf -> skip this unit", flush=True)
                         continue
 
                     m = metrics_from_scores(yt, ys)
@@ -498,7 +498,7 @@ def run(cfg):
                     print(f"[ERROR] {unit_key}: {e}\n{traceback.format_exc()}", flush=True)
                     continue
 
-    print("\nTất cả unit đã hoàn tất. Tổng hợp...\n", flush=True)
+    print("\nAll units finished. Aggregating...\n", flush=True)
     aggregate(cfg)
 
 
@@ -508,13 +508,13 @@ def run(cfg):
 def aggregate(cfg):
     prog = load_progress()
     if not prog["units"]:
-        print("Chưa có kết quả để tổng hợp."); return
+        print("No results to aggregate yet."); return
 
     rows = list(prog["units"].values())
     dfm = pd.DataFrame(rows)
     summary = {}
     print("=" * 64)
-    print("PHASE 1 — TỔNG HỢP (mean ± std qua các fold×seed)")
+    print("PHASE 1: SUMMARY (mean ± std over fold×seed)")
     print("=" * 64)
     for mname in cfg["models"]:
         sub = dfm[dfm["model"] == mname]
@@ -535,7 +535,7 @@ def aggregate(cfg):
 
     # Pooled out-of-fold predictions per seed -> bootstrap CI + DeLong erm vs slim
     print("\n" + "=" * 64)
-    print("Bootstrap 95% CI (pooled OOF mỗi seed) + DeLong (ERM vs SLIM)")
+    print("Bootstrap 95% CI (pooled OOF per seed) + DeLong (ERM vs SLIM)")
     print("=" * 64)
     delong_rows = []
     boot_rows = []
@@ -559,7 +559,7 @@ def aggregate(cfg):
             print(f"  seed {seed} [{mname}] AUC={auc:.4f}  95%CI=[{lo:.4f}, {hi:.4f}]")
         if "erm" in pooled and "slim" in pooled:
             yt = pooled["erm"][0]
-            # hai model dùng CÙNG OOF samples (cùng split+undersample) -> paired hợp lệ
+            # both models use the same OOF samples (same split+undersample) -> paired test is valid
             if np.array_equal(yt, pooled["slim"][0]):
                 a1, a2, p = delong_test(yt, pooled["erm"][1], pooled["slim"][1])
                 delong_rows.append(dict(seed=seed, auc_erm=a1, auc_slim=a2, delta=a2 - a1, p=p))
@@ -567,7 +567,7 @@ def aggregate(cfg):
                 print(f"  seed {seed} DeLong: AUC_erm={a1:.4f} AUC_slim={a2:.4f} "
                       f"Δ={a2-a1:+.4f}  p={p:.3f} [{sig}]")
             else:
-                print(f"  seed {seed}: OOF samples lệch nhau, bỏ qua DeLong")
+                print(f"  seed {seed}: OOF samples differ, skipping DeLong")
 
     out = dict(config=cfg, per_model=summary,
                bootstrap=boot_rows, delong=delong_rows,
@@ -575,16 +575,16 @@ def aggregate(cfg):
     with open(SUMMARY_JSON, "w") as f:
         json.dump(out, f, indent=2)
     pd.DataFrame(rows).to_csv(SUMMARY_CSV, index=False)
-    print(f"\nĐã lưu: {SUMMARY_JSON}\n         {SUMMARY_CSV}", flush=True)
+    print(f"\nSaved: {SUMMARY_JSON}\n         {SUMMARY_CSV}", flush=True)
 
     if delong_rows:
         ps = [r["p"] for r in delong_rows]
         deltas = [r["delta"] for r in delong_rows]
-        print("\n>>> KẾT LUẬN THỐNG KÊ:")
-        print(f"    Δ AUC (slim−erm) trung bình = {np.mean(deltas):+.4f}")
-        print(f"    DeLong p trung bình = {np.mean(ps):.3f}  "
-              f"({'KHÁC BIỆT có ý nghĩa' if np.mean(ps) < 0.05 else 'KHÔNG có ý nghĩa thống kê'})")
-        print("    => xác nhận: chênh lệch AUC nhỏ nằm trong nhiễu (giống phê bình v12).")
+        print("\n>>> Statistical conclusion:")
+        print(f"    Δ AUC (slim−erm) mean = {np.mean(deltas):+.4f}")
+        print(f"    DeLong p mean = {np.mean(ps):.3f}  "
+              f"({'significant difference' if np.mean(ps) < 0.05 else 'not statistically significant'})")
+        print("    => confirms: the small AUC gap lies within noise.")
 
 
 # ============================================================
@@ -595,7 +595,7 @@ def main():
     ap.add_argument("--epochs", type=int, default=CFG["epochs"])
     ap.add_argument("--models", type=str, nargs="+", default=CFG["models"])
     ap.add_argument("--save_ckpt", action="store_true")
-    ap.add_argument("--aggregate", action="store_true", help="chỉ tổng hợp")
+    ap.add_argument("--aggregate", action="store_true", help="aggregate only")
     args = ap.parse_args()
 
     CFG["seeds"] = args.seeds

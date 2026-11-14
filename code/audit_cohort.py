@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Danh sách ảnh audit CỐ ĐỊNH.
+Fixed list of audit images.
 
-Vì sao. Trước đây mỗi script tự dựng lại phân hoạch bằng StratifiedGroupKFold rồi lấy mẫu ảnh.
-Cách đó phụ thuộc phiên bản thư viện: cùng seed nhưng khác phiên bản sklearn hoặc pandas thì ra
-fold khác. Trên máy này, dựng lại cho 183 ảnh / 100 bệnh nhân / 83 ca ác tính, trong khi lần chạy
-gốc lưu 178 / 90 / 78. Kết luận không đổi nhưng con số thì lệch tới 13%, và đó là thứ không chấp
-nhận được với một bài báo.
+Why. Each script used to rebuild the partition with StratifiedGroupKFold and then sample images.
+That depends on library versions: the same seed with a different sklearn or pandas version gives
+different folds. On this machine the rebuild gives 183 images / 100 patients / 83 malignant cases,
+while the original run stored 178 / 90 / 78. The conclusions do not change, but the counts differ
+by up to 13%, which is not acceptable for a paper.
 
-Cách chữa. Dựng một lần, ghi danh sách `isic_id` theo đúng thứ tự cùng nhãn và mã bệnh nhân vào
-`results/audit_cohort.json`, rồi từ đó về sau mọi script nạp thẳng từ file. Ảnh được đọc theo id
-nên không còn phụ thuộc bất kỳ bước lấy mẫu nào.
+Fix. Build once, write the `isic_id` list in exact order, with labels and patient ids, to
+`results/audit_cohort.json`, and from then on every script loads directly from that file. Images
+are read by id, so nothing depends on any sampling step.
 
-Dùng:
+Usage:
     import audit_cohort
     imgs, labels, pid, ids = audit_cohort.load()
 
-Dựng lại từ đầu (chỉ làm khi cố ý đổi cohort):
+Rebuild from scratch (only when you deliberately change the cohort):
     python code/audit_cohort.py --rebuild
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ SEED, N_EVAL = 42, 200
 
 
 def _read(ids):
-    """Đọc ảnh theo id, đúng thứ tự, đúng phép biến đổi mà phần còn lại của đường ống dùng."""
+    """Read images by id, in order, with the same transform the rest of the pipeline uses."""
     to_t = T.ToTensor()
     size = (p1.CFG["img_size"], p1.CFG["img_size"])
     out = []
@@ -55,8 +55,8 @@ def _read(ids):
 
 
 def build(seed=SEED, n_eval=N_EVAL):
-    """Dựng cohort từ phân hoạch ba phần, sao lại đúng logic của p2.load_eval_images để lấy được
-    thứ tự id thật sự, rồi trả về mọi thứ cần cho manifest."""
+    """Build the cohort from the three-way partition. Replicates the logic of p2.load_eval_images to
+    get the true id order, then returns everything the manifest needs."""
     _, _, df_au = frozen_split.load()
     df_au = df_au.reset_index(drop=True)
     k = n_eval // 2
@@ -71,7 +71,7 @@ def build(seed=SEED, n_eval=N_EVAL):
 
 
 def load(rebuild=False):
-    """Trả (imgs, labels, pid, ids). Đọc manifest nếu có, nếu chưa thì dựng rồi ghi."""
+    """Return (imgs, labels, pid, ids). Read the manifest if it exists; otherwise build and write it."""
     if rebuild or not os.path.exists(MANIFEST):
         ids, labels, pid = build()
         os.makedirs(RES, exist_ok=True)
@@ -83,7 +83,7 @@ def load(rebuild=False):
                             "library versions."),
                    "isic_id": ids, "target": labels, "patient_id": pid},
                   open(MANIFEST, "w"), indent=1)
-        print(f"[audit_cohort] dựng mới và ghi {MANIFEST}", flush=True)
+        print(f"[audit_cohort] building and writing {MANIFEST}", flush=True)
     m = json.load(open(MANIFEST))
     ids = m["isic_id"]; labels = np.array(m["target"]); pid = np.array(m["patient_id"])
     assert len(ids) == len(labels) == len(pid)
@@ -95,9 +95,9 @@ def main():
     ap.add_argument("--rebuild", action="store_true")
     a = ap.parse_args()
     imgs, labels, pid, ids = load(rebuild=a.rebuild)
-    print(f"cohort: {len(ids)} ảnh / {len(set(pid))} bệnh nhân / {int(labels.sum())} ác tính")
+    print(f"cohort: {len(ids)} images / {len(set(pid))} patients / {int(labels.sum())} malignant")
     print(f"manifest: {MANIFEST}")
-    print("5 id đầu:", ids[:5])
+    print("first 5 ids:", ids[:5])
 
 
 if __name__ == "__main__":

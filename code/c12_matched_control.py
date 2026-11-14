@@ -1,72 +1,76 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-CausalXAI v14 — C12: MATCHED-CONTROL analysis.
+C12: matched-control analysis.
 
-Vấn đề còn lại sau C10/C11: ta mới chứng minh "control choice MATTERS" (A_corr đổi dấu/đổi độ lớn
-theo placebo), CHỨ CHƯA chứng minh "WHICH control is causally VALID". C12 biến việc chọn control từ
-một *lựa chọn tuỳ ý* thành một *giả định kiểm chứng được*, bằng thiết kế matching.
+Open problem after C10/C11: they show that the control choice matters (A_corr changes sign or size
+with the placebo), but not which control is causally valid. C12 turns the choice of control from an
+*arbitrary choice* into a *testable assumption*, using a matching design.
 
 --------------------------------------------------------------------------------------------------
 ESTIMAND & IDENTIFICATION
 --------------------------------------------------------------------------------------------------
-Với concept edit k, đại lượng cần đo là thành phần ĐẶC-HIỆU-CONCEPT của phản ứng model:
+For concept edit k, the target quantity is the concept-specific component of the model response:
 
     ΔCaCE_k(f) = CaCE_logit(edit_k) − CaCE_logit(control)                       (difference-in-differences)
 
-Mô hình phản ứng: CaCE(edit) = g(M(edit)) + h(concept change), trong đó M(edit) là "dấu chân nhiễu
-loạn" (perturbation footprint) của phép edit trong không gian pixel và g là edit-sensitivity CHUNG
-(không đặc hiệu concept). ΔCaCE_k identifies h(·) KHI VÀ CHỈ KHI control thoả:
+Response model: CaCE(edit) = g(M(edit)) + h(concept change), where M(edit) is the perturbation
+footprint of the edit in pixel space and g is the generic edit-sensitivity (not concept-specific).
+ΔCaCE_k identifies h(·) if and only if the control satisfies:
 
-  (A1) BALANCE / footprint-exchangeability : M(control) = M(edit_k) trên mọi thành phần của M
-       -> g triệt tiêu trong hiệu số. M gồm 5 chiều mà reviewer có thể kiểm:
+  (A1) BALANCE / footprint-exchangeability : M(control) = M(edit_k) on every component of M
+       -> g cancels in the difference. M has 5 checkable dimensions:
          (1) altered-pixel fraction, (2) mean absolute pixel change, (3) LAB (ΔE76) distance,
-         (4) spatial support (bán kính RMS của khối lượng nhiễu loạn), (5) lesion-region coverage.
-  (A2) NEUTRALITY / exclusion : control KHÔNG làm đổi proxy concept (đo bằng tham chiếu da gốc,
-       c7.proxy_fixed) -> control không có đường tác động qua kênh concept.
-  (A3) POSITIVITY / overlap : họ control PHẢI với tới được footprint của concept edit trên (hầu hết)
-       từng ảnh. Không với tới -> vi phạm overlap -> control đó KHÔNG dùng được, tự loại.
+         (4) spatial support (RMS radius of the perturbation mass), (5) lesion-region coverage.
+  (A2) NEUTRALITY / exclusion : the control does not change the concept proxy (measured against the
+       original skin reference, c7.proxy_fixed) -> the control has no path through the concept channel.
+  (A3) POSITIVITY / overlap : the control family must reach the concept edit's footprint on (almost)
+       every image. If it cannot, overlap is violated, and that control is unusable and excluded.
 
-Ba điều kiện trên đo được TỪ ẢNH, độc lập với model => "control nào hợp lệ" là câu hỏi THỰC NGHIỆM.
+All three conditions are measured from the images, independently of the model. So "which control is
+valid" is an empirical question.
 
-  (T)  HỆ QUẢ KIỂM CHỨNG ĐƯỢC: nếu g chỉ phụ thuộc M thì HAI control hợp lệ KHÁC HỌ (khác cơ chế,
-       cùng M, cùng trung tính) phải cho CaCE BẰNG NHAU: control-vs-control ≈ 0, và ΔCaCE phải HỘI TỤ
-       giữa các họ. Đây là falsification test cho chính lớp control — thứ mà "control choice matters"
-       không cung cấp. Ngược lại, các control CHƯA matched lệch M -> ΔCaCE phân tán (đúng như C10).
+  (T)  Testable implication: if g depends only on M, then two valid controls from different families
+       (different mechanism, same M, both neutral) must give equal CaCE: control-vs-control ≈ 0, and
+       ΔCaCE must converge across families. This is a falsification test for the control class itself,
+       which "control choice matters" does not provide. Conversely, unmatched controls with a different M
+       give dispersed ΔCaCE (as in C10).
 
 --------------------------------------------------------------------------------------------------
-THIẾT KẾ CONTROL
+CONTROL DESIGN
 --------------------------------------------------------------------------------------------------
-Đặt d = x − skin (lệch màu so với da nền), Δ_k = edit_k(x) − x.
-  * MATCHED-BY-CONSTRUCTION (khớp footprint theo cấu trúc, dùng chính Δ_k):
-      rotd : x + R_120°(Δ_k)   — xoay vector Δ quanh trục xám: |Δ| TỪNG PIXEL bảo toàn tuyệt đối.
-      sgnd : x + s⊙Δ_k, s=±1 ngẫu nhiên theo pixel — |Δ| từng pixel bảo toàn, net concept ≈ 0.
-      permd: x + hoán vị KHÔNG GIAN của Δ_k trong lesion — cùng histogram |Δ|, phá cấu trúc không gian.
-  * REARRANGEMENT (chỉ XÁO CHỖ pixel có thật trong tổn thương -> multiset giá trị pixel bảo toàn =>
-    contrast/color_var/size proxy BẤT BIẾN; cường độ chỉnh được; không ra ngoài gamut):
-      pixperm_m : hoán vị ngẫu nhiên giá trị pixel trong lesion (tham gia với xác suất q) — trung tính
-                  CHÍNH XÁC (proxyΔ = 0.00%) với mọi q. Ứng viên control hợp lệ số 1.
-      warp_m    : biến dạng đàn hồi (nearest-sampling) trong lesion — giữ cấu trúc cục bộ, cơ chế KHÁC
-                  hẳn pixperm => cặp này chính là phép thử control-vs-control.
-  * FAMILY-MATCHED (họ placebo của C10, hiệu chuẩn CƯỜNG ĐỘ bằng bisection cho khớp mean|Δ| của edit_k):
-      hue_m   : xoay d quanh trục XÁM góc θ (Rodrigues) — BẢO TOÀN |d| từng pixel => trung tính
-                concept theo cấu trúc, mà cường độ vẫn chỉnh được. Trần cường độ = 2|d_⊥xám|.
-      rotax_m : cùng cơ chế nhưng trục ⊥ hướng lệch màu trung bình => trần = 2|d| (tầm với gấp đôi,
-                cần cho liều cao). hue_m và rotax_m là hai control ỨNG VIÊN chính, khác cơ chế.
-      flip_m / jitter_m / noise_m : blend α (hoặc σ) với mirror / roll / nhiễu Gauss trong mask.
-  * UNMATCHED (nguyên trạng C10, để đối chứng): hue, flip, jitter, noise ở cường độ mặc định.
+Let d = x − skin (colour deviation from the background skin), Δ_k = edit_k(x) − x.
+  * MATCHED-BY-CONSTRUCTION (footprint matched by construction, using Δ_k itself):
+      rotd : x + R_120°(Δ_k). Rotates the vector Δ about the gray axis: per-pixel |Δ| is preserved exactly.
+      sgnd : x + s⊙Δ_k, s=±1 random per pixel. Per-pixel |Δ| is preserved, net concept ≈ 0.
+      permd: x + spatial permutation of Δ_k within the lesion. Same |Δ| histogram, spatial structure destroyed.
+  * REARRANGEMENT (only moves real pixels within the lesion, so the multiset of pixel values is preserved;
+    hence the contrast/color_var/size proxies are invariant; strength is tunable; never leaves the gamut):
+      pixperm_m : random permutation of pixel values within the lesion (each pixel joins with probability q).
+                  Exactly neutral (proxyΔ = 0.00%) for every q. Valid control candidate no. 1.
+      warp_m    : elastic deformation (nearest sampling) within the lesion. Keeps local structure, with a
+                  mechanism entirely different from pixperm, so this pair is the control-vs-control test.
+  * FAMILY-MATCHED (C10 placebo families, strength calibrated by bisection to match mean|Δ| of edit_k):
+      hue_m   : rotates d about the gray axis by angle θ (Rodrigues). Preserves per-pixel |d|, so it is
+                concept-neutral by construction while strength stays tunable. Strength ceiling = 2|d_⊥gray|.
+      rotax_m : same mechanism, but the axis is ⊥ to the mean colour-deviation direction, so the ceiling is
+                2|d| (twice the reach, needed for high doses). hue_m and rotax_m are the two main candidate
+                controls, with different mechanisms.
+      flip_m / jitter_m / noise_m : blend α (or σ) with mirror / roll / Gaussian noise inside the mask.
+  * UNMATCHED (as in C10, for comparison): hue, flip, jitter, noise at default strength.
 
-Concept targets: contrast@{0,2}, color_var@{0,2} (liều thấp nhất & cao nhất). Mỗi target có 10 control
-riêng => 4 concept + 4 unmatched + 4×10 matched = 48 edit/ảnh, dùng CHUNG cho cả 3 model.
+Concept targets: contrast@{0,2}, color_var@{0,2} (lowest and highest dose). Each target has its own 10
+controls, so 4 concepts + 4 unmatched + 4×10 matched = 48 edits/image, shared by all 3 models.
 
-LƯU Ý VỀ POSITIVITY: control trung tính kiểu "xáo chỗ" chỉ tạo được biên độ tối đa bằng ĐỘ TÁN SẮC
-MÀU NỘI TẠI của tổn thương, trong khi concept edit KHUẾCH ĐẠI độ lệch màu (tạo màu mới ngoài phân
-phối gốc). Vì vậy ở liều cao, concept edit có thể VƯỢT RA NGOÀI tầm với của mọi control trung tính →
-vi phạm overlap → ΔCaCE ở liều đó KHÔNG được định danh. Đây là kết quả, không phải lỗi: nó giải thích
-vì sao ở liều cao mọi người buộc phải dùng control lệch footprint (và do đó bất đồng kết luận).
+Note on positivity: a neutral "rearrangement" control can reach at most an amplitude equal to the
+intrinsic colour dispersion of the lesion, while the concept edit amplifies the colour deviation (it
+creates new colours outside the original distribution). So at high dose the concept edit can go beyond
+the reach of every neutral control. Overlap is then violated, and ΔCaCE at that dose is not identified.
+This is a result, not a bug: it explains why at high dose one is forced to use footprint-mismatched
+controls (and hence reaches conflicting conclusions).
 
 Out -> results/c12_matched_control.json + paper/figures/fig_matched_control.png
-Chạy:  .venv/bin/python Causal_XAI_v3/code/c12_matched_control.py [--n-eval 200] [--boot 2000]
+Run:  .venv/bin/python Causal_XAI_v3/code/c12_matched_control.py [--n-eval 200] [--boot 2000]
 """
 from __future__ import annotations
 
@@ -83,16 +87,16 @@ import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import c3_cace_concept as c3m       # noqa: E402  (soft_mask, make_edit, model_prob, logit, DOSES)
 import audit_cohort               # noqa: E402
-import c7_extra_controls as c7m     # noqa: E402  (proxy_fixed: proxy concept theo tham chiếu da GỐC)
-import c10_multiplacebo as c10      # noqa: E402  (4 placebo nguyên trạng)
+import c7_extra_controls as c7m     # noqa: E402  (proxy_fixed: concept proxy against the original skin reference)
+import c10_multiplacebo as c10      # noqa: E402  (the 4 original placebos)
 
-torch.set_num_threads(min(8, os.cpu_count() or 8))   # máy dùng chung: tránh thrash khi load cao
+torch.set_num_threads(min(8, os.cpu_count() or 8))   # shared machine: avoid thrashing under high load
 p1, p2, DEVICE = c3m.p1, c3m.p2, c3m.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c12_matched_control.json")
 FIGDIR = os.path.join(os.path.dirname(HERE), "paper", "figures")
-import audited_models                # noqa: E402  (phân giải checkpoint ở một chỗ)
-CKPTS = audited_models.CKPTS         # đường dẫn TUYỆT ĐỐI tới bộ đã cố định
+import audited_models                # noqa: E402  (checkpoints are resolved in one place)
+CKPTS = audited_models.CKPTS         # absolute paths to the frozen set
 SEED, N_EVAL, BOOT = 42, 200, 2000
 ORDER = ["erm", "slim", "causal"]
 COL = {"erm": "#1f77b4", "slim": "#7f7f7f", "causal": "#d62728"}
@@ -101,40 +105,40 @@ NAME = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}
 TARGETS = ["contrast@2", "color_var@2", "contrast@0", "color_var@0"]
 TOPDOSE = ["contrast@2", "color_var@2"]
 CTRL_STRUCT = ["rotd", "sgnd", "permd"]                      # matched-by-construction
-# ĐỐI-LIỀU (symmetric-dose): control KHÔNG phải placebo mà là CHÍNH phép can thiệp theo CHIỀU NGƯỢC.
-# Nó không thoả A2 (không trung tính) — và đó là CHỦ Ý: estimand đổi thành tương phản liều
+# Symmetric dose: the control is not a placebo but the same intervention in the opposite direction.
+# It does not satisfy A2 (it is not neutral), and that is intended: the estimand becomes a dose contrast
 #   ΔCaCE_sym = CaCE(C↑) − CaCE(C↓) = h(+δ) − h(−δ),
-# trong đó g(M) triệt tiêu vì hai edit là ẢNH GƯƠNG của nhau trong không gian pixel (cùng |Δ| từng
-# pixel, cùng support, cùng texture, cùng ΔE) — thứ mà KHÔNG placebo trung tính nào đạt được.
+# where g(M) cancels because the two edits are mirror images of each other in pixel space (same
+# per-pixel |Δ|, same support, same texture, same ΔE), which no neutral placebo can achieve.
 CTRL_DOSE = ["invdose"]
 CTRL_FAMILY = ["hybrid_m", "texswap_m", "globrot_m", "warp2_m", "pixperm_m", "warp_m",
                "hue_m", "rotax_m", "flip_m", "jitter_m", "noise_m"]   # family-matched (bisection)
-HYBRID_B = np.linspace(0.0, 1.0, 9)      # lưới núm ghép-kết-cấu cho control 2 núm
+HYBRID_B = np.linspace(0.0, 1.0, 9)      # grid for the texture-swap knob of the 2-knob control
 MATCHED = CTRL_STRUCT + CTRL_FAMILY + CTRL_DOSE
-UNMATCHED = ["hue", "flip", "jitter", "noise"]               # nguyên trạng C10
-# 5 hiệp biến matching theo yêu cầu + hf_change: hiệp biến THỨ SÁU do chính phép thử
-# leave-one-family-out chỉ ra là còn thiếu (hai control cùng 5 chiều đầu vẫn lệch nhau >10 logit
-# vì chúng phá vỡ KẾT CẤU (texture) ở mức rất khác nhau).
+UNMATCHED = ["hue", "flip", "jitter", "noise"]               # as in C10
+# The 5 required matching covariates + hf_change: a sixth covariate that the leave-one-family-out
+# test itself showed to be missing (two controls matched on the first 5 dimensions still differ by
+# >10 logits, because they disrupt texture to very different degrees).
 COVS = ["frac_altered", "mean_abs", "lab_dE", "support_rms", "lesion_cov", "hf_change"]
 COVLAB = {"frac_altered": "altered-pixel frac", "mean_abs": "mean |Δ| pixel",
           "lab_dE": "LAB ΔE76", "support_rms": "spatial support", "lesion_cov": "lesion coverage",
           "hf_change": "high-freq (texture)"}
 
-# Thang liều TRUNG TÍNH: 2 họ rearrangement × 5 mức cường độ (bội số của mean|Δ| của contrast@2).
-# Dùng để ƯỚC LƯỢNG hàm nhạy-cảm-chung g(M) thay vì chỉ dựa vào MỘT control đơn lẻ.
-SIGMAS = [2, 8, 24]                 # độ trơn của trường dịch chuyển (px)
+# Neutral dose ladder: 2 rearrangement families × 5 strength levels (multiples of mean|Δ| of contrast@2).
+# Used to estimate the generic sensitivity function g(M) instead of relying on a single control.
+SIGMAS = [2, 8, 24]                 # smoothness of the displacement field (px)
 LADDER_MULT = [0.25, 0.5, 1.0, 1.5, 2.0]
-# Thang liều 2 CHIỀU (cường độ × độ trơn) để ước lượng g(M) trên cả trục texture, cộng một họ
-# CƠ CHẾ KHÁC (pixperm) giữ riêng để leave-one-family-out kiểm định giả định A1.
-LADDER_FAM = ["globrot_m", "w2s24", "w2s2", "pixperm_m"]   # phủ trục texture từ ~0 đến cao nhất
+# 2-D dose ladder (strength × smoothness) to estimate g(M) along the texture axis too, plus a family
+# with a different mechanism (pixperm) held out for leave-one-family-out testing of assumption A1.
+LADDER_FAM = ["globrot_m", "w2s24", "w2s2", "pixperm_m"]   # covers the texture axis from ~0 to the highest
 LOFO_GROUPS = {"globrot": ["globrot_m"], "warp2": ["w2s24", "w2s2"], "pixperm": ["pixperm_m"]}
 
-SMD_TOL = 0.10        # |SMD| <= 0.10 -> balanced (quy ước matching)
-SMD_TOL_OK = 0.25     # 0.10 = lý tưởng; 0.25 = ngưỡng "đủ cân bằng" kinh điển (Rosenbaum-Rubin)
-NEUTRAL_TOL = 0.10    # |Δ| proxy concept tuyệt đối <= 10%
-NEUTRAL_RATIO = 0.15  # và <= 15% mức dịch proxy của CHÍNH concept edit (chặn bias bậc nhất của ΔCaCE)
-MATCH_TOL = 0.02      # sai số khớp mean|Δ| <= 2%
-POS_TOL = 0.95        # >=95% ảnh khớp được -> đạt positivity
+SMD_TOL = 0.10        # |SMD| <= 0.10 -> balanced (matching convention)
+SMD_TOL_OK = 0.25     # 0.10 = ideal; 0.25 = classic "balanced enough" threshold (Rosenbaum-Rubin)
+NEUTRAL_TOL = 0.10    # absolute |Δ| of concept proxy <= 10%
+NEUTRAL_RATIO = 0.15  # and <= 15% of the proxy shift of the concept edit itself (bounds first-order bias of ΔCaCE)
+MATCH_TOL = 0.02      # mean|Δ| matching error <= 2%
+POS_TOL = 0.95        # >=95% of images matched -> positivity holds
 
 _GRID = {}
 
@@ -151,7 +155,7 @@ def _grid(H, W):
 
 
 def rgb2lab(x01):
-    """sRGB [0,1] [3,H,W] -> CIELAB (D65). Dùng cho khoảng cách tri giác ΔE76."""
+    """sRGB [0,1] [3,H,W] -> CIELAB (D65). Used for the perceptual distance ΔE76."""
     m = torch.tensor([[0.4124, 0.3576, 0.1805],
                       [0.2126, 0.7152, 0.0722],
                       [0.0193, 0.1192, 0.9505]], dtype=x01.dtype)
@@ -164,19 +168,19 @@ def rgb2lab(x01):
 
 
 def hf_map(x, k=5):
-    """Năng lượng tần số cao (kết cấu) = ‖x − blur_k(x)‖ theo pixel."""
+    """High-frequency (texture) energy = ‖x − blur_k(x)‖ per pixel."""
     ker = torch.ones(3, 1, k, k, dtype=x.dtype) / (k * k)
     b = torch.nn.functional.conv2d(x.unsqueeze(0), ker, padding=k // 2, groups=3)[0]
     return (x - b).pow(2).sum(0).sqrt()
 
 
 def dpix(x, e):
-    """Độ lớn thay đổi mỗi pixel = chuẩn L2 trên 3 kênh màu."""
+    """Per-pixel change magnitude = L2 norm over the 3 colour channels."""
     return (e - x).pow(2).sum(0).sqrt()
 
 
 def footprint(x, e, w):
-    """5 hiệp biến matching mô tả 'dấu chân' của một phép can thiệp trong không gian pixel."""
+    """5 matching covariates describing the pixel-space footprint of an intervention."""
     d = dpix(x, e)
     H, W = d.shape
     tot = d.sum().clamp_min(1e-8)
@@ -192,7 +196,7 @@ def footprint(x, e, w):
 
 
 def support_iou(x, e1, e2, thr=0.02):
-    """Chồng lấn KHÔNG GIAN của hai vùng bị sửa (kiểm tra control có động vào cùng pixel không)."""
+    """Spatial overlap of two edited regions (checks whether the control touches the same pixels)."""
     a, b = dpix(x, e1) > thr, dpix(x, e2) > thr
     u = (a | b).sum().clamp_min(1)
     return float((a & b).sum() / u)
@@ -202,11 +206,11 @@ def support_iou(x, e1, e2, thr=0.02):
 # Control builders
 # ==================================================================================================
 def axis_rot(d, k, theta):
-    """Xoay vector màu d[3,H,W] quanh trục đơn vị k[3] góc theta (Rodrigues) — BẢO TOÀN CHUẨN từng pixel.
+    """Rotate colour vector d[3,H,W] about unit axis k[3] by angle theta (Rodrigues). Preserves the per-pixel norm.
 
-    Vì phép xoay là TUYẾN TÍNH & bảo toàn chuẩn, áp cho mọi pixel thì: ‖lesmean−skin‖ (proxy contrast),
-    tổng phương sai màu trong tổn thương (proxy color_var) và ‖x−skin‖ (=> mask/size) đều GIỮ NGUYÊN
-    CHÍNH XÁC. Đó là control trung tính-concept theo CẤU TRÚC, mà cường độ vẫn chỉnh được qua theta.
+    Since the rotation is linear and norm-preserving, applied to every pixel it keeps exactly: ‖lesmean−skin‖
+    (contrast proxy), total colour variance inside the lesion (color_var proxy) and ‖x−skin‖ (=> mask/size).
+    This is a control that is concept-neutral by construction, while its strength stays tunable via theta.
     """
     cross = torch.stack([k[1] * d[2] - k[2] * d[1],
                          k[2] * d[0] - k[0] * d[2],
@@ -217,22 +221,22 @@ def axis_rot(d, k, theta):
 
 
 def gray_rot(d, theta):
-    """Xoay quanh trục xám (1,1,1)/√3 — phép xoay hue kinh điển (theta=120° = hoán vị vòng kênh)."""
+    """Rotation about the gray axis (1,1,1)/√3: the classic hue rotation (theta=120° = cyclic channel permutation)."""
     return axis_rot(d, torch.full((3,), 1.0 / float(np.sqrt(3.0)), dtype=d.dtype), theta)
 
 
 def pix_perm_fn(x, w, seed):
-    """Hoán vị GIÁ TRỊ pixel bên trong tổn thương; mỗi pixel tham gia nếu u_p < q (tập lồng nhau).
+    """Permute pixel values inside the lesion; each pixel joins if u_p < q (nested sets).
 
-    Ba proxy concept (contrast=‖lesmean−skin‖, color_var, size=Σw) đều là PHIẾM HÀM CỦA MULTISET giá
-    trị pixel (w_p = clamp(‖x_p−skin0‖/scale) đi kèm chính giá trị đó), nên mọi hoán vị bảo toàn chúng
-    CHÍNH XÁC với MỌI q -> control trung tính tuyệt đối, cường độ chỉnh được, và không bao giờ ra
-    ngoài gamut (mọi giá trị đều là giá trị pixel có thật của ảnh).
+    The three concept proxies (contrast=‖lesmean−skin‖, color_var, size=Σw) are all functionals of the multiset
+    of pixel values (w_p = clamp(‖x_p−skin0‖/scale) goes with that same value), so every permutation preserves them
+    exactly for every q. This gives a perfectly neutral control, with tunable strength, that never leaves the
+    gamut (every value is a real pixel value of the image).
     """
     rng = np.random.RandomState(seed + 313)
     idx = torch.nonzero(w.reshape(-1) > 0.05, as_tuple=False).reshape(-1)
-    # xác suất tham gia ~ w: khối lượng nhiễu loạn dồn vào LÕI tổn thương giống concept edit
-    # (Δ concept ∝ w·|d|), nhờ vậy 'lesion coverage' & 'altered fraction' mới cân bằng được.
+    # participation probability ~ w: the perturbation mass concentrates in the lesion core, like the concept edit
+    # (concept Δ ∝ w·|d|), so that 'lesion coverage' and 'altered fraction' can be balanced.
     u = torch.from_numpy(rng.rand(len(idx)).astype(np.float32)) / w.reshape(-1)[idx].clamp_min(1e-3)
     key = torch.from_numpy(rng.rand(len(idx)).astype(np.float32))
     flat = x.reshape(3, -1)
@@ -249,23 +253,23 @@ def pix_perm_fn(x, w, seed):
 
 
 def globrot_fn(x, skin, nax):
-    """Xoay TOÀN ẢNH vector (x−skin) quanh trục nax, góc theta.
+    """Rotate the vector (x−skin) of the whole image about axis nax by angle theta.
 
-    Là phép TUYẾN TÍNH BẢO TOÀN CHUẨN áp cho MỌI pixel (không nhân mask mềm) nên:
-      * proxy contrast/color_var/size bất biến CHÍNH XÁC  -> trung tính concept theo cấu trúc;
-      * bản đồ tần số cao bất biến (‖R(x−blur x)‖ = ‖x−blur x‖) -> KHÔNG phá texture;
-      * |Δ| = 2 sin(θ/2)|d_⊥| với trần 2|d| -> với tới được cả liều concept cao nhất.
-    Chỉ phép clamp gamut mới làm lệch (đo được: proxy ratio ~1-2%).
+    It is a linear, norm-preserving map applied to every pixel (no soft-mask blending), so:
+      * the contrast/color_var/size proxies are exactly invariant  -> concept-neutral by construction;
+      * the high-frequency map is invariant (‖R(x−blur x)‖ = ‖x−blur x‖) -> texture is not disrupted;
+      * |Δ| = 2 sin(θ/2)|d_⊥| with ceiling 2|d| -> it can reach even the highest concept dose.
+    Only the gamut clamp introduces deviations (measured: proxy ratio ~1-2%).
     """
     d = x - skin.view(-1, 1, 1)
     return lambda th: torch.clamp(skin.view(-1, 1, 1) + axis_rot(d, nax, th), 0, 1)
 
 
 def warp2_fn(x, w, seed, sigma):
-    """Warp với trường dịch chuyển ĐỘ TRƠN sigma px: núm thứ hai điều khiển mức phá vỡ texture.
+    """Warp with a displacement field of smoothness sigma px: the second knob controls texture disruption.
 
-    sigma lớn -> dịch chuyển trơn, giữ kết cấu (hf_change nhỏ); sigma nhỏ -> xáo cục bộ, phá kết cấu.
-    Nhờ hai núm (biên độ, sigma) mới khớp ĐỒNG THỜI được mean|Δ| và hf_change của concept edit.
+    Large sigma -> smooth displacement, texture kept (small hf_change); small sigma -> local shuffling, texture disrupted.
+    The two knobs (amplitude, sigma) are what allow matching mean|Δ| and hf_change of the concept edit at the same time.
     """
     C, H, W = x.shape
     rng = np.random.RandomState(seed + 977 + int(sigma))
@@ -283,16 +287,16 @@ def warp2_fn(x, w, seed, sigma):
 
 
 def warp_fn(x, w, seed):
-    """Biến dạng đàn hồi trong tổn thương (lấy mẫu NEAREST theo trường dịch chuyển trơn, biên độ amp).
+    """Elastic deformation inside the lesion (nearest sampling along a smooth displacement field, amplitude amp).
 
-    Chỉ DI CHUYỂN pixel có thật -> phân phối màu gần như bảo toàn (proxy shift nhỏ), cơ chế KHÁC hẳn
-    pix-perm (giữ cấu trúc cục bộ) -> dùng làm control thứ hai cho phép thử control-vs-control.
+    It only moves real pixels -> the colour distribution is nearly preserved (small proxy shift). Its mechanism is
+    entirely different from pix-perm (it keeps local structure) -> used as the second control in the control-vs-control test.
     """
     C, H, W = x.shape
     rng = np.random.RandomState(seed + 707)
     f = torch.from_numpy(rng.normal(0, 1, (2, 1, max(2, H // 8), max(2, W // 8))).astype(np.float32))
     f = torch.nn.functional.interpolate(f, size=(H, W), mode="bilinear", align_corners=False)[:, 0]
-    f = f / f.std().clamp_min(1e-6) * w * w      # ~w²: dịch chuyển dồn vào lõi, không phá viền
+    f = f / f.std().clamp_min(1e-6) * w * w      # ~w²: displacement concentrated in the core, border kept intact
     yy, xx = _grid(H, W)
 
     def fn(amp):
@@ -303,19 +307,19 @@ def warp_fn(x, w, seed):
 
 
 def hf_split(x, k=5):
-    """Tách ảnh thành băng thấp (blur) và băng cao (kết cấu)."""
+    """Split the image into a low band (blur) and a high band (texture)."""
     ker = torch.ones(3, 1, k, k, dtype=x.dtype) / (k * k)
     lf = torch.nn.functional.conv2d(x.unsqueeze(0), ker, padding=k // 2, groups=3)[0]
     return lf, x - lf
 
 
 def texswap_fn(x, w, donor):
-    """GHÉP KẾT CẤU: thay băng tần cao trong tổn thương bằng băng tần cao của tổn thương ẢNH KHÁC.
+    """Texture swap: replace the high-frequency band inside the lesion with that of another image's lesion.
 
-    Vì băng cao có trung bình cục bộ ~0 và ta chuẩn hoá cho CÙNG NĂNG LƯỢNG (rồi trộn theo kiểu bảo
-    toàn năng lượng), phép này giữ gần như nguyên: lesmean (=> proxy contrast), tổng phương sai màu
-    (=> proxy color_var) và ‖x−skin‖ (=> mask/size). Nhưng nó LÀM ĐỔI hf_change — đúng chiều hiệp biến
-    mà mọi control trung tính trước đây không khớp được. Kết cấu lấy từ tổn thương thật => in-distribution.
+    Since the high band has local mean ~0 and we normalise it to the same energy (then mix in an
+    energy-preserving way), this nearly preserves: lesmean (=> contrast proxy), total colour variance
+    (=> color_var proxy) and ‖x−skin‖ (=> mask/size). But it does change hf_change, which is exactly the covariate
+    that no earlier neutral control could match. The texture comes from a real lesion => in-distribution.
     """
     lf, hf = hf_split(x)
     hfd = hf_split(donor)[1]
@@ -326,17 +330,17 @@ def texswap_fn(x, w, donor):
     w3 = w.unsqueeze(0)
 
     def fn(b):
-        mix = ((1 - b) * hf + b * hfd) / float(np.sqrt((1 - b) ** 2 + b ** 2))   # bảo toàn năng lượng
+        mix = ((1 - b) * hf + b * hfd) / float(np.sqrt((1 - b) ** 2 + b ** 2))   # energy-preserving
         return torch.clamp(x + w3 * (mix - hf), 0, 1)
     return fn
 
 
 def hybrid_fn(x, w, skin, nax, donor):
-    """HAI NÚM: (theta) xoay màu bảo toàn chuẩn + (b) ghép kết cấu.
+    """Two knobs: (theta) norm-preserving colour rotation + (b) texture swap.
 
-    Núm theta bơm biên độ nhiễu loạn mà KHÔNG đụng kết cấu; núm b bơm kết cấu mà KHÔNG đụng proxy
-    concept. Nhờ đó lần đầu khớp được ĐỒNG THỜI mean|Δ| và hf_change của concept edit, trong khi vẫn
-    trung tính. Đây là ứng viên control hợp lệ theo cả A1/A2/A3.
+    The theta knob injects perturbation amplitude without touching texture; the b knob injects texture without
+    touching the concept proxy. This makes it possible to match mean|Δ| and hf_change of the concept edit at the
+    same time, while staying neutral. This is a valid control candidate under all of A1/A2/A3.
     """
     tex = texswap_fn(x, w, donor)
     d = x - skin.view(-1, 1, 1); w3 = w.unsqueeze(0)
@@ -348,7 +352,7 @@ def hybrid_fn(x, w, skin, nax, donor):
 
 
 def make_families(x, w, skin, seed, donor=None):
-    """Trả {tên: (fn(strength) -> ảnh, lo, hi)}. Nhiễu/độ dời cố định theo ảnh => mag đơn điệu theo s."""
+    """Return {name: (fn(strength) -> image, lo, hi)}. Noise/shift are fixed per image => mag is monotone in s."""
     rng = np.random.RandomState(seed)
     noise = torch.from_numpy(rng.normal(0, 1, x.shape).astype(np.float32))
     sh = (int(rng.randint(4, 9)) * (1 if rng.rand() > .5 else -1),
@@ -356,8 +360,8 @@ def make_families(x, w, skin, seed, donor=None):
     d = x - skin.view(-1, 1, 1)
     w3 = w.unsqueeze(0)
     xf, xr = torch.flip(x, dims=[2]), torch.roll(x, shifts=sh, dims=(1, 2))
-    # trục xoay VUÔNG GÓC hướng lệch màu trung bình của tổn thương -> |Δ| đạt tới ~2|d| (đủ tầm với
-    # mọi liều concept, g<=1), trong khi hue quanh trục xám chỉ đạt 2|d_⊥xám| (có thể KHÔNG với tới).
+    # rotation axis perpendicular to the mean colour-deviation direction of the lesion -> |Δ| reaches ~2|d| (enough
+    # for every concept dose, g<=1), whereas hue about the gray axis only reaches 2|d_⊥gray| (may fall short).
     dm = (d * w3).sum((1, 2)) / w.sum().clamp_min(1e-6)
     g3 = torch.full((3,), 1.0 / float(np.sqrt(3.0)), dtype=x.dtype)
     nax = torch.linalg.cross(dm, g3)
@@ -365,33 +369,33 @@ def make_families(x, w, skin, seed, donor=None):
         nax = torch.linalg.cross(dm, torch.tensor([1.0, 0.0, 0.0], dtype=x.dtype))
     nax = nax / nax.norm().clamp_min(1e-8)
     out = {
-        # xoay màu TOÀN ẢNH: trung tính + giữ texture + đủ tầm với (xem globrot_fn)
+        # whole-image colour rotation: neutral + keeps texture + enough reach (see globrot_fn)
         "globrot_m": (globrot_fn(x, skin, nax), 0.0, float(np.pi)),
-        # REARRANGEMENT controls: chỉ xáo chỗ pixel -> phân phối màu (=> proxy concept) bảo toàn
+        # Rearrangement controls: only move pixels -> colour distribution (=> concept proxy) preserved
         "pixperm_m": (pix_perm_fn(x, w, seed), 0.0, 1.0),
         "warp_m":    (warp_fn(x, w, seed), 0.0, 30.0),
-        # xoay hue quanh trục xám: |d| bảo toàn TRƯỚC clamp, nhưng blend theo mask mềm + clamp gamut
-        # làm lệch proxy -> để lại trong bảng như ứng viên bị loại (minh hoạ tiêu chí neutrality).
+        # hue rotation about the gray axis: |d| is preserved before the clamp, but soft-mask blending + gamut clamp
+        # shift the proxy -> kept in the table as a rejected candidate (illustrates the neutrality criterion).
         "hue_m":    (lambda s: torch.clamp(x + w3 * (gray_rot(d, s) - d), 0, 1), 0.0, float(np.pi)),
-        # xoay quanh trục ⊥ hướng lệch màu trung bình: cũng bảo toàn chuẩn, nhưng tầm với gấp đôi
+        # rotation about the axis ⊥ to the mean colour-deviation direction: also norm-preserving, but twice the reach
         "rotax_m":  (lambda s: torch.clamp(x + w3 * (axis_rot(d, nax, s) - d), 0, 1), 0.0, float(np.pi)),
         "flip_m":   (lambda s: torch.clamp(x + s * w3 * (xf - x), 0, 1), 0.0, 1.0),
         "jitter_m": (lambda s: torch.clamp(x + s * w3 * (xr - x), 0, 1), 0.0, 1.0),
         "noise_m":  (lambda s: torch.clamp(x + s * w3 * noise, 0, 1), 0.0, 0.60),
     }
-    for sg in SIGMAS:                       # warp 2 núm: mỗi sigma là một họ con để chọn theo texture
+    for sg in SIGMAS:                       # 2-knob warp: each sigma is a sub-family, selected by texture
         out[f"w2s{sg}"] = (warp2_fn(x, w, seed, sg), 0.0, 40.0)
     if donor is not None:
         out["texswap_m"] = (texswap_fn(x, w, donor), 0.0, 1.0)
-        out["_hybrid"] = hybrid_fn(x, w, skin, nax, donor)     # 2 núm -> xử lý riêng
+        out["_hybrid"] = hybrid_fn(x, w, skin, nax, donor)     # 2 knobs -> handled separately
     return out
 
 
 def match_strength(fn, lo, hi, x, target, iters=22):
-    """Bisection trên cường độ để mean|Δ| khớp target. Trả (edit, s, mag, ok_positivity)."""
+    """Bisection on strength so that mean|Δ| matches target. Returns (edit, s, mag, ok_positivity)."""
     e_hi = fn(hi)
     if float(dpix(x, e_hi).mean()) < target * (1 - MATCH_TOL):
-        return e_hi, hi, float(dpix(x, e_hi).mean()), False      # không với tới -> vi phạm overlap
+        return e_hi, hi, float(dpix(x, e_hi).mean()), False      # cannot reach -> overlap violated
     for _ in range(iters):
         mid = 0.5 * (lo + hi)
         if float(dpix(x, fn(mid)).mean()) < target:
@@ -403,7 +407,7 @@ def match_strength(fn, lo, hi, x, target, iters=22):
 
 
 def match_hybrid(base, x, w, tgt_mag, tgt_hf):
-    """Quét núm ghép-kết-cấu b, mỗi b bisection theo theta để khớp mean|Δ|; chọn b khớp hf_change nhất."""
+    """Sweep the texture-swap knob b; for each b, bisect on theta to match mean|Δ|; pick the b that best matches hf_change."""
     best = None
     for b in HYBRID_B:
         fn = base(float(b))
@@ -415,7 +419,7 @@ def match_hybrid(base, x, w, tgt_mag, tgt_hf):
 
 
 def match_2knob(fams, x, tgt_mag, tgt_hf, w):
-    """Khớp ĐỒNG THỜI mean|Δ| (bisection biên độ) và hf_change (chọn sigma tốt nhất)."""
+    """Match mean|Δ| (amplitude bisection) and hf_change (best sigma) at the same time."""
     best = None
     for sg in SIGMAS:
         fn, lo, hi = fams[f"w2s{sg}"]
@@ -427,7 +431,7 @@ def match_2knob(fams, x, tgt_mag, tgt_hf, w):
 
 
 def struct_controls(x, delta, w, seed):
-    """Control khớp footprint theo cấu trúc, xây trực tiếp từ Δ của concept edit."""
+    """Controls with footprint matched by construction, built directly from the Δ of the concept edit."""
     rng = np.random.RandomState(seed + 991)
     out = {"rotd": torch.clamp(x + gray_rot(delta, 2 * np.pi / 3), 0, 1)}
     sgn = torch.from_numpy(np.where(rng.rand(1, *delta.shape[1:]) > 0.5, 1.0, -1.0).astype(np.float32))
@@ -447,32 +451,32 @@ def boot(v, nboot, seed=SEED):
 
 
 def smd(a, b):
-    """Standardized mean difference (paired): (mean_ctrl − mean_concept)/SD gộp."""
+    """Standardized mean difference (paired): (mean_ctrl − mean_concept)/pooled SD."""
     a, b = np.asarray(a, float), np.asarray(b, float)
     sd = np.sqrt(0.5 * (a.var(ddof=1) + b.var(ddof=1)))
     return float((a.mean() - b.mean()) / sd) if sd > 1e-12 else 0.0
 
 
 def rel_proxy_shift(base, px):
-    """|Δ| tương đối của proxy concept (contrast, color_var) so với ảnh gốc — 0 = trung tính."""
+    """Relative |Δ| of the concept proxies (contrast, color_var) vs the original image. 0 = neutral."""
     return float(np.mean([abs(px[c] - base[c]) / (abs(base[c]) + 1e-6) for c in ("contrast", "color_var")]))
 
 
 # ==================================================================================================
-# Ước lượng hàm nhạy-cảm-chung g(M) và ΔCaCE hiệu chỉnh
+# Estimate the generic sensitivity function g(M) and the adjusted ΔCaCE
 # --------------------------------------------------------------------------------------------------
-# Thay vì chọn MỘT control rồi hy vọng nó khớp, ta ước lượng g(M) từ CẢ THANG LIỀU control trung tính
-# rồi đọc g tại ĐÚNG footprint của concept edit:  ΔCaCE_adj = CaCE(edit) − ĝ(M(edit)).
-# Đây chính là "control phản thực": phản ứng mà một can thiệp TRUNG TÍNH có cùng dấu chân sẽ tạo ra.
-# Hồi quy TRONG-ẢNH (khử trung bình theo ảnh) nên độ nhạy nền khác nhau giữa ảnh không gây nhiễu.
+# Instead of picking one control and hoping it matches, we estimate g(M) from the whole neutral control
+# dose ladder and read g at the exact footprint of the concept edit:  ΔCaCE_adj = CaCE(edit) − ĝ(M(edit)).
+# This is the "counterfactual control": the response that a neutral intervention with the same footprint would produce.
+# Within-image regression (image means removed), so differing baseline sensitivity across images adds no noise.
 # ==================================================================================================
 def _feat(M):
-    """M[..., 5] -> đặc trưng tuyến tính + bậc hai của mean|Δ| (phi tuyến theo cường độ)."""
+    """M[..., 5] -> linear features + the square of mean|Δ| (nonlinear in strength)."""
     return np.concatenate([M, M[..., 1:2] ** 2], -1)
 
 
 def fit_g(Mtr, ytr):
-    """Mtr [nimg, ntrain, 5], ytr [nimg, ntrain] -> (beta, Fbar, ybar, scale) của hồi quy trong-ảnh."""
+    """Mtr [nimg, ntrain, 5], ytr [nimg, ntrain] -> (beta, Fbar, ybar, scale) of the within-image regression."""
     F = _feat(Mtr)
     Fbar, ybar = F.mean(1, keepdims=True), ytr.mean(1, keepdims=True)
     X = (F - Fbar).reshape(-1, F.shape[-1]); y = (ytr - ybar).reshape(-1)
@@ -494,14 +498,14 @@ def main():
     t0 = time.time()
     print(f"##### C12 matched-control {time.strftime('%H:%M:%S')} #####", flush=True)
 
-    imgs01, labels, _pid, _ids = audit_cohort.load()   # tập đánh giá cố định
+    imgs01, labels, _pid, _ids = audit_cohort.load()   # fixed evaluation set
     labels = np.array(labels); mal = np.where(labels == 1)[0]
     print(f"malignant {len(mal)}  device={DEVICE}", flush=True)
 
     # ---------------------------------------------------------------------------------------------
-    # 1) Dựng edit + đo footprint/neutrality (KHÔNG cần model -> tính hợp lệ là thuộc tính THIẾT KẾ)
+    # 1) Build edits + measure footprint/neutrality (no model needed -> validity is a design property)
     # ---------------------------------------------------------------------------------------------
-    LADDER = [f"L:{c}@{j}" for c in LADDER_FAM for j in range(len(LADDER_MULT))]   # 4 họ × 5 mức
+    LADDER = [f"L:{c}@{j}" for c in LADDER_FAM for j in range(len(LADDER_MULT))]   # 4 families × 5 levels
     names = list(TARGETS) + [f"u:{p}" for p in UNMATCHED] + \
             [f"{t}|{c}" for t in TARGETS for c in MATCHED] + LADDER
     edits = []
@@ -510,33 +514,33 @@ def main():
     IOU.update({f"{t}|u:{p}": [] for t in TARGETS for p in UNMATCHED})
     PRX = {n: [] for n in names}                        # rel. proxy-concept shift
     POS = {f"{t}|{c}": [] for t in TARGETS for c in CTRL_FAMILY + CTRL_DOSE}   # positivity
-    STR = {f"{t}|{c}": [] for t in TARGETS for c in CTRL_FAMILY + CTRL_DOSE}   # cường độ đã hiệu chuẩn
-    SIG = {f"{t}|warp2_m": [] for t in TARGETS}                    # sigma được chọn (khớp texture)
-    PRXS = {n: [] for n in list(TARGETS) + [f"{t}|invdose" for t in TARGETS]}   # dịch proxy CÓ DẤU
-    HYB = {t: [] for t in TARGETS}                                 # núm ghép-kết-cấu b được chọn
+    STR = {f"{t}|{c}": [] for t in TARGETS for c in CTRL_FAMILY + CTRL_DOSE}   # calibrated strength
+    SIG = {f"{t}|warp2_m": [] for t in TARGETS}                    # chosen sigma (texture match)
+    PRXS = {n: [] for n in list(TARGETS) + [f"{t}|invdose" for t in TARGETS]}   # signed proxy shift
+    HYB = {t: [] for t in TARGETS}                                 # chosen texture-swap knob b
 
     for ii in mal:
         x = imgs01[ii]
         w, skin, lm = c3m.soft_mask(x)
         base = c7m.proxy_fixed(x, skin)
-        donor = imgs01[mal[(len(edits) + 1) % len(mal)]]                # kết cấu từ tổn thương kế tiếp
+        donor = imgs01[mal[(len(edits) + 1) % len(mal)]]                # texture from the next lesion
         fams = make_families(x, w, skin, SEED + int(ii), donor=donor)
         d = {}
         for t in TARGETS:                                     # concept edits
             cname, k = t.split("@")
             d[t] = c3m.make_edit(x, cname, c3m.DOSES[int(k)], w, skin, lm)
-        for p in UNMATCHED:                                   # placebo nguyên trạng (C10)
+        for p in UNMATCHED:                                   # original placebos (C10)
             d[f"u:{p}"] = c10.PLACEBOS[p](x, w, skin, np.random.RandomState(SEED + int(ii) + 7))
-        for t in TARGETS:                                     # control khớp theo từng target
+        for t in TARGETS:                                     # controls matched to each target
             tgt_mag = float(dpix(x, d[t]).mean())
             for c, e in struct_controls(x, d[t] - x, w, SEED + int(ii)).items():
                 d[f"{t}|{c}"] = e
             tgt_hf = footprint(x, d[t], w)["hf_change"]
             for c in CTRL_FAMILY:
-                if c == "hybrid_m":                      # 2 núm: xoay màu + ghép kết cấu
+                if c == "hybrid_m":                      # 2 knobs: colour rotation + texture swap
                     e, bb, th, ok, _ = match_hybrid(fams["_hybrid"], x, w, tgt_mag, tgt_hf)
                     s = th; HYB[f"{t}"].append(bb)
-                elif c == "warp2_m":                     # khớp đồng thời cường độ + texture
+                elif c == "warp2_m":                     # match strength + texture at the same time
                     e, s, ok, sg = match_2knob(fams, x, tgt_mag, tgt_hf, w)
                     SIG[f"{t}|warp2_m"].append(int(sg))
                 else:
@@ -544,9 +548,9 @@ def main():
                     e, s, m, ok = match_strength(fn, lo, hi, x, tgt_mag)
                 d[f"{t}|{c}"] = e
                 POS[f"{t}|{c}"].append(bool(ok)); STR[f"{t}|{c}"].append(float(s))
-        for t in TARGETS:                                      # đối liều: cùng toán tử, ngược chiều
-            cname, k = t.split("@")                            # khớp mean|Δ| bằng bisection trên |g'|
-            # (cần vì clamp gamut làm edit TĂNG bão hoà còn edit GIẢM thì không -> lệch ~9% nếu để g'=g)
+        for t in TARGETS:                                      # reversed dose: same operator, opposite direction
+            cname, k = t.split("@")                            # match mean|Δ| by bisection on |g'|
+            # (needed because the gamut clamp saturates the increasing edit but not the decreasing one -> ~9% off if g'=g)
             e, gp, mm_, ok = match_strength(
                 lambda gp: c3m.make_edit(x, cname, -gp, w, skin, lm), 0.0, 1.0, x,
                 float(dpix(x, d[t]).mean()))
@@ -556,12 +560,12 @@ def main():
                 px = c7m.proxy_fixed(d[nm], skin)
                 key = "contrast" if cname == "contrast" else "color_var"
                 PRXS[nm].append((px[key] - base[key]) / (abs(base[key]) + 1e-6))
-        ref_mag = float(dpix(x, d["contrast@2"]).mean())       # thang liều trung tính (fit g(M))
+        ref_mag = float(dpix(x, d["contrast@2"]).mean())       # neutral dose ladder (fit g(M))
         for c in LADDER_FAM:
             fn, lo, hi = fams[c]
             for j, mult in enumerate(LADDER_MULT):
                 d[f"L:{c}@{j}"] = match_strength(fn, lo, hi, x, ref_mag * mult)[0]
-        for n in names:                                       # đo 5 hiệp biến + neutrality
+        for n in names:                                       # measure the 5 covariates + neutrality
             fp = footprint(x, d[n], w)
             for k in COVS: FP[n][k].append(fp[k])
             PRX[n].append(rel_proxy_shift(base, c7m.proxy_fixed(d[n], skin)))
@@ -601,11 +605,11 @@ def main():
                                          and design[t][c]["overlap_ok"])
             design[t][c]["valid_ok"] = bool(design[t][c]["balanced_ok"] and design[t][c]["neutral"]
                                             and design[t][c]["overlap_ok"])
-        design[t]["invdose"]["antisymmetric"] = None      # điền sau khi có proxy có dấu
+        design[t]["invdose"]["antisymmetric"] = None      # filled in once the signed proxy is available
         design[t]["_concept"] = {"footprint": {k: float(np.mean(FP[t][k])) for k in COVS},
                                  "proxy_shift": float(np.mean(PRX[t]))}
 
-    # ---- overlap của thang liều trung tính: footprint concept có nằm TRONG miền của ladder không? ----
+    # ---- overlap of the neutral dose ladder: does the concept footprint lie inside the ladder range? ----
     Mall = {n: np.array([FP[n][k] for k in COVS], float).T for n in names}     # [n_img, 5]
     Mlad = np.stack([Mall[n] for n in LADDER], 1)                             # [n_img, n_ladder, 5]
     for t in TARGETS:
@@ -614,7 +618,7 @@ def main():
         design[t]["_ladder_overlap"]["all_covs"] = float(inr.all(1).mean())
 
     # ---------------------------------------------------------------------------------------------
-    # 2) CaCE cho mọi edit, 3 model, edit dùng chung, common set p_full>=0.1
+    # 2) CaCE for every edit, 3 models, shared edits, common set p_full>=0.1
     # ---------------------------------------------------------------------------------------------
     P0, DL = {}, {}
     for m in ORDER:
@@ -632,21 +636,21 @@ def main():
         if DEVICE == "cuda": torch.cuda.empty_cache()
         print(f"[{m}] p_full={p0.mean():.3f}  ({time.time()-t0:.0f}s)", flush=True)
 
-    # Lưu phản hồi TỪNG ẢNH để phân tích định danh từng phần (c45) khỏi phải dựng lại edit.
+    # Save per-image responses so the partial-identification analysis (c45) need not rebuild the edits.
     cache = {"names": np.array(names, dtype=object), "img_index": np.array(mal)}
     for m in ORDER:
         cache[f"p0_{m}"] = P0[m]
         for n in names:
             cache[f"dl_{m}|{n}"] = DL[m][n]
     np.savez_compressed(os.path.join(RES, "c12_preds.npz"), **cache)
-    print(f"  lưu phản hồi từng ảnh -> c12_preds.npz ({len(names)} edit)", flush=True)
+    print(f"  saved per-image responses -> c12_preds.npz ({len(names)} edits)", flush=True)
 
     common = (P0["erm"] >= 0.1) & (P0["slim"] >= 0.1) & (P0["causal"] >= 0.1)
     nC = int(common.sum())
     print(f"common set n={nC}", flush=True)
 
     # ---------------------------------------------------------------------------------------------
-    # 3) ΔCaCE, hội tụ, control-vs-control falsification
+    # 3) ΔCaCE, convergence, control-vs-control falsification
     # ---------------------------------------------------------------------------------------------
     res = {"n_malignant": int(len(mal)), "n_common": nC, "n_boot": a.boot,
            "criteria": {"smd_tol": SMD_TOL, "neutral_tol": NEUTRAL_TOL,
@@ -667,7 +671,7 @@ def main():
                 mn, lo, hi = boot((dl[t] - dl[key])[common], a.boot)
                 mm["dcace"][t][c] = {"mean": mn, "ci": [lo, hi], "sig": bool(not (lo <= 0 <= hi)),
                                      "valid": design[t][c]["valid"], "valid_ok": design[t][c]["valid_ok"]}
-            # HỘI TỤ: độ phân tán ΔCaCE giữa các control — chưa matched vs matched-hợp-lệ
+            # Convergence: dispersion of ΔCaCE across controls, unmatched vs matched-valid
             un = [mm["dcace"][t][f"u:{p}"]["mean"] for p in UNMATCHED]
             va = [mm["dcace"][t][c]["mean"] for c in MATCHED if design[t][c]["valid_ok"]]
             al = [mm["dcace"][t][c]["mean"] for c in MATCHED]
@@ -679,9 +683,9 @@ def main():
                                   {"sd": None, "range": None, "n": len(va)}),
                 "sign_consistent_valid": bool(len(va) > 0 and (all(v > 0 for v in va) or all(v < 0 for v in va))),
             }
-            # FALSIFICATION: hai control TRUNG TÍNH (khác cơ chế, cùng cường độ) phải cho CaCE bằng
-            # nhau nếu phản ứng chung chỉ phụ thuộc footprint. Lệch nhau => neutrality + matching
-            # cường độ VẪN CHƯA ghim được control => ΔCaCE không được định danh.
+            # Falsification: two neutral controls (different mechanism, same strength) must give equal CaCE
+            # if the generic response depends only on the footprint. A difference means neutrality + strength
+            # matching still do not pin down the control => ΔCaCE is not identified.
             vc = [c for c in MATCHED if design[t][c]["neutral"] and design[t][c]["overlap_ok"]]
             pairs = {}
             for i in range(len(vc)):
@@ -692,7 +696,7 @@ def main():
             mm["ctrl_vs_ctrl"][t] = {"controls": vc, "pairs": pairs,
                                      "all_null": bool(len(pairs) > 0 and all(p["null_ok"] for p in pairs.values())),
                                      "n_pairs": len(pairs)}
-        # alignment (2 concept liều cao) dưới control hợp lệ vs dưới placebo chưa matched
+        # alignment (2 high-dose concepts) under valid controls vs under unmatched placebos
         for c in MATCHED + [f"u:{p}" for p in UNMATCHED]:
             per = {}
             for t in TOPDOSE:
@@ -706,7 +710,7 @@ def main():
                 "valid": all(design[t][c]["valid_ok"] for t in TOPDOSE),
             }
 
-        # ---- ΔCaCE HIỆU CHỈNH: đọc ĝ(M) tại đúng footprint của concept edit -------------------------
+        # ---- Adjusted ΔCaCE: read ĝ(M) at the exact footprint of the concept edit -------------------------
         idxc = np.where(common)[0]
         Mtr = np.stack([Mall[n][idxc] for n in LADDER], 1)
         ytr = np.stack([dl[n][idxc] for n in LADDER], 1)
@@ -719,7 +723,7 @@ def main():
                                    "ladder_overlap": design[t]["_ladder_overlap"]["all_covs"]}
         mm["g_adjusted"]["A"] = float(np.mean([mm["g_adjusted"][t]["mean"] for t in TOPDOSE]))
         mm["g_adjusted"]["aligned"] = bool(all(mm["g_adjusted"][t]["ci"][0] > 0 for t in TOPDOSE))
-        # LEAVE-ONE-FAMILY-OUT: g có thực sự là HÀM CỦA FOOTPRINT không? (kiểm định giả định A1)
+        # Leave-one-family-out: is g really a function of the footprint? (tests assumption A1)
         lofo = {}
         for held, fams_h in LOFO_GROUPS.items():
             te = [n for n in LADDER if any(n.startswith(f"L:{f}@") for f in fams_h)]
@@ -736,26 +740,26 @@ def main():
     json.dump(res, open(OUT, "w"), indent=2, default=float)
 
     # ---------------------------------------------------------------------------------------------
-    # 4) In bảng
+    # 4) Print tables
     # ---------------------------------------------------------------------------------------------
     ALLC = MATCHED + [f"u:{p}" for p in UNMATCHED]
     line = "=" * 118
     print("\n" + line)
-    print("A) FOOTPRINT & VALIDITY (thuộc tính THIẾT KẾ, không phụ thuộc model) — target = contrast@2")
+    print("A) FOOTPRINT & VALIDITY (design property, model-independent): target = contrast@2")
     t = "contrast@2"
     cf = design[t]["_concept"]["footprint"]
     print(f"{'control':10s}" + "".join(f"{COVLAB[k][:13]:>15s}" for k in COVS) +
           f"{'IoU':>7s}{'maxSMD':>8s}{'proxyΔ':>8s}{'ratio':>7s}{'overlap':>9s}{'VALID':>7s}")
     print(f"{'CONCEPT':10s}" + "".join(f"{cf[k]:>15.4f}" for k in COVS) +
-          f"{1.0:>7.2f}{'—':>8s}{design[t]['_concept']['proxy_shift']*100:>7.0f}%"
-          f"{'1.00':>7s}{'—':>9s}{'(ref)':>7s}")
+          f"{1.0:>7.2f}{'-':>8s}{design[t]['_concept']['proxy_shift']*100:>7.0f}%"
+          f"{'1.00':>7s}{'-':>9s}{'(ref)':>7s}")
     for c in ALLC:
         d = design[t][c]
         print(f"{c:10s}" + "".join(f"{d['footprint'][k]:>15.4f}" for k in COVS) +
               f"{d['support_iou']:>7.2f}{d['max_abs_smd']:>8.2f}{d['proxy_shift']*100:>7.0f}%"
-              f"{d['proxy_ratio']:>7.2f}{d['positivity']*100:>8.0f}%{('YES' if d['valid'] else '—'):>7s}")
+              f"{d['proxy_ratio']:>7.2f}{d['positivity']*100:>8.0f}%{('YES' if d['valid'] else '-'):>7s}")
     print("-" * 118)
-    print("B) ΔCaCE = CaCE_concept − CaCE_control  (logit; [] = 95% CI; * = CI loại 0)")
+    print("B) ΔCaCE = CaCE_concept − CaCE_control  (logit; [] = 95% CI; * = CI excludes 0)")
     for t in TOPDOSE:
         print(f"  target {t}:")
         print(f"    {'control':10s}{'valid':>7s}" + "".join(f"{NAME[m]:>26s}" for m in ORDER))
@@ -774,7 +778,7 @@ def main():
                   f" range={('%.2f' % mv['range']) if mv['range'] is not None else 'n/a'} (n={mv['n']})"
                   f"  sign-consistent={'YES' if s['sign_consistent_valid'] else 'no'}")
     print("-" * 118)
-    print("C) FALSIFICATION — control-vs-control (hai control HỢP LỆ khác họ phải ≈ 0):")
+    print("C) FALSIFICATION: control-vs-control (two valid controls from different families must be ≈ 0):")
     for m in ORDER:
         for t in TOPDOSE:
             cc = res["models"][m]["ctrl_vs_ctrl"][t]
@@ -783,7 +787,7 @@ def main():
                   + (f"  worst {worst[0]}={worst[1]['mean']:+.2f}[{worst[1]['ci'][0]:+.2f},{worst[1]['ci'][1]:+.2f}]"
                      if worst[0] else ""))
     print("-" * 118)
-    print("D) ALIGNMENT A = mean ΔCaCE (contrast@2, color_var@2) theo từng control:")
+    print("D) ALIGNMENT A = mean ΔCaCE (contrast@2, color_var@2) per control:")
     print(f"  {'control':10s}{'valid':>7s}" + "".join(f"{NAME[m]:>14s}" for m in ORDER))
     for c in ALLC:
         row = f"  {c:10s}{('Y' if res['models']['erm']['alignment'][c]['valid'] else '.'):>7s}"
@@ -792,8 +796,8 @@ def main():
             row += f"{al['A']:+.2f}[{'Y' if al['aligned'] else ('A' if al['anti'] else '.')}]".rjust(14)
         print(row)
     print("-" * 118)
-    print("E) ΔCaCE HIỆU CHỈNH THEO ĝ(footprint) — control phản thực trung tính tại đúng dấu chân concept")
-    print("   (thang liều trung tính: %s × %s mức; kiểm định A1 bằng leave-one-family-out)"
+    print("E) ΔCaCE adjusted by ĝ(footprint): neutral counterfactual control at the exact concept footprint")
+    print("   (neutral dose ladder: %s × %s levels; A1 tested by leave-one-family-out)"
           % ("/".join(LADDER_FAM), len(LADDER_MULT)))
     for m in ORDER:
         g = res["models"][m]["g_fit"]["lofo"]
@@ -807,11 +811,11 @@ def main():
             d = res["models"][m]["g_adjusted"][t]
             row += f"{d['mean']:+.2f}[{d['ci'][0]:+.2f},{d['ci'][1]:+.2f}]{'*' if d['sig'] else ' '}".rjust(24)
         print(row)
-    print("  A_adj (mean 2 concept liều cao): " +
+    print("  A_adj (mean of the 2 high-dose concepts): " +
           "  ".join(f"{NAME[m]}={res['models'][m]['g_adjusted']['A']:+.2f}"
                     f"[{'aligned' if res['models'][m]['g_adjusted']['aligned'] else 'n.s.'}]" for m in ORDER))
     print("-" * 118)
-    print("F) ƯỚC LƯỢNG CHÍNH — control được biện minh tốt nhất (globrot_m) vs hiệu chỉnh ĝ(M):")
+    print("F) PRIMARY ESTIMATE: best-justified control (globrot_m) vs ĝ(M) adjustment:")
     print(f"  {'model':6s}{'target':13s}{'ΔCaCE(globrot_m)':>26s}{'ΔCaCE_adj':>26s}{'agree':>7s}")
     prim = {}
     for m in ORDER:
@@ -825,7 +829,7 @@ def main():
                   + f"{a2['mean']:+.2f}[{a2['ci'][0]:+.2f},{a2['ci'][1]:+.2f}]".rjust(26)
                   + f"{('YES' if ag else 'no'):>7s}")
     print("-" * 118)
-    print("G) BIÊN ΔCaCE trên TOÀN THƯ VIỆN control (min..max) — độ bất định do CHỌN CONTROL:")
+    print("G) ΔCaCE bounds over the whole control library (min..max): uncertainty due to control choice:")
     bounds = {}
     for m in ORDER:
         bounds[m] = {}
@@ -848,7 +852,7 @@ def main():
     }
     res["ladder_mag"] = {n: float(np.mean(FP[n]["mean_abs"])) for n in LADDER}
     res["proxy_signed"] = {n: float(np.mean(v)) for n, v in PRXS.items()}
-    for t in TARGETS:                                  # A2' : can thiệp ngược phải đổi DẤU proxy
+    for t in TARGETS:                                  # A2' : the reversed intervention must flip the proxy sign
         up, dn = res["proxy_signed"][t], res["proxy_signed"][f"{t}|invdose"]
         design[t]["invdose"]["antisymmetric"] = bool(up > 0 > dn)
         design[t]["invdose"]["valid_sym"] = bool(design[t]["invdose"]["balanced_ok"]
@@ -858,8 +862,8 @@ def main():
                       "validity": {t: design[t]["globrot_m"] for t in TOPDOSE}}
     json.dump(res, open(OUT, "w"), indent=2, default=float)
     print("-" * 118)
-    print("H) THIẾT KẾ ĐỐI-LIỀU (symmetric dose) — control là CHÍNH can thiệp theo chiều NGƯỢC, không phải placebo")
-    print("   ΔCaCE_sym = CaCE(C↑) − CaCE(C↓): g(M) triệt tiêu vì hai edit là ảnh gương trong không gian pixel.")
+    print("H) SYMMETRIC-DOSE DESIGN: the control is the same intervention in the opposite direction, not a placebo")
+    print("   ΔCaCE_sym = CaCE(C↑) − CaCE(C↓): g(M) cancels because the two edits are mirror images in pixel space.")
     print(f"   {'target':13s}{'maxSMD':>8s}{'proxy ↑':>10s}{'proxy ↓':>10s}" + "".join(f"{NAME[m]:>24s}" for m in ORDER))
     sym = {}
     for t in TARGETS:
@@ -870,24 +874,24 @@ def main():
             e = res["models"][m]["dcace"][t]["invdose"]; sym.setdefault(m, {})[t] = e
             row += f"{e['mean']:+.2f}[{e['ci'][0]:+.2f},{e['ci'][1]:+.2f}]{'*' if e['sig'] else ' '}".rjust(24)
         print(row)
-    print("   A_sym (mean 2 concept liều cao): " + "  ".join(
+    print("   A_sym (mean of the 2 high-dose concepts): " + "  ".join(
         f"{NAME[m]}={np.mean([sym[m][t]['mean'] for t in TOPDOSE]):+.2f}"
         f"[{'aligned' if all(sym[m][t]['ci'][0] > 0 for t in TOPDOSE) else 'n.s.'}]" for m in ORDER))
     res["symmetric_dose"] = {"by_model": {m: {t: sym[m][t] for t in TARGETS} for m in ORDER},
                              "balance": {t: design[t]["invdose"] for t in TARGETS}}
     json.dump(res, open(OUT, "w"), indent=2, default=float)
     print(line)
-    print("QUY TẮC ĐỌC — một control chỉ HỢP LỆ VỀ NHÂN QUẢ khi đạt CẢ BA:")
-    print("  (A1) balance: |SMD| <= 0.10 (chấp nhận được 0.25) trên CẢ 6 hiệp biến dấu chân;")
-    print("  (A2) neutrality: dịch proxy concept <= 10% tuyệt đối VÀ <= 15% mức dịch của chính concept edit;")
-    print("  (A3) overlap: >= 95% ảnh hiệu chuẩn được tới đúng cường độ của concept edit.")
-    print("  Kiểm định (T): các control TRUNG TÍNH khác cơ chế phải cho CaCE bằng nhau (mục C) và ĝ(M)")
-    print("  phải khái quát được sang họ chưa thấy (LOFO R2 > 0, mục E). Nếu (T) HỎNG thì phản ứng chung")
-    print("  KHÔNG phải hàm của dấu chân đo được -> KHÔNG control nào định danh được ΔCaCE, và biên ở")
-    print("  mục G chính là độ bất định thực sự của mọi điểm số 'placebo-corrected'.")
+    print("READING RULE: a control is causally valid only if it passes all three:")
+    print("  (A1) balance: |SMD| <= 0.10 (0.25 acceptable) on all 6 footprint covariates;")
+    print("  (A2) neutrality: concept proxy shift <= 10% absolute and <= 15% of the concept edit's own shift;")
+    print("  (A3) overlap: >= 95% of images can be calibrated to the exact strength of the concept edit.")
+    print("  Test (T): neutral controls with different mechanisms must give equal CaCE (section C), and ĝ(M)")
+    print("  must generalise to an unseen family (LOFO R2 > 0, section E). If (T) fails, the generic response")
+    print("  is not a function of the measured footprint -> no control identifies ΔCaCE, and the bounds in")
+    print("  section G are the real uncertainty of every 'placebo-corrected' score.")
     idf = res["identification"]
-    print(f"  => control đạt cả 3 tiêu chí: {idf['any_valid_ok_control']}")
-    print(f"  => LOFO đạt: {idf['lofo_passes']}   control-vs-control ≈ 0: {idf['ctrl_vs_ctrl_null']}")
+    print(f"  => controls passing all 3 criteria: {idf['any_valid_ok_control']}")
+    print(f"  => LOFO passes: {idf['lofo_passes']}   control-vs-control ≈ 0: {idf['ctrl_vs_ctrl_null']}")
 
     # ---------------------------------------------------------------------------------------------
     # 5) Figure
@@ -925,7 +929,7 @@ def main():
     ax.set_title(f"(b) dCaCE by control - {t}  (no control passes the screen)", fontsize=10)
     ax.set_ylabel("ΔCaCE (logit)"); ax.legend(fontsize=8); ax.grid(alpha=.3, axis="y")
 
-    ax = axes[1, 0]                                  # (c) đường cong nhạy-cảm-chung g(magnitude)
+    ax = axes[1, 0]                                  # (c) generic sensitivity curve g(magnitude)
     for m in ORDER:
         for fam, ls in zip(LADDER_FAM, ["-", "--", "-.", ":"]):
             nn = [f"L:{fam}@{j}" for j in range(len(LADDER_MULT))]
@@ -942,7 +946,7 @@ def main():
                  "(open markers: o contrast@2, s color@2, ^ contrast@0, D color@0)", fontsize=9)
     ax.legend(fontsize=6, ncol=2); ax.grid(alpha=.3)
 
-    ax = axes[1, 1]                                  # (d) thiết kế đối-liều (ĐƯỢC ĐỊNH DANH)
+    ax = axes[1, 1]                                  # (d) symmetric-dose design (identified)
     xs = np.arange(len(TARGETS))
     for oi, m in enumerate(ORDER):
         mu = [res["models"][m]["dcace"][t2]["invdose"]["mean"] for t2 in TARGETS]

@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-C51 — Đối chiếu với một bản CÀI ĐẶT LẠI ĐỘC LẬP của cùng đường ống.
+C51: comparison against an independent reimplementation of the same pipeline.
 
-Vì sao. Mọi kiểm tra khác trong kho này chạy trên cùng một mã nguồn, nên chúng bắt được lỗi số
-học và lỗi lấy mẫu nhưng KHÔNG bắt được lỗi nằm trong chính cách hiểu đặc tả. Cách duy nhất để
-dò lớp lỗi đó là cài lại từ đặc tả bằng mã khác, rồi so.
+Why. Every other check in this repository runs on the same source code, so they catch numerical
+and sampling errors but not errors in the interpretation of the specification itself. The only way to
+probe that class of errors is to reimplement from the specification with different code, then compare.
 
-Bản đối chiếu tự dựng phân hoạch riêng, tự huấn luyện checkpoint riêng, và tự cài ước lượng tử.
-Hệ quả bắt buộc: bên MÔ HÌNH không so được theo số, vì hai bên audit hai bộ mô hình khác nhau
-trên hai bộ ảnh khác nhau. Chỉ so được theo PHÁN QUYẾT. Bên BỆNH thì so được theo số, vì nó chạy
-trên toàn bộ metadata với ngưỡng tam phân vị tất định, không có phân hoạch ngẫu nhiên nào.
+The reference copy builds its own partition, trains its own checkpoints, and implements its own estimator.
+Necessary consequence: the model side cannot be compared by number, because the two sides audit two different sets
+of models on two different image sets. It can only be compared by verdict. The disease side can be compared by number,
+because it runs on the full metadata with deterministic tertile thresholds and no random partition.
 
-Khi hai bên bất đồng ở một ô, script làm hai việc để định vị nguyên nhân:
-  (1) THÍ NGHIỆM CHÉO 2x2 — chạy CẢ HAI checkpoint trên CẢ HAI nhóm ảnh. Nếu số bám theo
-      checkpoint thì nguyên nhân là mô hình; nếu bám theo nhóm ảnh thì nguyên nhân là mẫu.
-  (2) QUÉT SEED — chạy checkpoint của bên kia trên chính nhóm ảnh của bên kia qua nhiều hiện
-      thực chồng lớp, để biết ô đó có ổn định hay chỉ là một lần rút may.
+When the two sides disagree on a cell, the script does two things to locate the cause:
+  (1) 2x2 cross experiment: run both checkpoints on both image cohorts. If the numbers follow the
+      checkpoint, the cause is the model; if they follow the image cohort, the cause is the sample.
+  (2) Seed sweep: run the other side's checkpoint on the other side's own cohort over several overlay
+      realizations, to tell whether the cell is stable or just one lucky draw.
 
 Out -> results/c51_independent_rebuild.json
-Chạy:  python Causal_XAI_v3/code/c51_independent_rebuild.py --other /đường/dẫn/bản/đối/chiếu
+Run:  python Causal_XAI_v3/code/c51_independent_rebuild.py --other /path/to/reference/copy
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ RES = os.path.join(BASE, "results")
 OUT = os.path.join(RES, "c51_independent_rebuild.json")
 HELD, MARGIN = c30.HELD, c30.MARGIN_P
 SEEDS = [42, 1, 2, 3, 7, 11, 99]
-# Đầu mô hình của bản đối chiếu gói thành MỘT Sequential; kích thước lớp giống hệt, chỉ khác tên.
+# The reference copy's model head is packed into a single Sequential; layer sizes are identical, only the names differ.
 REMAP = {"head.0": "proj_c.0", "head.3": "proj_c.3",
          "head.5": "disease_head.0", "head.8": "disease_head.3"}
 
@@ -87,11 +87,11 @@ def cell(p0, pe, msk, pid):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--other", required=True, help="gốc cây của bản cài đặt lại")
+    ap.add_argument("--other", required=True, help="root directory of the reimplementation")
     args = ap.parse_args()
     O = args.other
     t0 = time.time()
-    assert os.path.isdir(os.path.join(O, "results")), f"không thấy {O}/results"
+    assert os.path.isdir(os.path.join(O, "results")), f"missing {O}/results"
 
     res = {"note": ("Comparison against an independent reimplementation of the same pipeline, "
                     "written from the specification with its own split, its own trained "
@@ -99,7 +99,7 @@ def main():
                     "numerically; the model side is comparable only by verdict."),
            "other_root": O, "seeds": SEEDS, "margin_p": MARGIN}
 
-    # ---- 1. bên bệnh: so theo SỐ ------------------------------------------------------------
+    # ---- 1. disease side: compare by number ------------------------------------------------
     a = {x["concept"]: x for x in json.load(open(RES + "/c41_within_patient.json"))["concepts"]}
     b = json.load(open(O + "/results/c41_within_patient.json"))["proxies"]
     dis = {}
@@ -112,10 +112,10 @@ def main():
                            "max_abs_diff": max(v["abs_diff"] for v in dis.values()),
                            "strata_all_equal": all(v["n_strata_here"] == v["n_strata_other"]
                                                    for v in dis.values())}
-    log(f"bên bệnh: chênh lệch OR tối đa {res['disease_side']['max_abs_diff']:.3e}, "
-        f"số tầng khớp {res['disease_side']['strata_all_equal']}")
+    log(f"disease side: max OR difference {res['disease_side']['max_abs_diff']:.3e}, "
+        f"strata counts match {res['disease_side']['strata_all_equal']}")
 
-    # ---- 2. bên mô hình: so theo PHÁN QUYẾT --------------------------------------------------
+    # ---- 2. model side: compare by verdict --------------------------------------------------
     here = json.load(open(RES + "/c30_disjoint_audit.json"))["models"]
     oth = json.load(open(O + "/results/c30_disjoint_audit.json"))["cells"]
     okey = {("b3", "ERM"): "b3_erm_s42", ("b3", "Slim"): "b3_slim_s42", ("b3", "Inv"): "b3_inv_s42",
@@ -138,13 +138,13 @@ def main():
                     disagree.append((bb, m, s))
     res["model_side"] = {"n_cells": len(cmp), "n_agree": sum(c["agree"] for c in cmp.values()),
                          "cells": cmp, "disagreeing": ["|".join(d) for d in disagree]}
-    log(f"bên mô hình: {res['model_side']['n_agree']}/{len(cmp)} ô cùng phán quyết; "
-        f"bất đồng {res['model_side']['disagreeing']}")
+    log(f"model side: {res['model_side']['n_agree']}/{len(cmp)} cells with the same verdict; "
+        f"disagreeing {res['model_side']['disagreeing']}")
     if not disagree:
         res["runtime_sec"] = round(time.time() - t0, 1)
         json.dump(res, open(OUT, "w"), indent=1); log(f"saved -> {OUT}"); return
 
-    # ---- 3. thí nghiệm chéo 2x2 trên ô bất đồng ---------------------------------------------
+    # ---- 3. 2x2 cross experiment on the disagreeing cell ---------------------------------------
     meta = pd.read_csv(json.load(open(RES + "/tier1_ate.json"))["data"], low_memory=False,
                        usecols=["isic_id", "target", "patient_id"]).set_index("isic_id")
     ih, lh, ph, _ = audit_cohort.load()
@@ -153,14 +153,14 @@ def main():
     io_, lo_, po_ = read_images(oid), mo["target"].to_numpy(), mo["patient_id"].astype(str).to_numpy()
     res["cohorts"] = {"n_here": len(ih), "n_other": len(oid),
                       "shared_images": len(set(json.load(open(RES + "/audit_cohort.json"))["isic_id"]) & set(oid))}
-    log(f"nhóm ảnh: {len(ih)} và {len(oid)}, chung {res['cohorts']['shared_images']} ảnh")
+    log(f"image cohorts: {len(ih)} and {len(oid)}, {res['cohorts']['shared_images']} images shared")
 
     ed = {"here": {}, "other": {}}
     for tag, imgs in [("here", ih), ("other", io_)]:
         for s in SEEDS:
             per, _ = c2m.precompute_edits(imgs, c30.ART, s)
             ed[tag][s] = {x: [d[x] for d in per] for x in HELD}
-        log(f"  chồng lớp {tag}: xong {len(SEEDS)} hiện thực")
+        log(f"  overlay {tag}: done {len(SEEDS)} realizations")
 
     bb, mname, sub = disagree[0]
     fn_here = {v[2]: v[0] for v in c30.TRIO[bb]}[mname]
@@ -200,8 +200,8 @@ def main():
         "sweep_resolves_cell": len({v["joint_verdict"] for v in sweep.values()}) == 1
                                and list({v["joint_verdict"] for v in sweep.values()})[0] != "indeterminate"}
     d = res["disagreement_diagnosis"]
-    log(f"  hiệu ứng checkpoint {d['checkpoint_effect']:.4f} so với hiệu ứng nhóm ảnh {d['cohort_effect']:.4f}")
-    log(f"  quét seed trên checkpoint bên kia: {min(mags):.4f}–{max(mags):.4f}, phán quyết {d['sweep_verdicts']}")
+    log(f"  checkpoint effect {d['checkpoint_effect']:.4f} vs image-cohort effect {d['cohort_effect']:.4f}")
+    log(f"  seed sweep on the other checkpoint: {min(mags):.4f} to {max(mags):.4f}, verdicts {d['sweep_verdicts']}")
     res["runtime_sec"] = round(time.time() - t0, 1)
     json.dump(res, open(OUT, "w"), indent=1)
     log(f"saved -> {OUT}")
