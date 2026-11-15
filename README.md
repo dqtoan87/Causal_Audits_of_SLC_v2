@@ -1,8 +1,6 @@
 # Causal_Audits_of_SLC_v2
 
-This repository extends https://github.com/dqtoan87/Causal_Audits_of_SLC. Its history is identical up to commit 93dfd52; later commits add a pre-specified route test on held-out images, described at the end of this file.
-
-Analysis code and cached results for a causal audit of skin-lesion classifiers. The audit has two tiers. The artifact tier asks whether a classifier's malignant score moves under performed acquisition edits (hair and ruler overlays), judged against a stated tolerance with a three-way interval rule. The concept tier asks whether a library of performed edits identifies the classifier's response to a clinical concept, decided by the connectivity of an audit graph.
+Analysis code and cached results for a causal audit of skin-lesion classifiers. The audit has two tiers. The artifact tier asks whether a classifier's malignant score moves under performed acquisition edits (hair and ruler overlays), judged against a stated tolerance with a three-way interval rule. The concept tier asks whether a library of performed edits identifies the classifier's response to a clinical concept, decided by the connectivity of an audit graph. A pre-specified route test on held-out images, described at the end of this file, tests the working form behind that decision.
 
 ## Layout
 
@@ -16,11 +14,11 @@ checkpoints/   audited checkpoints, downloaded from the release below (not track
 paper/         the manuscript, read by the verifier (not included)
 ```
 
-Model checkpoints are published as assets of the release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC/releases/tag/checkpoints-v1.0), with a `SHA256SUMS` file. Download them into `checkpoints/` at the repository root:
+Model checkpoints are published as assets of the release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/releases/tag/checkpoints-v1.0), with a `SHA256SUMS` file. Download them into `checkpoints/` at the repository root:
 
 ```bash
 mkdir -p checkpoints && cd checkpoints
-gh release download checkpoints-v1.0 --repo dqtoan87/Causal_Audits_of_SLC
+gh release download checkpoints-v1.0 --repo dqtoan87/Causal_Audits_of_SLC_v2
 sha256sum -c SHA256SUMS
 ```
 
