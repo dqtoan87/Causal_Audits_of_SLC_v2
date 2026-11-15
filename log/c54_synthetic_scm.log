@@ -18,4 +18,4 @@
     length-four route returns +1.111 against target +1.117, error 0.006, 95% CI [+1.085, +1.151], covers target True
     component-range restriction            delta in [-9.58, +12.70], implied target -8.46 to +13.82, width 22.3 logits
 
-saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c54_synthetic_scm.json  (0.4s)
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P3_clear/results/c54_synthetic_scm.json  (0.4s)

@@ -11,7 +11,8 @@ responses that c63_route_exploratory.py stored, and the registered gates, score 
   2. Cell frontiers: for each cell, the largest margin at which it would still disagree and the smallest
      margin at which it would agree, read from the registered simultaneous band.
   3. Bootstrap seeds: the band recomputed with 20 other seeds; decisions and decisive bounds per seed.
-  4. Leave one patient out: the band recomputed 54 times, each time without one patient's images.
+  4. Leave one patient out: the band recomputed 54 times, each time without one patient's images; the
+     summary counts separately the subsets that drop a patient present in the cell.
   5. Cross pairs: the two differences that the registration left out (rad4 against hue16, rad16 against
      hue4), with marginal 95% intervals, reported descriptively.
 
@@ -112,7 +113,8 @@ def main():
         e3, l3, h3, c3, _ = band(vals[:, keep], masks[:, keep], pids[keep], c62.CRIT["boot_seed"], c62.CRIT["boot"])
         for k in dec:
             res["decisive"][names[k]]["leave_one_patient_out"].append(
-                {"patient": p, "est": float(e3[k]), "lower": float(l3[k]), "decision": c62.decide(l3[k], h3[k], EPS)})
+                {"patient": p, "in_cell": bool(masks[k][pids == p].any()), "est": float(e3[k]), "lower": float(l3[k]),
+                 "decision": c62.decide(l3[k], h3[k], EPS)})
     print("leave-one-patient-out done (%.0fs)" % (time.time() - t0), flush=True)
     for k in dec:
         d = res["decisive"][names[k]]
@@ -121,6 +123,10 @@ def main():
         d["lopo_exceeds"] = sum(q["decision"] == "exceeds" for q in d["leave_one_patient_out"])
         d["lopo_n"] = len(d["leave_one_patient_out"])
         d["lopo_lower_min"] = min(q["lower"] for q in d["leave_one_patient_out"])
+        inc = [q for q in d["leave_one_patient_out"] if q["in_cell"]]
+        d["lopo_in_cell_n"] = len(inc)
+        d["lopo_in_cell_exceeds"] = sum(q["decision"] == "exceeds" for q in inc)
+        d["lopo_in_cell_lower_min"] = min(q["lower"] for q in inc)
 
     # 5. cross pairs, descriptive
     res["cross_pairs"] = {}
@@ -140,9 +146,9 @@ def main():
     json.dump(res, open(OUT, "w"), indent=1)
     for k in dec:
         d = res["decisive"][names[k]]
-        print("%-28s est %+.3f lower %.4f | seeds exceed %d/%d lower %.3f..%.3f | LOPO exceed %d/%d min lower %.3f" % (
+        print("%-28s est %+.3f lower %.4f | seeds exceed %d/%d lower %.3f..%.3f | LOPO exceed %d/%d min lower %.3f | in cell %d/%d min %.3f" % (
             names[k], d["est"], d["sim_lower_unrounded"], d["seed_exceeds"], len(SEEDS), *d["seed_lower_range"],
-            d["lopo_exceeds"], d["lopo_n"], d["lopo_lower_min"]))
+            d["lopo_exceeds"], d["lopo_n"], d["lopo_lower_min"], d["lopo_in_cell_exceeds"], d["lopo_in_cell_n"], d["lopo_in_cell_lower_min"]))
     print("seed crit range", res["seed_crit_range"])
     for c, v in res["cells"].items():
         print("  %-22s %-16s disagree below %.2f, agree above %.2f" % (c, v["registered_class"], v["disagrees_below_margin"], v["agrees_above_margin"]))

@@ -291,17 +291,16 @@ def main():
     # the concept part is a free sensitivity parameter. We therefore report the footprint-only
     # half-width, and the break-even concept-side constant at which the interval stops being
     # narrower than the full range of the corrected scores it would qualify.
-    # The range is the span of the corrected scores at the four targets, read from c7
-    # rather than fixed here, so that it tracks the responses the same run produces.
-    _c7 = json.load(open(os.path.join(RES, "c7_controls.json")))["models"]
-    _cells = []
-    for _m in _c7.values():
-        for _k, _i in (("contrast_corr", 2), ("color_corr", 2),
-                       ("contrast_corr", 0), ("color_corr", 0)):
-            _a = _m.get(_k)
-            if isinstance(_a, list):
-                _cells.append(_a[_i])
+    # The range is the span of the corrected scores at the four targets on the three models:
+    # the point estimate of the concept edit minus the hue placebo, on the images all three
+    # models score at 0.1 or above, read from c12 rather than fixed here, so that it tracks the
+    # responses of the same audit cohort. (c7 stores [mean, lower, upper] at the top dose only,
+    # so it cannot supply the four targets.)
+    _c12 = json.load(open(os.path.join(RES, "c12_matched_control.json")))["models"]
+    _cells = [float(_m["dcace"][_t]["u:hue"]["mean"]) for _m in _c12.values() for _t in TARGETS]
+    assert len(_cells) == 3 * len(TARGETS), len(_cells)
     SCORE_RANGE = float(max(_cells) - min(_cells))
+    SCORE_ENDS = [float(min(_cells)), float(max(_cells))]
     print(f"  corrected-score range over {len(_cells)} target cells: "
           f"{min(_cells):.3f} to {max(_cells):.3f}, span {SCORE_RANGE:.3f}", flush=True)
     hw_fp = {t: Lmin * out_targets[t]["total_footprint_part"] for t in TARGETS}
@@ -367,6 +366,9 @@ def main():
             "footprint_only_half_width_leave_one_pair_out": hw_fp_loo,
             "footprint_only_half_width_conservative": hw_fp_cons,
             "score_range_logits": SCORE_RANGE,
+            "score_range_ends_logits": SCORE_ENDS,
+            "score_range_source": ("c12_matched_control.json, models[*].dcace[target]['u:hue'].mean, "
+                                   "four targets by three models"),
             "breakeven_kappa_Lh": breakeven,
             "breakeven_kappa_Lh_halfwidth_criterion": breakeven_hw,
             "breakeven_note": ("Concept-side constant at which the full width 2*hw of the "

@@ -55,6 +55,10 @@ CFG3 = dict(
     epochs      = 15,
     warmup      = 3,        # first epochs use focal only, then V-REx + artifact-CF are enabled
     patience    = 4,
+    # When True, checkpoint selection and early stopping read only epochs with the penalties on, so
+    # the saved weights always carry the invariance objective. False keeps the original rule, which
+    # also scores the warm-up epochs (c29 sets True for the audited Inv models).
+    select_after_warmup = False,
     lambda_rex  = 2.0,
     lambda_cf   = 0.5,
     grad_clip   = 1.0,
@@ -180,8 +184,12 @@ def train_causal(model, tr_loader, va_loader, cfg, weight, tag):
         sched.step()
 
         yt, ys = evaluate_env(model, va_loader)
+        eligible = use_pen or not cfg.get("select_after_warmup", False)
         if not np.all(np.isfinite(ys)):
-            print(f"      [{tag}] ep{ep+1}: NaN -> skip", flush=True); no_imp += 1
+            print(f"      [{tag}] ep{ep+1}: NaN -> skip", flush=True)
+            if not eligible:
+                continue
+            no_imp += 1
             if no_imp >= cfg["patience"]: break
             continue
         auc = roc_auc_score(yt, ys) if len(np.unique(yt)) > 1 else 0.5
@@ -189,7 +197,10 @@ def train_causal(model, tr_loader, va_loader, cfg, weight, tag):
         print(f"      [{tag}] ep{ep+1:02d}/{cfg['epochs']} auc={auc:.4f} "
               f"focal={agg['focal']/nb:.3f} vrex={agg['vrex']/nb:.4f} "
               f"cf={agg['cf']/nb:.4f} pen={'on' if use_pen else 'off'} "
-              f"({time.time()-t0:.0f}s)", flush=True)
+              f"({time.time()-t0:.0f}s){'' if eligible else ' [warm-up, not eligible for selection]'}",
+              flush=True)
+        if not eligible:
+            continue
         if auc > best_auc:
             best_auc = auc; no_imp = 0
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}

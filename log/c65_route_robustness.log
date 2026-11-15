@@ -1,9 +1,9 @@
 reproduction: max abs difference 0.00e+00, crit 3.3041
 seeds done (4s)
 leave-one-patient-out done (13s)
-slim|contrast@0|D_rad4-rad16 est +1.988 lower 0.5098 | seeds exceed 10/20 lower 0.491..0.521 | LOPO exceed 32/54 min lower 0.316
-erm|contrast@2|D_rad4-rad16  est +4.629 lower 1.9194 | seeds exceed 20/20 lower 1.919..1.965 | LOPO exceed 54/54 min lower 1.585
-slim|color_var@2|D_rad4-rad16 est +5.268 lower 1.8363 | seeds exceed 20/20 lower 1.789..1.875 | LOPO exceed 54/54 min lower 1.462
+slim|contrast@0|D_rad4-rad16 est +1.988 lower 0.5098 | seeds exceed 10/20 lower 0.491..0.521 | LOPO exceed 32/54 min lower 0.316 | in cell 31/53 min 0.316
+erm|contrast@2|D_rad4-rad16  est +4.629 lower 1.9194 | seeds exceed 20/20 lower 1.919..1.965 | LOPO exceed 54/54 min lower 1.585 | in cell 52/52 min 1.585
+slim|color_var@2|D_rad4-rad16 est +5.268 lower 1.8363 | seeds exceed 20/20 lower 1.789..1.875 | LOPO exceed 54/54 min lower 1.462 | in cell 54/54 min 1.462
 seed crit range [3.286878956214227, 3.328188897265825]
   erm|contrast@0         indeterminate    disagree below 0.39, agree above 2.58
   slim|contrast@0        routes disagree  disagree below 0.51, agree above 5.62

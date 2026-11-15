@@ -286,7 +286,7 @@ def p3_fig1_dag():
     a2.text(0.0, 0.63, "concept side", fontsize=SM, weight="bold", ha="left", color="0.30")
     a2.text(0.09, 0.46, r"$R(e)$", ha="center", va="center", fontsize=MD, bbox=obs)
     a2.text(0.44, 0.46, r"$g+h$", ha="center", va="center", fontsize=MD, bbox=box)
-    a2.text(0.72, 0.46, r"$h$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.72, 0.46, r"$h^{\ast}$", ha="center", va="center", fontsize=MD, bbox=box)
     a2.text(0.95, 0.46, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
     _rung(a2, 0.46, 0.19, 0.36, "C1  working form\ngranted; probed by\ndiagnostic (T)", "assumed", ASSC)
     _rung(a2, 0.46, 0.52, 0.67, "C2  identification\nfrom the library\nnot satisfied", "tested", BADC)

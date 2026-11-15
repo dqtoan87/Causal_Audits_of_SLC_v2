@@ -9,9 +9,9 @@
  "boot": 2000,
  "level": 95,
  "margin_p": 0.05,
- "joint_coverage": 0.97,
- "joint_coverage_mc_se": 0.007628892449104264,
- "component_coverage_min": 0.99,
+ "joint_coverage": 0.954,
+ "joint_coverage_mc_se": 0.009368457717255283,
+ "component_coverage_min": 0.988,
  "component_coverage_median": 1.0,
  "component_coverage_by_key": {
   "b3-ERM/all/mag": 1.0,
@@ -22,16 +22,16 @@
   "b3-ERM/ben/sgn": 0.996,
   "b3-Slim/all/mag": 1.0,
   "b3-Slim/mal/mag": 1.0,
-  "b3-Slim/ben/mag": 0.998,
+  "b3-Slim/ben/mag": 0.996,
   "b3-Slim/all/sgn": 1.0,
   "b3-Slim/mal/sgn": 1.0,
   "b3-Slim/ben/sgn": 1.0,
   "b3-Inv/all/mag": 1.0,
   "b3-Inv/mal/mag": 1.0,
-  "b3-Inv/ben/mag": 0.998,
+  "b3-Inv/ben/mag": 0.994,
   "b3-Inv/all/sgn": 1.0,
   "b3-Inv/mal/sgn": 1.0,
-  "b3-Inv/ben/sgn": 0.998,
+  "b3-Inv/ben/sgn": 0.988,
   "r50-ERM/all/mag": 1.0,
   "r50-ERM/mal/mag": 1.0,
   "r50-ERM/ben/mag": 0.994,
@@ -52,25 +52,25 @@
   "r50-Inv/ben/sgn": 0.996
  },
  "worst_components": [
+  "b3-Inv/ben/sgn",
   "b3-ERM/ben/mag",
   "r50-ERM/ben/mag",
-  "b3-ERM/ben/sgn",
-  "r50-Inv/ben/sgn",
-  "r50-Slim/ben/mag"
+  "b3-Inv/ben/mag",
+  "b3-Slim/ben/mag"
  ],
- "crit_median": 3.097504757649914,
+ "crit_median": 3.0805988145091585,
  "crit_range": [
-  3.013547252605255,
-  3.2563045445068477
+  2.9886284013261784,
+  3.226533413152626
  ],
- "frontier_median": 0.06973563245973853,
+ "frontier_median": 0.04699395912454757,
  "frontier_2.5_97.5": [
-  0.06769221587179146,
-  0.0717800432420387
+  0.03263946613951531,
+  0.0661805173704362
  ],
- "frontier_min": 0.06678046346971556,
- "share_draws_all_18_exceed": 1.0,
- "share_draws_frontier_above_0.05": 1.0,
+ "frontier_min": 0.027960997019641914,
+ "share_draws_all_18_exceed": 0.382,
+ "share_draws_frontier_above_0.05": 0.382,
  "design_targets": {
   "b3-ERM/all/mag": 0.37410146278765205,
   "b3-ERM/mal/mag": 0.5376444754291729,
@@ -84,12 +84,12 @@
   "b3-Slim/all/sgn": -0.45000388538931907,
   "b3-Slim/mal/sgn": -0.695268601358655,
   "b3-Slim/ben/sgn": -0.24643417113477037,
-  "b3-Inv/all/mag": 0.16527576621434711,
-  "b3-Inv/mal/mag": 0.18903093654886785,
-  "b3-Inv/ben/mag": 0.14555897483669492,
-  "b3-Inv/all/sgn": -0.051670910624887906,
-  "b3-Inv/mal/sgn": -0.12733047500432257,
-  "b3-Inv/ben/sgn": 0.01112652781004288,
+  "b3-Inv/all/mag": 0.22684324661828764,
+  "b3-Inv/mal/mag": 0.3965723993963596,
+  "b3-Inv/ben/mag": 0.08596804981248794,
+  "b3-Inv/all/sgn": -0.1345482432338613,
+  "b3-Inv/mal/sgn": -0.32307717524446455,
+  "b3-Inv/ben/sgn": 0.02193077033493941,
   "r50-ERM/all/mag": 0.20901966141529169,
   "r50-ERM/mal/mag": 0.12416951995657151,
   "r50-ERM/ben/mag": 0.27944527882602943,
@@ -109,5 +109,5 @@
   "r50-Inv/mal/sgn": -0.00950821004359119,
   "r50-Inv/ben/sgn": 0.10887909982835942
  },
- "runtime_sec": 1303.3
+ "runtime_sec": 1086.1
 }

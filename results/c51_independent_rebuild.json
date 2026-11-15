@@ -115,21 +115,21 @@
    "b3|Inv|all": {
     "verdict_here": "exceedance",
     "verdict_other": "exceedance",
-    "magnitude_here": 0.15886974334716797,
+    "magnitude_here": 0.22322462499141693,
     "magnitude_other": 0.20126371085643768,
     "agree": true
    },
    "b3|Inv|malignant": {
     "verdict_here": "exceedance",
     "verdict_other": "exceedance",
-    "magnitude_here": 0.18125782907009125,
+    "magnitude_here": 0.38294997811317444,
     "magnitude_other": 0.22901593148708344,
     "agree": true
    },
    "b3|Inv|benign": {
     "verdict_here": "exceedance",
     "verdict_other": "exceedance",
-    "magnitude_here": 0.1402876228094101,
+    "magnitude_here": 0.09065257757902145,
     "magnitude_other": 0.17767436802387238,
     "agree": true
    },
@@ -393,5 +393,5 @@
   ],
   "sweep_resolves_cell": false
  },
- "runtime_sec": 675.3
+ "runtime_sec": 589.4
 }

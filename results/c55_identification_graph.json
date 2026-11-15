@@ -290,320 +290,325 @@
     "target": "color_var@2",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 9.537504867809576,
-    "abs_diff_lower_patient": 8.092941082309464,
+    "abs_diff_logits": 9.252910772436543,
+    "abs_diff_lower_patient": 7.34729524520376,
     "distance_tolerance_units": 18.15931036265636,
     "distance_upper_tolerance_units": 24.00177678153446,
-    "implied_L": 0.5252129446183672,
-    "implied_L_conservative": 0.3371809160618347
+    "implied_L": 0.5095408684387406,
+    "implied_L_conservative": 0.30611463943187456
    },
    {
     "model": "ERM",
     "target": "contrast@0",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 9.832339396927415,
-    "abs_diff_lower_patient": 8.572890950440708,
+    "abs_diff_logits": 9.472598335722036,
+    "abs_diff_lower_patient": 8.031903265393899,
     "distance_tolerance_units": 15.030436652539558,
     "distance_upper_tolerance_units": 20.414510708845352,
-    "implied_L": 0.6541619265110393,
-    "implied_L_conservative": 0.4199410445201698
+    "implied_L": 0.6302277541698389,
+    "implied_L_conservative": 0.3934408901563228
    },
    {
     "model": "ERM",
     "target": "contrast@0",
     "a": "globrot_m",
     "b": "noise_m",
-    "abs_diff_logits": 1.962011680370424,
-    "abs_diff_lower_patient": 1.4432612557878548,
+    "abs_diff_logits": 2.3738035831535074,
+    "abs_diff_lower_patient": 1.9000884298892582,
     "distance_tolerance_units": 12.375679020699678,
     "distance_upper_tolerance_units": 16.389153109494202,
-    "implied_L": 0.15853769939320053,
-    "implied_L_conservative": 0.08806197892872064
+    "implied_L": 0.19181198697728513,
+    "implied_L_conservative": 0.11593573000355588
    },
    {
     "model": "ERM",
     "target": "contrast@0",
     "a": "pixperm_m",
     "b": "noise_m",
-    "abs_diff_logits": 7.870327716556991,
-    "abs_diff_lower_patient": 6.6304382879566415,
+    "abs_diff_logits": 7.098794752568529,
+    "abs_diff_lower_patient": 5.727887801929508,
     "distance_tolerance_units": 7.236247028405168,
     "distance_upper_tolerance_units": 9.230683489997874,
-    "implied_L": 1.087625627713206,
-    "implied_L_conservative": 0.7183041532234541
+    "implied_L": 0.9810050326782539,
+    "implied_L_conservative": 0.6205269423587209
    },
    {
     "model": "ERM",
     "target": "color_var@0",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 10.517153127618679,
-    "abs_diff_lower_patient": 8.971413039122776,
+    "abs_diff_logits": 10.055285035126042,
+    "abs_diff_lower_patient": 8.43792839071291,
     "distance_tolerance_units": 17.824911721213674,
     "distance_upper_tolerance_units": 22.464329798823215,
-    "implied_L": 0.5900255379723462,
-    "implied_L_conservative": 0.3993625948098723
+    "implied_L": 0.5641141562097672,
+    "implied_L_conservative": 0.3756145171602194
    },
    {
     "model": "ERM",
     "target": "color_var@0",
     "a": "globrot_m",
     "b": "noise_m",
-    "abs_diff_logits": 1.8528903291174552,
-    "abs_diff_lower_patient": 1.31263578664881,
+    "abs_diff_logits": 2.2571934635440507,
+    "abs_diff_lower_patient": 1.7340396464867303,
     "distance_tolerance_units": 15.076250984856356,
     "distance_upper_tolerance_units": 18.75597999123561,
-    "implied_L": 0.12290126577082248,
-    "implied_L_conservative": 0.06998492146303127
+    "implied_L": 0.149718485438544,
+    "implied_L_conservative": 0.09245262829758942
    },
    {
     "model": "ERM",
     "target": "color_var@0",
     "a": "pixperm_m",
     "b": "noise_m",
-    "abs_diff_logits": 8.664262798501223,
-    "abs_diff_lower_patient": 7.228826688624164,
+    "abs_diff_logits": 7.798091571581991,
+    "abs_diff_lower_patient": 6.277782233078885,
     "distance_tolerance_units": 8.577313026770192,
     "distance_upper_tolerance_units": 10.736042843788956,
-    "implied_L": 1.0101371806601505,
-    "implied_L_conservative": 0.6733231968058141
+    "implied_L": 0.9091531983552175,
+    "implied_L_conservative": 0.5847389326236458
    },
    {
     "model": "Slim",
     "target": "color_var@2",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 10.036902086400405,
-    "abs_diff_lower_patient": 8.170231962567742,
+    "abs_diff_logits": 10.221987953311519,
+    "abs_diff_lower_patient": 8.251875296781181,
     "distance_tolerance_units": 18.15931036265636,
     "distance_upper_tolerance_units": 24.00177678153446,
-    "implied_L": 0.5527138358205911,
-    "implied_L_conservative": 0.34040113100516095
+    "implied_L": 0.5629061759048122,
+    "implied_L_conservative": 0.3438026847716409
    },
    {
     "model": "Slim",
     "target": "contrast@0",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 12.905252956944269,
-    "abs_diff_lower_patient": 10.958477914857369,
+    "abs_diff_logits": 13.662032501739368,
+    "abs_diff_lower_patient": 11.335825067425299,
     "distance_tolerance_units": 15.030436652539558,
     "distance_upper_tolerance_units": 20.414510708845352,
-    "implied_L": 0.8586079869318889,
-    "implied_L_conservative": 0.5367984602300165
+    "implied_L": 0.9089577912848604,
+    "implied_L_conservative": 0.5552827216433666
    },
    {
     "model": "Slim",
     "target": "contrast@0",
     "a": "globrot_m",
     "b": "noise_m",
-    "abs_diff_logits": 3.2644489861843065,
-    "abs_diff_lower_patient": 2.4096702150323175,
+    "abs_diff_logits": 4.190086272724888,
+    "abs_diff_lower_patient": 3.30572274991645,
     "distance_tolerance_units": 12.375679020699678,
     "distance_upper_tolerance_units": 16.389153109494202,
-    "implied_L": 0.26377938379980265,
-    "implied_L_conservative": 0.1470283546034115
+    "implied_L": 0.338574252428211,
+    "implied_L_conservative": 0.20170186511964744
    },
    {
     "model": "Slim",
     "target": "contrast@0",
     "a": "pixperm_m",
     "b": "noise_m",
-    "abs_diff_logits": 9.640803970759961,
-    "abs_diff_lower_patient": 7.769951009068249,
+    "abs_diff_logits": 9.471946229014481,
+    "abs_diff_lower_patient": 7.193706390005993,
     "distance_tolerance_units": 7.236247028405168,
     "distance_upper_tolerance_units": 9.230683489997874,
-    "implied_L": 1.332293374302445,
-    "implied_L_conservative": 0.8417525113376018
+    "implied_L": 1.3089583857258187,
+    "implied_L_conservative": 0.7793254310800392
    },
    {
     "model": "Slim",
     "target": "color_var@0",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 12.6872397228712,
-    "abs_diff_lower_patient": 10.82328555361318,
+    "abs_diff_logits": 12.695711291150042,
+    "abs_diff_lower_patient": 10.538426286755946,
     "distance_tolerance_units": 17.824911721213674,
     "distance_upper_tolerance_units": 22.464329798823215,
-    "implied_L": 0.7117701294291371,
-    "implied_L_conservative": 0.48179872938742885
+    "implied_L": 0.7122453950804536,
+    "implied_L_conservative": 0.46911821457090597
    },
    {
     "model": "Slim",
     "target": "color_var@0",
     "a": "globrot_m",
     "b": "noise_m",
-    "abs_diff_logits": 2.763445160919573,
-    "abs_diff_lower_patient": 2.0216547161148535,
+    "abs_diff_logits": 3.437543067492937,
+    "abs_diff_lower_patient": 2.6626531178739086,
     "distance_tolerance_units": 15.076250984856356,
     "distance_upper_tolerance_units": 18.75597999123561,
-    "implied_L": 0.18329790102959756,
-    "implied_L_conservative": 0.1077872079763117
+    "implied_L": 0.2280104696416799,
+    "implied_L_conservative": 0.14196288965535936
    },
    {
     "model": "Slim",
     "target": "color_var@0",
     "a": "pixperm_m",
     "b": "noise_m",
-    "abs_diff_logits": 9.923794561951626,
-    "abs_diff_lower_patient": 8.139137911342715,
+    "abs_diff_logits": 9.258168223657107,
+    "abs_diff_lower_patient": 7.146878742746857,
     "distance_tolerance_units": 8.577313026770192,
     "distance_upper_tolerance_units": 10.736042843788956,
-    "implied_L": 1.1569817413657404,
-    "implied_L_conservative": 0.7581133970652315
+    "implied_L": 1.0793786113159138,
+    "implied_L_conservative": 0.6656902218755105
    },
    {
     "model": "Inv",
     "target": "color_var@2",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 2.177749275207156,
-    "abs_diff_lower_patient": 1.066317604554719,
+    "abs_diff_logits": 14.046332357222575,
+    "abs_diff_lower_patient": 12.243122204921573,
     "distance_tolerance_units": 18.15931036265636,
     "distance_upper_tolerance_units": 24.00177678153446,
-    "implied_L": 0.11992466848771856,
-    "implied_L_conservative": 0.044426611173847774
+    "implied_L": 0.7735058257558116,
+    "implied_L_conservative": 0.5100923284288146
    },
    {
     "model": "Inv",
     "target": "contrast@0",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 1.79371239626553,
-    "abs_diff_lower_patient": 1.0442493342122656,
+    "abs_diff_logits": 13.395713272847628,
+    "abs_diff_lower_patient": 10.982870520530843,
     "distance_tolerance_units": 15.030436652539558,
     "distance_upper_tolerance_units": 20.414510708845352,
-    "implied_L": 0.11933867509846843,
-    "implied_L_conservative": 0.051152307743521155
+    "implied_L": 0.8912391291429497,
+    "implied_L_conservative": 0.5379933262751236
    },
    {
     "model": "Inv",
     "target": "contrast@0",
     "a": "globrot_m",
     "b": "noise_m",
-    "abs_diff_logits": 0.6115298597369252,
-    "abs_diff_lower_patient": 0.3821194512425707,
+    "abs_diff_logits": 3.157699511762251,
+    "abs_diff_lower_patient": 1.508678030673854,
     "distance_tolerance_units": 12.375679020699678,
     "distance_upper_tolerance_units": 16.389153109494202,
-    "implied_L": 0.04941384296684445,
-    "implied_L_conservative": 0.023315387237502205
+    "implied_L": 0.2551536369423167,
+    "implied_L_conservative": 0.09205344660547958
    },
    {
     "model": "Inv",
     "target": "contrast@0",
     "a": "pixperm_m",
     "b": "noise_m",
-    "abs_diff_logits": 1.1821825365286047,
-    "abs_diff_lower_patient": 0.4421827142541121,
+    "abs_diff_logits": 10.238013761085377,
+    "abs_diff_lower_patient": 8.860561419873179,
     "distance_tolerance_units": 7.236247028405168,
     "distance_upper_tolerance_units": 9.230683489997874,
-    "implied_L": 0.16336956600404393,
-    "implied_L_conservative": 0.04790357233386343
+    "implied_L": 1.4148236953350366,
+    "implied_L_conservative": 0.9599030699594726
    },
    {
     "model": "Inv",
     "target": "color_var@0",
     "a": "globrot_m",
     "b": "pixperm_m",
-    "abs_diff_logits": 1.4284747321067788,
-    "abs_diff_lower_patient": 0.7226009660182271,
+    "abs_diff_logits": 14.433257660322022,
+    "abs_diff_lower_patient": 12.372100269679287,
     "distance_tolerance_units": 17.824911721213674,
     "distance_upper_tolerance_units": 22.464329798823215,
-    "implied_L": 0.08013923179247677,
-    "implied_L_conservative": 0.03216659355028167
+    "implied_L": 0.8097239350220625,
+    "implied_L_conservative": 0.5507442412249216
    },
    {
     "model": "Inv",
     "target": "color_var@0",
     "a": "globrot_m",
     "b": "noise_m",
-    "abs_diff_logits": 0.5512621272809621,
-    "abs_diff_lower_patient": 0.31889192779061803,
+    "abs_diff_logits": 3.037053813014114,
+    "abs_diff_lower_patient": 1.408216626987387,
     "distance_tolerance_units": 15.076250984856356,
     "distance_upper_tolerance_units": 18.75597999123561,
-    "implied_L": 0.03656493433511345,
-    "implied_L_conservative": 0.01700214693871669
+    "implied_L": 0.20144622267596526,
+    "implied_L_conservative": 0.07508094099297535
    },
    {
     "model": "Inv",
     "target": "color_var@0",
     "a": "pixperm_m",
     "b": "noise_m",
-    "abs_diff_logits": 0.8772126048258165,
-    "abs_diff_lower_patient": 0.24147783605298295,
+    "abs_diff_logits": 11.396203847307907,
+    "abs_diff_lower_patient": 10.046070154567067,
     "distance_tolerance_units": 8.577313026770192,
     "distance_upper_tolerance_units": 10.736042843788956,
-    "implied_L": 0.1022712593195556,
-    "implied_L_conservative": 0.022492257116194663
+    "implied_L": 1.3286449744506033,
+    "implied_L_conservative": 0.9357330536715347
    }
   ],
   "n_pairs": 21,
-  "implied_L_binding": 1.332293374302445,
-  "implied_L_second_largest": 1.1569817413657404,
-  "implied_L_median": 0.26377938379980265,
+  "implied_L_binding": 1.4148236953350366,
+  "implied_L_second_largest": 1.3286449744506033,
+  "implied_L_median": 0.7122453950804536,
   "implied_L_quartiles": [
-   0.11992466848771856,
-   0.7117701294291371
+   0.338574252428211,
+   0.9091531983552175
   ],
-  "implied_L_conservative_interval_ends": 0.8417525113376018,
+  "implied_L_conservative_interval_ends": 0.9599030699594726,
   "worst_pair": {
-   "model": "Slim",
+   "model": "Inv",
    "target": "contrast@0",
    "a": "pixperm_m",
    "b": "noise_m",
-   "abs_diff_logits": 9.640803970759961,
-   "abs_diff_lower_patient": 7.769951009068249,
+   "abs_diff_logits": 10.238013761085377,
+   "abs_diff_lower_patient": 8.860561419873179,
    "distance_tolerance_units": 7.236247028405168,
    "distance_upper_tolerance_units": 9.230683489997874,
-   "implied_L": 1.332293374302445,
-   "implied_L_conservative": 0.8417525113376018
+   "implied_L": 1.4148236953350366,
+   "implied_L_conservative": 0.9599030699594726
   },
   "second_pair": {
-   "model": "Slim",
+   "model": "Inv",
    "target": "color_var@0",
    "a": "pixperm_m",
    "b": "noise_m",
-   "abs_diff_logits": 9.923794561951626,
-   "abs_diff_lower_patient": 8.139137911342715,
+   "abs_diff_logits": 11.396203847307907,
+   "abs_diff_lower_patient": 10.046070154567067,
    "distance_tolerance_units": 8.577313026770192,
    "distance_upper_tolerance_units": 10.736042843788956,
-   "implied_L": 1.1569817413657404,
-   "implied_L_conservative": 0.7581133970652315
+   "implied_L": 1.3286449744506033,
+   "implied_L_conservative": 0.9357330536715347
   },
   "footprint_only_half_width_at_binding_L": {
-   "contrast@2": 0.9422311351565729,
-   "color_var@2": 4.54331428554391,
-   "contrast@0": 0.9549841403926721,
-   "color_var@0": 0.6204816079108572
+   "contrast@2": 1.0005986385693177,
+   "color_var@2": 4.824754690315283,
+   "contrast@0": 1.0141416421920835,
+   "color_var@0": 0.6589179968349657
   },
   "footprint_only_half_width_leave_one_pair_out": {
-   "contrast@2": 0.8182463716696347,
-   "color_var@2": 3.9454761053755325,
-   "contrast@0": 0.829321255392924,
-   "color_var@0": 0.538834692908373
+   "contrast@2": 0.9396508956986489,
+   "color_var@2": 4.5308727111234655,
+   "contrast@0": 0.9523689776488478,
+   "color_var@0": 0.618782458872037
   },
   "footprint_only_half_width_conservative": {
-   "contrast@2": 0.5953083904615114,
-   "color_var@2": 2.8704985579132813,
-   "contrast@0": 0.6033658306557244,
-   "color_var@0": 0.39202473101783303
+   "contrast@2": 0.6788674151605238,
+   "color_var@2": 3.2734091564237566,
+   "contrast@0": 0.6880558184907966,
+   "color_var@0": 0.4470503357407026
   },
-  "score_range_logits": 2.0730058867288266,
+  "score_range_logits": 3.331193570047617,
+  "score_range_ends_logits": [
+   0.9589084892951208,
+   4.290102059342738
+  ],
+  "score_range_source": "c12_matched_control.json, models[*].dcace[target]['u:hue'].mean, four targets by three models",
   "breakeven_kappa_Lh": {
-   "contrast@2": 0.016575818748999813,
+   "contrast@2": 0.11692667143658031,
    "color_var@2": 0.0,
-   "contrast@0": 0.0172851796323132,
-   "color_var@0": 0.06384186484176099
+   "contrast@0": 0.13813401026195296,
+   "color_var@0": 0.15448306530854505
   },
   "breakeven_kappa_Lh_halfwidth_criterion": {
-   "contrast@2": 0.19882420507606327,
+   "contrast@2": 0.4097886727318445,
    "color_var@2": 0.0,
-   "contrast@0": 0.23706440739754345,
-   "color_var@0": 0.22290168985341757
+   "contrast@0": 0.4913057764631825,
+   "color_var@0": 0.41008246795560627
   },
   "breakeven_note": "Concept-side constant at which the full width 2*hw of the single-route outer interval stops being narrower than the span of the corrected scores. Zero means the footprint side alone already makes the interval wider than that span. The second field uses hw <= span instead and is kept only for comparison.",
   "binding_L_note": "L must hold for every pair, so the largest implied value binds. The conservative variant divides the lower end of each pair's patient-clustered response interval by the upper end of its bootstrapped footprint distance."
  },
- "runtime_sec": 312.8
+ "runtime_sec": 307.6
 }

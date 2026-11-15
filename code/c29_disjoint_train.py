@@ -16,8 +16,14 @@ This script builds three patient-disjoint parts from StratifiedGroupKFold(5, see
 and retrains all six models (three EfficientNet-B3 and three ResNet-50) with checkpoint selection based
 only on SELECT. Tier 2 then runs on AUDIT (script C30).
 
-Cost: the training set drops from 315 to 237 positive cases, because one fifth of the patients is held out
+Cost: the training set drops from 315 to 232 positive cases, because one fifth of the patients is held out
 for AUDIT.
+
+Checkpoint selection for the Inv models reads only epochs in which both penalties are on
+(phase3 CFG3 select_after_warmup=True). Under the original rule, which also scored the three warm-up
+epochs, the EfficientNet-B3 Inv model was saved at its first epoch and so never carried the penalties;
+the ResNet-50 Inv model was saved at epoch 6 under either rule. Set C29_ONLY to a comma-separated list
+of job names (for example dj_causal_b3) to train only those jobs.
 
 Out -> checkpoints/dj_*.pt and results/c29_disjoint_split.json
 Run:  .venv/bin/python Causal_XAI_v3/code/c29_disjoint_train.py
@@ -53,6 +59,7 @@ OUT = os.path.join(RES, "c29_disjoint_split.json")
 META = "/mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv"
 SEED, N_FOLDS, EPOCHS, NUM_WORKERS = 42, 5, 15, 0
 FORCE = os.environ.get("C29_FORCE", "") == "1"   # retrain even if a checkpoint exists
+ONLY = {j for j in os.environ.get("C29_ONLY", "").split(",") if j}   # train only these jobs, if set
 CAUSAL_BATCH = 24          # the causal job needs twice the activation memory
 # /dev/shm is only 64 MB on this machine, not enough for DataLoader workers -> single-process loading
 
@@ -115,17 +122,19 @@ def main():
                  100 * d["target"].mean()), flush=True)
     print(f"  environments (site): {n_env}   epochs={EPOCHS}", flush=True)
 
-    json.dump({"seed": SEED, "n_folds": N_FOLDS, "epochs": EPOCHS,
-               "note": ("Patient-disjoint three-way split. Checkpoint selection and calibration "
-                        "use SELECT only; AUDIT is untouched until Tier 2."),
-               "splits": {nm: {"n": int(len(d)), "n_patients": int(d["patient_id"].nunique()),
-                               "n_pos": int(d["target"].sum())}
-                          for nm, d in [("train", df_tr), ("select", df_se), ("audit", df_au)]}},
-              open(OUT, "w"), indent=1)
+    if not ONLY:   # a partial retrain leaves the split record as it is
+        json.dump({"seed": SEED, "n_folds": N_FOLDS, "epochs": EPOCHS,
+                   "note": ("Patient-disjoint three-way split. Checkpoint selection and calibration "
+                            "use SELECT only; AUDIT is untouched until Tier 2."),
+                   "splits": {nm: {"n": int(len(d)), "n_patients": int(d["patient_id"].nunique()),
+                                   "n_pos": int(d["target"].sum())}
+                              for nm, d in [("train", df_tr), ("select", df_se), ("audit", df_au)]}},
+                  open(OUT, "w"), indent=1)
 
     cfg = dict(p1.CFG); cfg["epochs"] = EPOCHS
     w = c8.class_weight(df_tr)
     cfg3 = dict(p3.CFG3); cfg3["epochs"] = EPOCHS
+    cfg3["select_after_warmup"] = True   # the saved Inv weights must have been trained with the penalties
 
     jobs = [
         ("dj_erm_b3",    lambda: p1.build_model("erm", p1.CFG["z_dim"]),  "plain"),
@@ -136,6 +145,8 @@ def main():
         ("dj_causal_r50", lambda: c8.Slim_R50(p1.CFG["z_dim"]),           "causal"),
     ]
     for name, make, kind in jobs:
+        if ONLY and name not in ONLY:
+            continue
         f = os.path.join(CKPT, name + ".pt")
         if os.path.exists(f) and not FORCE:
             print(f"[{name}] already exists, skipping (use --force to retrain)", flush=True); continue

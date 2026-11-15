@@ -1,6 +1,6 @@
-##### C42 positive control 10:25:06 #####
-audit cohort: 183 ảnh / 100 bệnh nhân (83 ác tính)
-pixel bị đổi theo liều: hair_x1=0.16%  hair_x2=0.34%  hair_x3=0.52%  hair_light=1.02%  hair=2.37%  hair_heavy=4.06%  ruler=1.04%  identity=0.00%
+##### C42 positive control 16:34:30 #####
+audit cohort: 183 images / 100 patients (83 malignant)
+pixels changed by dose: hair_x1=0.16%  hair_x2=0.34%  hair_x3=0.52%  hair_light=1.02%  hair=2.37%  hair_heavy=4.06%  ruler=1.04%  identity=0.00%
 ========================================================================================================
 backbone model dose           %pxsubgroup       E|Δp|                95% CI         verdict
 b3       ERM   hair_x1       0.16        all   0.0236      [0.0169, 0.0321]     equivalence
@@ -27,7 +27,7 @@ b3       ERM   ruler         1.04     benign   0.1993      [0.1627, 0.2381]     
 b3       ERM   identity      0.00        all   0.0000      [0.0000, 0.0000]     equivalence
 b3       ERM   identity      0.00  malignant   0.0000      [0.0000, 0.0000]     equivalence
 b3       ERM   identity      0.00     benign   0.0000      [0.0000, 0.0000]     equivalence
-b3       ERM   AGG(4 held-out)         0.3705   <- đại lượng của Bảng 2
+b3       ERM   AGG(4 held-out)         0.3705   <- Table 2 quantity
 b3       Slim  hair_x1       0.16        all   0.0273      [0.0179, 0.0413]     equivalence
 b3       Slim  hair_x1       0.16  malignant   0.0170      [0.0099, 0.0244]     equivalence
 b3       Slim  hair_x1       0.16     benign   0.0358      [0.0205, 0.0595]   indeterminate
@@ -52,32 +52,32 @@ b3       Slim  ruler         1.04     benign   0.4222      [0.3694, 0.4814]     
 b3       Slim  identity      0.00        all   0.0000      [0.0000, 0.0000]     equivalence
 b3       Slim  identity      0.00  malignant   0.0000      [0.0000, 0.0000]     equivalence
 b3       Slim  identity      0.00     benign   0.0000      [0.0000, 0.0000]     equivalence
-b3       Slim  AGG(4 held-out)         0.5396   <- đại lượng của Bảng 2
-b3       Inv   hair_x1       0.16        all   0.0156      [0.0130, 0.0182]     equivalence
-b3       Inv   hair_x1       0.16  malignant   0.0183      [0.0144, 0.0229]     equivalence
-b3       Inv   hair_x1       0.16     benign   0.0134      [0.0103, 0.0168]     equivalence
-b3       Inv   hair_x2       0.34        all   0.0354      [0.0304, 0.0406]     equivalence
-b3       Inv   hair_x2       0.34  malignant   0.0341      [0.0280, 0.0418]     equivalence
-b3       Inv   hair_x2       0.34     benign   0.0364      [0.0293, 0.0441]     equivalence
-b3       Inv   hair_x3       0.52        all   0.0543      [0.0464, 0.0627]   indeterminate
-b3       Inv   hair_x3       0.52  malignant   0.0530      [0.0419, 0.0652]   indeterminate
-b3       Inv   hair_x3       0.52     benign   0.0554      [0.0457, 0.0670]   indeterminate
-b3       Inv   hair_light    1.02        all   0.0802      [0.0680, 0.0938]      exceedance
-b3       Inv   hair_light    1.02  malignant   0.0719      [0.0570, 0.0909]      exceedance
-b3       Inv   hair_light    1.02     benign   0.0870      [0.0719, 0.1039]      exceedance
-b3       Inv   hair          2.37        all   0.1537      [0.1366, 0.1708]      exceedance
-b3       Inv   hair          2.37  malignant   0.1517      [0.1220, 0.1768]      exceedance
-b3       Inv   hair          2.37     benign   0.1554      [0.1332, 0.1814]      exceedance
-b3       Inv   hair_heavy    4.06        all   0.2322      [0.2040, 0.2601]      exceedance
-b3       Inv   hair_heavy    4.06  malignant   0.2946      [0.2484, 0.3378]      exceedance
-b3       Inv   hair_heavy    4.06     benign   0.1805      [0.1589, 0.2024]      exceedance
-b3       Inv   ruler         1.04        all   0.1587      [0.1311, 0.1866]      exceedance
-b3       Inv   ruler         1.04  malignant   0.2023      [0.1497, 0.2568]      exceedance
-b3       Inv   ruler         1.04     benign   0.1225      [0.1002, 0.1450]      exceedance
+b3       Slim  AGG(4 held-out)         0.5396   <- Table 2 quantity
+b3       Inv   hair_x1       0.16        all   0.0205      [0.0112, 0.0319]     equivalence
+b3       Inv   hair_x1       0.16  malignant   0.0284      [0.0185, 0.0390]     equivalence
+b3       Inv   hair_x1       0.16     benign   0.0140      [0.0029, 0.0331]     equivalence
+b3       Inv   hair_x2       0.34        all   0.0337      [0.0217, 0.0481]     equivalence
+b3       Inv   hair_x2       0.34  malignant   0.0596      [0.0350, 0.0931]   indeterminate
+b3       Inv   hair_x2       0.34     benign   0.0122      [0.0071, 0.0198]     equivalence
+b3       Inv   hair_x3       0.52        all   0.0699      [0.0432, 0.0984]   indeterminate
+b3       Inv   hair_x3       0.52  malignant   0.1138      [0.0676, 0.1523]      exceedance
+b3       Inv   hair_x3       0.52     benign   0.0335      [0.0175, 0.0550]   indeterminate
+b3       Inv   hair_light    1.02        all   0.1418      [0.0946, 0.1931]      exceedance
+b3       Inv   hair_light    1.02  malignant   0.2431      [0.1588, 0.3130]      exceedance
+b3       Inv   hair_light    1.02     benign   0.0577      [0.0361, 0.0840]   indeterminate
+b3       Inv   hair          2.37        all   0.2806      [0.2057, 0.3475]      exceedance
+b3       Inv   hair          2.37  malignant   0.5020      [0.4011, 0.5933]      exceedance
+b3       Inv   hair          2.37     benign   0.0968      [0.0542, 0.1426]      exceedance
+b3       Inv   hair_heavy    4.06        all   0.2866      [0.2052, 0.3670]      exceedance
+b3       Inv   hair_heavy    4.06  malignant   0.4983      [0.3800, 0.6014]      exceedance
+b3       Inv   hair_heavy    4.06     benign   0.1109      [0.0636, 0.1637]      exceedance
+b3       Inv   ruler         1.04        all   0.1684      [0.1198, 0.2157]      exceedance
+b3       Inv   ruler         1.04  malignant   0.2753      [0.2033, 0.3384]      exceedance
+b3       Inv   ruler         1.04     benign   0.0797      [0.0486, 0.1155]   indeterminate
 b3       Inv   identity      0.00        all   0.0000      [0.0000, 0.0000]     equivalence
 b3       Inv   identity      0.00  malignant   0.0000      [0.0000, 0.0000]     equivalence
 b3       Inv   identity      0.00     benign   0.0000      [0.0000, 0.0000]     equivalence
-b3       Inv   AGG(4 held-out)         0.1562   <- đại lượng của Bảng 2
+b3       Inv   AGG(4 held-out)         0.2193   <- Table 2 quantity
 r50      ERM   hair_x1       0.16        all   0.0174      [0.0120, 0.0238]     equivalence
 r50      ERM   hair_x1       0.16  malignant   0.0163      [0.0079, 0.0292]     equivalence
 r50      ERM   hair_x1       0.16     benign   0.0183      [0.0122, 0.0253]     equivalence
@@ -102,7 +102,7 @@ r50      ERM   ruler         1.04     benign   0.0572      [0.0457, 0.0692]   in
 r50      ERM   identity      0.00        all   0.0000      [0.0000, 0.0000]     equivalence
 r50      ERM   identity      0.00  malignant   0.0000      [0.0000, 0.0000]     equivalence
 r50      ERM   identity      0.00     benign   0.0000      [0.0000, 0.0000]     equivalence
-r50      ERM   AGG(4 held-out)         0.2107   <- đại lượng của Bảng 2
+r50      ERM   AGG(4 held-out)         0.2107   <- Table 2 quantity
 r50      Slim  hair_x1       0.16        all   0.0135      [0.0103, 0.0169]     equivalence
 r50      Slim  hair_x1       0.16  malignant   0.0159      [0.0102, 0.0230]     equivalence
 r50      Slim  hair_x1       0.16     benign   0.0115      [0.0081, 0.0151]     equivalence
@@ -127,7 +127,7 @@ r50      Slim  ruler         1.04     benign   0.0247      [0.0196, 0.0309]     
 r50      Slim  identity      0.00        all   0.0000      [0.0000, 0.0000]     equivalence
 r50      Slim  identity      0.00  malignant   0.0000      [0.0000, 0.0000]     equivalence
 r50      Slim  identity      0.00     benign   0.0000      [0.0000, 0.0000]     equivalence
-r50      Slim  AGG(4 held-out)         0.1413   <- đại lượng của Bảng 2
+r50      Slim  AGG(4 held-out)         0.1413   <- Table 2 quantity
 r50      Inv   hair_x1       0.16        all   0.0063      [0.0045, 0.0081]     equivalence
 r50      Inv   hair_x1       0.16  malignant   0.0090      [0.0057, 0.0130]     equivalence
 r50      Inv   hair_x1       0.16     benign   0.0040      [0.0026, 0.0057]     equivalence
@@ -152,9 +152,9 @@ r50      Inv   ruler         1.04     benign   0.0156      [0.0103, 0.0230]     
 r50      Inv   identity      0.00        all   0.0000      [0.0000, 0.0000]     equivalence
 r50      Inv   identity      0.00  malignant   0.0000      [0.0000, 0.0000]     equivalence
 r50      Inv   identity      0.00     benign   0.0000      [0.0000, 0.0000]     equivalence
-r50      Inv   AGG(4 held-out)         0.1044   <- đại lượng của Bảng 2
+r50      Inv   AGG(4 held-out)         0.1044   <- Table 2 quantity
 ========================================================================================================
-ô đạt equivalence : 56 / 144
-ô indeterminate   : 17
-tiêu chí CÓ vùng chấp nhận
-saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c42_positive_control.json  (141.6s)
+cells at equivalence : 55 / 144
+cells indeterminate  : 19
+the criterion has an acceptance region
+saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P3_clear/results/c42_positive_control.json  (108.5s)

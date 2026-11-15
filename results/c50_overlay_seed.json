@@ -816,11 +816,11 @@
    ]
   },
   "b3|Inv|all": {
-   "magnitude_min": 0.15886974334716797,
-   "magnitude_max": 0.1677297055721283,
-   "magnitude_at_seed42": 0.15886974334716797,
-   "spread_pct_of_seed42": 5.576871994813521,
-   "lower_bound_min": 0.14363601803779602,
+   "magnitude_min": 0.21801957488059998,
+   "magnitude_max": 0.23406803607940674,
+   "magnitude_at_seed42": 0.22322462499141693,
+   "spread_pct_of_seed42": 7.189377605371196,
+   "lower_bound_min": 0.16281914710998535,
    "joint_verdicts": [
     "exceedance"
    ],
@@ -828,124 +828,124 @@
    "per_seed": [
     {
      "seed": 42,
-     "magnitude": 0.15886974334716797,
+     "magnitude": 0.22322462499141693,
      "ci": [
-      0.14363601803779602,
-      0.17366112768650055
+      0.16668550670146942,
+      0.27699947357177734
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.03840158134698868,
+     "signed": -0.1349310725927353,
      "signed_ci": [
-      -0.0668095201253891,
-      -0.0103513328358531
+      -0.1935768723487854,
+      -0.07229350507259369
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 1,
-     "magnitude": 0.1677297055721283,
+     "magnitude": 0.22363786399364471,
      "ci": [
-      0.1535903811454773,
-      0.18218384683132172
+      0.16781805455684662,
+      0.27676093578338623
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.04423106089234352,
+     "signed": -0.12809792160987854,
      "signed_ci": [
-      -0.07164725661277771,
-      -0.014838499948382378
+      -0.1849525272846222,
+      -0.06668949872255325
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 2,
-     "magnitude": 0.16299471259117126,
+     "magnitude": 0.22811444103717804,
      "ci": [
-      0.1488819569349289,
-      0.17677687108516693
+      0.1703704595565796,
+      0.28358060121536255
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.05187036842107773,
+     "signed": -0.13753244280815125,
      "signed_ci": [
-      -0.07963234931230545,
-      -0.022341925650835037
+      -0.19311130046844482,
+      -0.07735919952392578
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 3,
-     "magnitude": 0.16603414714336395,
+     "magnitude": 0.22021950781345367,
      "ci": [
-      0.14919514954090118,
-      0.18232464790344238
+      0.16637398302555084,
+      0.2713013291358948
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.045677751302719116,
+     "signed": -0.1447954922914505,
      "signed_ci": [
-      -0.07581901550292969,
-      -0.012650075368583202
+      -0.20016460120677948,
+      -0.0832594558596611
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 7,
-     "magnitude": 0.16436953842639923,
+     "magnitude": 0.22018218040466309,
      "ci": [
-      0.14891676604747772,
-      0.17909696698188782
+      0.16281914710998535,
+      0.2742535471916199
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.049354929476976395,
+     "signed": -0.13102410733699799,
      "signed_ci": [
-      -0.07444950193166733,
-      -0.021988047286868095
+      -0.18993614614009857,
+      -0.06866428256034851
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 11,
-     "magnitude": 0.163626566529274,
+     "magnitude": 0.21801957488059998,
      "ci": [
-      0.14636269211769104,
-      0.17953917384147644
+      0.16430220007896423,
+      0.26853978633880615
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.04249433055520058,
+     "signed": -0.12870851159095764,
      "signed_ci": [
-      -0.07001081854104996,
-      -0.012885847128927708
+      -0.18687233328819275,
+      -0.0682147890329361
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 99,
-     "magnitude": 0.1660810261964798,
+     "magnitude": 0.23406803607940674,
      "ci": [
-      0.15244822204113007,
-      0.17998406291007996
+      0.18002960085868835,
+      0.2854667901992798
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.039774708449840546,
+     "signed": -0.12391441315412521,
      "signed_ci": [
-      -0.06633158773183823,
-      -0.012564676813781261
+      -0.18213851749897003,
+      -0.06163414567708969
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     }
    ]
   },
   "b3|Inv|malignant": {
-   "magnitude_min": 0.18125782907009125,
-   "magnitude_max": 0.20115843415260315,
-   "magnitude_at_seed42": 0.18125782907009125,
-   "spread_pct_of_seed42": 10.979169939642421,
-   "lower_bound_min": 0.15560145676136017,
+   "magnitude_min": 0.373705118894577,
+   "magnitude_max": 0.39399847388267517,
+   "magnitude_at_seed42": 0.38294997811317444,
+   "spread_pct_of_seed42": 5.299218213325184,
+   "lower_bound_min": 0.29879868030548096,
    "joint_verdicts": [
     "exceedance"
    ],
@@ -953,112 +953,112 @@
    "per_seed": [
     {
      "seed": 42,
-     "magnitude": 0.18125782907009125,
+     "magnitude": 0.38294997811317444,
      "ci": [
-      0.15560145676136017,
-      0.20244929194450378
+      0.30679643154144287,
+      0.4448864459991455
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.11289583891630173,
+     "signed": -0.3070470988750458,
      "signed_ci": [
-      -0.14196713268756866,
-      -0.07545258104801178
+      -0.3841320276260376,
+      -0.2127877175807953
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 1,
-     "magnitude": 0.20115843415260315,
+     "magnitude": 0.3883379399776459,
      "ci": [
-      0.17723886668682098,
-      0.2248290628194809
+      0.30756089091300964,
+      0.45304837822914124
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.14357614517211914,
+     "signed": -0.298814594745636,
      "signed_ci": [
-      -0.17349325120449066,
-      -0.11090356111526489
+      -0.37473437190055847,
+      -0.2087675929069519
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 2,
-     "magnitude": 0.18792864680290222,
+     "magnitude": 0.39399847388267517,
      "ci": [
-      0.163252592086792,
-      0.20766077935695648
+      0.3154416084289551,
+      0.4601607322692871
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.13335087895393372,
+     "signed": -0.317741721868515,
      "signed_ci": [
-      -0.16243621706962585,
-      -0.09701177477836609
+      -0.39394229650497437,
+      -0.23280669748783112
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 3,
-     "magnitude": 0.196242555975914,
+     "magnitude": 0.3817843794822693,
      "ci": [
-      0.16757355630397797,
-      0.2226478010416031
+      0.30387234687805176,
+      0.4495352506637573
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.137404665350914,
+     "signed": -0.3221430778503418,
      "signed_ci": [
-      -0.16744552552700043,
-      -0.09972347319126129
+      -0.396630197763443,
+      -0.2408611923456192
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 7,
-     "magnitude": 0.19038915634155273,
+     "magnitude": 0.38467922806739807,
      "ci": [
-      0.16736234724521637,
-      0.21581090986728668
+      0.3069579005241394,
+      0.4503174424171448
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.1338818520307541,
+     "signed": -0.29678022861480713,
      "signed_ci": [
-      -0.16607676446437836,
-      -0.10054002702236176
+      -0.3763459026813507,
+      -0.2022365927696228
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 11,
-     "magnitude": 0.19017787277698517,
+     "magnitude": 0.373705118894577,
      "ci": [
-      0.16238027811050415,
-      0.2129189521074295
+      0.29879868030548096,
+      0.43255043029785156
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.12302174419164658,
+     "signed": -0.2830527722835541,
      "signed_ci": [
-      -0.15333087742328644,
-      -0.08537701517343521
+      -0.35640949010849,
+      -0.1908620297908783
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 99,
-     "magnitude": 0.18418830633163452,
+     "magnitude": 0.3880845010280609,
      "ci": [
-      0.1617732048034668,
-      0.20839327573776245
+      0.31319162249565125,
+      0.45341795682907104
      ],
      "magnitude_verdict": "exceedance",
-     "signed": -0.11948297917842865,
+     "signed": -0.3085603713989258,
      "signed_ci": [
-      -0.149292454123497,
-      -0.08461476862430573
+      -0.38417768478393555,
+      -0.22176283597946167
      ],
      "signed_verdict": "exceedance",
      "joint_verdict": "exceedance"
@@ -1066,11 +1066,11 @@
    ]
   },
   "b3|Inv|benign": {
-   "magnitude_min": 0.1399838775396347,
-   "magnitude_max": 0.15105199813842773,
-   "magnitude_at_seed42": 0.1402876228094101,
-   "spread_pct_of_seed42": 7.889591666849894,
-   "lower_bound_min": 0.12669788300991058,
+   "magnitude_min": 0.0836496576666832,
+   "magnitude_max": 0.10623433440923691,
+   "magnitude_at_seed42": 0.09065257757902145,
+   "spread_pct_of_seed42": 24.91344134463992,
+   "lower_bound_min": 0.05846549943089485,
    "joint_verdicts": [
     "exceedance"
    ],
@@ -1078,114 +1078,114 @@
    "per_seed": [
     {
      "seed": 42,
-     "magnitude": 0.1402876228094101,
+     "magnitude": 0.09065257757902145,
      "ci": [
-      0.12766480445861816,
-      0.15271221101284027
+      0.06270590424537659,
+      0.12411167472600937
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.023428646847605705,
+     "signed": 0.007925191894173622,
      "signed_ci": [
-      0.0022638035006821156,
-      0.045190464705228806
+      -0.02340930700302124,
+      0.035784393548965454
      ],
      "signed_verdict": "equivalence",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 1,
-     "magnitude": 0.1399838775396347,
+     "magnitude": 0.08693675696849823,
      "ci": [
-      0.1292589008808136,
-      0.15112678706645966
+      0.06314195692539215,
+      0.11283104121685028
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.038225337862968445,
+     "signed": 0.013596929609775543,
      "signed_ci": [
-      0.017987405881285667,
-      0.05790578946471214
+      -0.01604708842933178,
+      0.04217812791466713
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "equivalence",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 2,
-     "magnitude": 0.14229953289031982,
+     "magnitude": 0.09043067693710327,
      "ci": [
-      0.12911225855350494,
-      0.1549023687839508
+      0.06376346945762634,
+      0.11975395679473877
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.015758445486426353,
+     "signed": 0.012041237205266953,
      "signed_ci": [
-      -0.009266896173357964,
-      0.04026878625154495
+      -0.0221319068223238,
+      0.04318011924624443
      ],
      "signed_verdict": "equivalence",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 3,
-     "magnitude": 0.140961155295372,
+     "magnitude": 0.08612063527107239,
      "ci": [
-      0.12733687460422516,
-      0.15531517565250397
+      0.06036343425512314,
+      0.11561035364866257
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.030455591157078743,
+     "signed": 0.0024030115455389023,
      "signed_ci": [
-      0.006295966915786266,
-      0.054028693586587906
+      -0.03180355206131935,
+      0.0320567861199379
      ],
-     "signed_verdict": "indeterminate",
+     "signed_verdict": "equivalence",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 7,
-     "magnitude": 0.14277327060699463,
+     "magnitude": 0.0836496576666832,
      "ci": [
-      0.12669788300991058,
-      0.1593370884656906
+      0.05846549943089485,
+      0.11217594891786575
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.020802412182092667,
+     "signed": 0.006553481332957745,
      "signed_ci": [
-      -0.004465868230909109,
-      0.04659866541624069
+      -0.025061212480068207,
+      0.03626222163438797
      ],
      "signed_verdict": "equivalence",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 11,
-     "magnitude": 0.1415889710187912,
+     "magnitude": 0.08880056440830231,
      "ci": [
-      0.12723760306835175,
-      0.15605281293392181
+      0.06177307665348053,
+      0.1224108412861824
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.024343425408005714,
+     "signed": -0.0006027661147527397,
      "signed_ci": [
-      -0.0015732981264591217,
-      0.048829711973667145
+      -0.03612834960222244,
+      0.03193321079015732
      ],
      "signed_verdict": "equivalence",
      "joint_verdict": "exceedance"
     },
     {
      "seed": 99,
-     "magnitude": 0.15105199813842773,
+     "magnitude": 0.10623433440923691,
      "ci": [
-      0.13859474658966064,
-      0.16330558061599731
+      0.07951570302248001,
+      0.1338348090648651
      ],
      "magnitude_verdict": "exceedance",
-     "signed": 0.026383159682154655,
+     "signed": 0.029341740533709526,
      "signed_ci": [
-      0.003011333988979459,
-      0.04921964555978775
+      -0.0028674830682575703,
+      0.0596950389444828
      ],
-     "signed_verdict": "equivalence",
+     "signed_verdict": "indeterminate",
      "joint_verdict": "exceedance"
     }
    ]
@@ -2320,9 +2320,9 @@
   "n_cells": 18,
   "n_verdict_stable": 18,
   "all_exceedance_every_seed": true,
-  "max_spread_pct": 12.320887166222903,
-  "min_lower_bound_over_seeds": 0.07723648846149445,
-  "margin_ratio_of_min_lower_bound": 1.544729769229889
+  "max_spread_pct": 24.91344134463992,
+  "min_lower_bound_over_seeds": 0.05846549943089485,
+  "margin_ratio_of_min_lower_bound": 1.169309988617897
  },
- "runtime_sec": 946.6
+ "runtime_sec": 412.2
 }

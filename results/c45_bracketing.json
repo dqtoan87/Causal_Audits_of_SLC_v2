@@ -60,15 +60,15 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.24693379137796667,
-       "concept_beta": 0.06171688103420772,
+       "concept_alpha": 0.13320036893211282,
+       "concept_beta": 1.5535091599950053,
        "control_alpha_range": [
-        0.42884675074362305,
-        0.42884675074362305
+        0.5263404994690205,
+        0.5263404994690205
        ],
        "control_beta_range": [
-        -0.2895805337405923,
-        -0.2895805337405923
+        -0.7105379254019486,
+        -0.7105379254019486
        ],
        "alpha_bracketed": false,
        "beta_bracketed": false,
@@ -145,18 +145,18 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.24693379137796667,
-       "concept_beta": 0.06171688103420772,
+       "concept_alpha": 0.13320036893211282,
+       "concept_beta": 1.5535091599950053,
        "control_alpha_range": [
-        0.34013901710193356,
-        1.3356969491241522
+        0.20805676505742363,
+        1.051957832247787
        ],
        "control_beta_range": [
-        -6.024494128309173,
-        0.502122741113785
+        -12.625237333363403,
+        0.21579945037408657
        ],
        "alpha_bracketed": false,
-       "beta_bracketed": true,
+       "beta_bracketed": false,
        "both": false,
        "edge_controls": [
         "globrot_m",
@@ -236,19 +236,19 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.24693379137796667,
-       "concept_beta": 0.06171688103420772,
+       "concept_alpha": 0.13320036893211282,
+       "concept_beta": 1.5535091599950053,
        "control_alpha_range": [
-        0.11459005225811902,
-        1.3564900235677664
+        0.021985781212212802,
+        1.051957832247787
        ],
        "control_beta_range": [
-        -6.024494128309173,
-        0.502122741113785
+        -12.625237333363403,
+        0.21579945037408657
        ],
        "alpha_bracketed": true,
-       "beta_bracketed": true,
-       "both": true,
+       "beta_bracketed": false,
+       "both": false,
        "edge_controls": [
         "globrot_m",
         "sgnd"
@@ -317,15 +317,15 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.27633904334749304,
-       "concept_beta": 0.048446750111737456,
+       "concept_alpha": 0.10944935710830196,
+       "concept_beta": 1.3305470716813101,
        "control_alpha_range": [
-        0.3411861396141923,
-        0.3411861396141923
+        0.4041455298936365,
+        0.4041455298936365
        ],
        "control_beta_range": [
-        -0.21702792645632835,
-        -0.21702792645632835
+        -0.3780919972817461,
+        -0.3780919972817461
        ],
        "alpha_bracketed": false,
        "beta_bracketed": false,
@@ -402,18 +402,18 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.27633904334749304,
-       "concept_beta": 0.048446750111737456,
+       "concept_alpha": 0.10944935710830196,
+       "concept_beta": 1.3305470716813101,
        "control_alpha_range": [
-        0.3411861396141923,
-        0.9743771198597335
+        0.19657643951317658,
+        1.1212024736481507
        ],
        "control_beta_range": [
-        -3.2129083850215507,
-        0.49121619926989135
+        -12.127177002951623,
+        0.1496065000923057
        ],
        "alpha_bracketed": false,
-       "beta_bracketed": true,
+       "beta_bracketed": false,
        "both": false,
        "edge_controls": [
         "globrot_m",
@@ -493,19 +493,19 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.27633904334749304,
-       "concept_beta": 0.048446750111737456,
+       "concept_alpha": 0.10944935710830196,
+       "concept_beta": 1.3305470716813101,
        "control_alpha_range": [
-        0.11459005225811902,
-        0.9743771198597335
+        0.021985781212212802,
+        1.1212024736481507
        ],
        "control_beta_range": [
-        -3.2129083850215507,
-        0.49121619926989135
+        -12.127177002951623,
+        0.1496065000923057
        ],
        "alpha_bracketed": true,
-       "beta_bracketed": true,
-       "both": true,
+       "beta_bracketed": false,
+       "both": false,
        "edge_controls": [
         "globrot_m",
         "sgnd"
@@ -575,17 +575,17 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.12261466486495998,
-       "concept_beta": 0.07770830825432488,
+       "concept_alpha": -0.003711841749578064,
+       "concept_beta": 0.5939093779747195,
        "control_alpha_range": [
-        -0.024465069091366858,
-        0.15498269268768622
+        0.08170802248999419,
+        0.0891895283855898
        ],
        "control_beta_range": [
-        -0.04278079017621261,
-        -0.04062662372518511
+        -0.6287562585347344,
+        0.06364349120492395
        ],
-       "alpha_bracketed": true,
+       "alpha_bracketed": false,
        "beta_bracketed": false,
        "both": false,
        "edge_controls": [
@@ -664,26 +664,26 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.12261466486495998,
-       "concept_beta": 0.07770830825432488,
+       "concept_alpha": -0.003711841749578064,
+       "concept_beta": 0.5939093779747195,
        "control_alpha_range": [
-        -1.28785187821661,
-        0.7182889945425024
+        0.07000283494886789,
+        1.3264775591165403
        ],
        "control_beta_range": [
-        -4.189932863224406,
-        0.2749103757323059
+        -10.698423114208397,
+        0.06364349120492395
        ],
-       "alpha_bracketed": true,
-       "beta_bracketed": true,
-       "both": true,
+       "alpha_bracketed": false,
+       "beta_bracketed": false,
+       "both": false,
        "edge_controls": [
-        "globrot_m",
-        "sgnd"
+        "rotd",
+        "pixperm_m"
        ],
        "edge_control_smd": [
-        2.3083170083708926,
-        1.1879418798402386
+        0.04439643541227368,
+        1.3460001604459706
        ]
       }
      }
@@ -755,26 +755,26 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.12261466486495998,
-       "concept_beta": 0.07770830825432488,
+       "concept_alpha": -0.003711841749578064,
+       "concept_beta": 0.5939093779747195,
        "control_alpha_range": [
-        -1.28785187821661,
-        0.7182889945425024
+        0.021985781212212802,
+        1.3264775591165403
        ],
        "control_beta_range": [
-        -4.189932863224406,
-        0.2749103757323059
+        -10.698423114208397,
+        0.06364349120492395
        ],
-       "alpha_bracketed": true,
-       "beta_bracketed": true,
-       "both": true,
+       "alpha_bracketed": false,
+       "beta_bracketed": false,
+       "both": false,
        "edge_controls": [
-        "globrot_m",
-        "sgnd"
+        "rotd",
+        "pixperm_m"
        ],
        "edge_control_smd": [
-        2.3083170083708926,
-        1.1879418798402386
+        0.04439643541227368,
+        1.3460001604459706
        ]
       }
      }
@@ -837,17 +837,17 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.12998186604223758,
-       "concept_beta": 0.07562936366569917,
+       "concept_alpha": 0.010176436123026784,
+       "concept_beta": 0.5516005782482818,
        "control_alpha_range": [
-        -0.006552974814981242,
-        0.13397979922642203
+        0.062199105787722975,
+        0.07970796207550188
        ],
        "control_beta_range": [
-        -0.03662225987865051,
-        0.00703643900435673
+        -0.5082936524465442,
+        0.32834754906165253
        ],
-       "alpha_bracketed": true,
+       "alpha_bracketed": false,
        "beta_bracketed": false,
        "both": false,
        "edge_controls": [
@@ -926,26 +926,26 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.12998186604223758,
-       "concept_beta": 0.07562936366569917,
+       "concept_alpha": 0.010176436123026784,
+       "concept_beta": 0.5516005782482818,
        "control_alpha_range": [
-        -0.2390562008156737,
-        1.1534526703842474
+        0.062199105787722975,
+        1.2297404736079816
        ],
        "control_beta_range": [
-        -1.5962224162910454,
-        0.2740102912651332
+        -9.854554292712452,
+        0.32834754906165253
        ],
-       "alpha_bracketed": true,
-       "beta_bracketed": true,
-       "both": true,
+       "alpha_bracketed": false,
+       "beta_bracketed": false,
+       "both": false,
        "edge_controls": [
-        "globrot_m",
-        "sgnd"
+        "rotd",
+        "pixperm_m"
        ],
        "edge_control_smd": [
-        2.4199868517757985,
-        1.3870012411122568
+        0.046572445669913025,
+        1.5691477089432917
        ]
       }
      }
@@ -1017,26 +1017,26 @@
        ]
       },
       "Inv": {
-       "concept_alpha": 0.12998186604223758,
-       "concept_beta": 0.07562936366569917,
+       "concept_alpha": 0.010176436123026784,
+       "concept_beta": 0.5516005782482818,
        "control_alpha_range": [
-        -0.2390562008156737,
-        1.1534526703842474
+        0.021252503902588052,
+        1.2297404736079816
        ],
        "control_beta_range": [
-        -1.5962224162910454,
-        0.2740102912651332
+        -9.854554292712452,
+        0.32834754906165253
        ],
-       "alpha_bracketed": true,
-       "beta_bracketed": true,
-       "both": true,
+       "alpha_bracketed": false,
+       "beta_bracketed": false,
+       "both": false,
        "edge_controls": [
-        "globrot_m",
-        "sgnd"
+        "rotd",
+        "pixperm_m"
        ],
        "edge_control_smd": [
-        2.4199868517757985,
-        1.3870012411122568
+        0.046572445669913025,
+        1.5691477089432917
        ]
       }
      }
@@ -1058,10 +1058,10 @@
     9,
     13
    ],
-   "cells_bracketed": 4,
+   "cells_bracketed": 2,
    "edge_control_smd_range": [
-    1.1879418798402386,
-    2.4199868517757985
+    1.3460001604459706,
+    2.0947152152590527
    ]
   },
   "all": {
@@ -1069,10 +1069,10 @@
     15,
     15
    ],
-   "cells_bracketed": 11,
+   "cells_bracketed": 7,
    "edge_control_smd_range": [
     0.4356104493701172,
-    2.4281497534596426
+    2.0947152152590527
    ]
   }
  }

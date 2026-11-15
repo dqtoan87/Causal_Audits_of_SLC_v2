@@ -9,11 +9,13 @@ six-descriptor footprint and the observable screens of Section III-C. It reads n
 Screens, computed as in c25_screen_full_sample.py, over the images on which a control is defined:
   (A1) footprint balance: |SMD| <= 0.10 on each of the six descriptors against the concept edit;
   (A2) proxy neutrality: the mean relative change of the two concept proxies (contrast and colour
-       variance) is at most 10%, and at most 15% of the concept edit's own change;
+       variance) is at most 10%, and at most 15% of the concept edit's own change. The script also
+       reports the target and the off-target proxy separately, and a target-only reading of (A2);
   (A3) overlap: the control is defined on at least 95% of the images (G1 for the registered controls,
        a converged neutrality solve for the frontier controls);
   G2   the independent CIELAB check of the route test, for the target concept;
-  rho  the bottleneck of the length-two route through the control, max |SMD| / 0.10.
+  link the footprint-link score max |SMD| / 0.10. It is a route bottleneck only for a control that
+       passes (A2), since a route must end at a concept-neutral edit.
 It also reports the off-target concept change of each control: the median relative change of the CIELAB
 measure of the other concept, next to that of the concept edit.
 
@@ -66,7 +68,14 @@ def screens(rows, concept):
     g2 = [abs(r[2][ik] - r[0][ik]) <= c62.CRIT["independent_rel"] * abs(r[1][ik] - r[0][ik]) for r in rows]
     off_c = [abs(r[2][ok_] - r[0][ok_]) / max(abs(r[0][ok_]), 1e-9) for r in rows]
     off_e = [abs(r[1][ok_] - r[0][ok_]) / max(abs(r[0][ok_]), 1e-9) for r in rows]
-    return {"n": len(rows), "smd": sm, "max_abs_smd": mx, "rho": mx / SMD_TOL, "A1": bool(mx <= SMD_TOL),
+    tp, op = "proxy_" + concept, "proxy_" + OTHER[concept]
+    rel = lambda r, k, m: abs(r[m][k] - r[0][k]) / (abs(r[0][k]) + 1e-6)
+    p_tgt_c = float(np.mean([rel(r, tp, 2) for r in rows])); p_tgt_e = float(np.mean([rel(r, tp, 1) for r in rows]))
+    p_off_c = float(np.mean([rel(r, op, 2) for r in rows])); p_off_e = float(np.mean([rel(r, op, 1) for r in rows]))
+    a2t = bool(p_tgt_c <= ABS_TOL and p_tgt_c / max(p_tgt_e, 1e-9) <= RATIO_TOL)
+    return {"n": len(rows), "smd": sm, "max_abs_smd": mx, "footprint_link_score": mx / SMD_TOL, "A1": bool(mx <= SMD_TOL),
+            "target_proxy_shift": p_tgt_c, "offtarget_proxy_shift": p_off_c,
+            "edit_target_proxy_shift": p_tgt_e, "edit_offtarget_proxy_shift": p_off_e, "A2_target_only": a2t,
             "proxy_shift": ps_c, "proxy_ratio": ps_c / max(ps_e, 1e-9),
             "A2": bool(ps_c <= ABS_TOL and ps_c / max(ps_e, 1e-9) <= RATIO_TOL),
             "G2_share": float(np.mean(g2)),
@@ -129,6 +138,7 @@ def main():
             s = screens(rows, concept)
             s["A3_share"] = n_def / len(ids); s["A3"] = bool(s["A3_share"] >= POS_TOL)
             s["valid"] = bool(s["A1"] and s["A2"] and s["A3"])
+            s["valid_target_only"] = bool(s["A1"] and s["A2_target_only"] and s["A3"])
             res["registered"][tk][c] = s
     # frontier controls, rebuilt
     with Pool(min(64, len(ids))) as pool:
@@ -148,16 +158,28 @@ def main():
             s = screens(rows, concept)
             s["A3_share"] = len(rows) / len(ids); s["A3"] = bool(s["A3_share"] >= POS_TOL)
             s["valid"] = bool(s["A1"] and s["A2"] and s["A3"])
+            s["valid_target_only"] = bool(s["A1"] and s["A2_target_only"] and s["A3"])
             res["frontier"][tk][mech] = s
+    # the concept edit's own off-target change, over all images
+    res["edit_offtarget"] = {}
+    for concept, dk in c62.TARGETS:
+        tk = "%s@%d" % (concept, dk)
+        ok_ = c62.INDEP[OTHER[concept]]; op = "proxy_" + OTHER[concept]
+        q = [r["targets"][tk] for r in con["images"]]
+        res["edit_offtarget"][tk] = {
+            "median_rel_cielab": float(np.median([abs(x["edit"][ok_] - x["unedited"][ok_]) / max(abs(x["unedited"][ok_]), 1e-9) for x in q])),
+            "mean_rel_proxy": float(np.mean([abs(x["edit"][op] - x["unedited"][op]) / (abs(x["unedited"][op]) + 1e-6) for x in q]))}
     res["runtime_sec"] = round(time.time() - t0, 1)
     json.dump(res, open(OUT, "w"), indent=1)
     print("rebuild reproduces the recorded frontier mismatches to %.2e" % worst)
     for part in ("registered", "frontier"):
         for tk, d in res[part].items():
             for c, s in d.items():
-                print("%-10s %-11s %-6s n=%2d maxSMD=%.3f rho=%.2f A1=%d A2=%d (shift %.3f ratio %.3f) A3=%.3f G2=%.2f off(ctrl/edit)=%.3f/%.3f valid=%d" % (
-                    part, tk, c, s["n"], s["max_abs_smd"], s["rho"], s["A1"], s["A2"], s["proxy_shift"], s["proxy_ratio"],
-                    s["A3_share"], s["G2_share"], s["offtarget_median_rel_control"], s["offtarget_median_rel_edit"], s["valid"]))
+                print("%-10s %-11s %-6s n=%2d maxSMD=%.3f link=%.2f A1=%d A2=%d (shift %.3f ratio %.3f; target %.3f off %.3f) A2t=%d A3=%.3f G2=%.2f off(ctrl/edit)=%.3f/%.3f valid=%d valid_t=%d" % (
+                    part, tk, c, s["n"], s["max_abs_smd"], s["footprint_link_score"], s["A1"], s["A2"], s["proxy_shift"], s["proxy_ratio"],
+                    s["target_proxy_shift"], s["offtarget_proxy_shift"], s["A2_target_only"],
+                    s["A3_share"], s["G2_share"], s["offtarget_median_rel_control"], s["offtarget_median_rel_edit"], s["valid"], s["valid_target_only"]))
+    print("edit off-target:", {k: {a: round(b, 3) for a, b in v.items()} for k, v in res["edit_offtarget"].items()})
     print("saved ->", OUT, "(%.0fs)" % (time.time() - t0))
 
 

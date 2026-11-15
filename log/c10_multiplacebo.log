@@ -1,26 +1,26 @@
-##### C10 multi-placebo 13:02:54 #####
+##### C10 multi-placebo 15:52:14 #####
 placebo proxy-change (lower=more neutral): hue=5.3% flip=39.2% jitter=9.2% noise=5.8%
 [erm] p_full=0.733
 [slim] p_full=0.859
-[causal] p_full=0.611
+[causal] p_full=0.501
 
 ================================================================================================
-#1c PLACEBO CaCE (logit) per model — HỘI TỤ hay PHÂN KỲ?
+(a) Placebo CaCE (logit) per model: converge or diverge?
 model                hue            flip          jitter           noise
-erm                -0.77           -0.29           -0.37           -2.39
-slim               -1.80            0.32            0.20           -4.34
-causal             -0.49           -0.18           -0.06           -0.84
+erm                -0.92           -0.44           -0.36           -3.17
+slim               -2.27            0.05           -0.01           -5.43
+causal             -3.21           -1.98           -0.94           -4.30
 ------------------------------------------------------------------------------------------------
-#1c CORRECTED alignment A_corr under EACH placebo (aligned nếu >0 & CI>0):
+(a) Corrected alignment A_corr under each placebo (aligned if >0 & CI>0):
 model                hue            flip          jitter           noise
-erm             +1.03[Y]        +0.55[Y]        +0.63[Y]        +2.66[Y]
-slim            +1.70[Y]        -0.42[.]        -0.30[.]        +4.23[Y]
-causal          +0.40[Y]        +0.09[.]        -0.03[.]        +0.75[Y]
+erm             +1.14[Y]        +0.66[Y]        +0.58[Y]        +3.39[Y]
+slim            +1.97[Y]        -0.34[.]        -0.29[.]        +5.14[Y]
+causal          +4.30[Y]        +3.07[Y]        +2.03[Y]        +5.38[Y]
 ------------------------------------------------------------------------------------------------
-#3 A_corr (hue) BY DOSE (dose0=cleanest):
-  erm      d0=+0.87[Y] d1=+0.93[Y] d2=+1.03[Y]
-  slim     d0=+1.80[Y] d1=+1.73[Y] d2=+1.70[Y]
-  causal   d0=+0.50[Y] d1=+0.44[Y] d2=+0.40[Y]
+(b) A_corr (hue) by dose (dose0=cleanest):
+  erm      d0=+1.03[Y] d1=+1.09[Y] d2=+1.14[Y]
+  slim     d0=+2.16[Y] d1=+2.02[Y] d2=+1.97[Y]
+  causal   d0=+3.82[Y] d1=+4.15[Y] d2=+4.30[Y]
 ================================================================================================
-KẾT LUẬN: nếu placebo_cace HỘI TỤ & A_corr>0[Y] với MỌI placebo & MỌI dose -> correction VALID, retraction giữ. Nếu PHÂN KỲ (vd flip≈0, hue lớn) -> correction không valid -> concept tier INCONCLUSIVE, phải hạ cấp.
-Saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P2_clear/results/c10_multiplacebo.json
+Conclusion: if placebo_cace converges & A_corr>0[Y] for every placebo & every dose -> correction valid, retraction holds. If it diverges (e.g. flip≈0, hue large) -> correction not valid -> concept tier inconclusive, must be downgraded.
+Saved -> /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P3_clear/results/c10_multiplacebo.json

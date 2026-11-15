@@ -8,21 +8,24 @@ Analysis code and cached results for a causal audit of skin-lesion classifiers. 
 code/          analysis scripts, shared modules, the runner and the verifier
   lib/         vendored training modules
 results/       cached JSON and NPZ outputs, one per script, plus the frozen manifests
-log/           one log per script and run_all.log for the last full run
+log/           one log per script; run_retrain_b3inv.log for the last re-run of the analyses;
+               e2e_fresh_copy_run.txt for a run in a fresh directory
 requirements.txt  exact package versions
 checkpoints/   audited checkpoints, downloaded from the release below (not tracked)
 paper/         the manuscript, read by the verifier (not included)
 ```
 
-Model checkpoints are published as assets of the release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/releases/tag/checkpoints-v1.0), with a `SHA256SUMS` file. Download them into `checkpoints/` at the repository root:
+Model checkpoints are published as assets of the release [`checkpoints-v1.1`](https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/releases/tag/checkpoints-v1.1), with a `SHA256SUMS` file. Download them into `checkpoints/` at the repository root:
 
 ```bash
 mkdir -p checkpoints && cd checkpoints
-gh release download checkpoints-v1.0 --repo dqtoan87/Causal_Audits_of_SLC_v2
+gh release download checkpoints-v1.1 --repo dqtoan87/Causal_Audits_of_SLC_v2
 sha256sum -c SHA256SUMS
 ```
 
 The release holds the six audited classifiers (`dj_{erm,slim,causal}_{b3,r50}.pt`), the two PAD-UFES-20 classifiers (`pad_{erm,slim}.pt`) and the checkpoints of the selection analysis (`sel_{blind,leaky}_{erm,slim,causal}.pt`). Analyses that read only cached predictions run without them (see below).
+
+In `checkpoints-v1.1` the EfficientNet-B3 Inv classifier (`dj_causal_b3.pt`) is selected only among epochs in which both invariance penalties are on (epoch 7). The release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/releases/tag/checkpoints-v1.0) keeps the checkpoint that the original selection rule saved at epoch 1, inside the penalty warm-up. It is needed only to reproduce the first run of the route test below; its other thirteen files are identical to those of `checkpoints-v1.1`.
 
 ## Setup
 
@@ -50,7 +53,7 @@ bash code/run_all.sh                                   # all analyses in depende
 PY=/path/to/python setsid nohup bash code/run_all.sh > log/nohup.out 2>&1 < /dev/null &   # detached
 ```
 
-`run_all.sh` audits the released PAD-UFES-20 checkpoints (`c46 --use-saved`), which is how the reported numbers were produced, and runs `c51`, `c58` and `c59` only when `OTHER` points at the reimplementation. It runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), regenerates the figures, and then calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes.
+`run_all.sh` audits the released PAD-UFES-20 checkpoints (`c46 --use-saved`), which is how the reported numbers were produced, and runs `c51`, `c58` and `c59` only when `OTHER` points at the reimplementation. It runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), regenerates the figures, and then calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes. `c29_disjoint_train.py` selects each Inv checkpoint among the epochs with both penalties on, and `C29_ONLY=dj_causal_b3` trains one job only. After any checkpoint changes, run `c44_cache_preds.py` before `run_all.sh`: it writes `results/c19_preds.npz`, which `c26`, `c32`, `c38` and the shrinkage figure read, and `run_all.sh` does not call it. `code/run_retrain_b3inv.sh` records how the EfficientNet-B3 Inv checkpoint was retrained and every analysis that reads it was run again, including the second run of the route test. `log/e2e_fresh_copy_run.txt` records a run of the released code and checkpoints in a fresh directory, compared file by file with `results/`.
 
 Scripts that read only cached predictions and need neither a GPU nor raw images include `c26_hair_dose_prob`, `c32_absdp_patient_ci`, `c38_shrinkage_sensitivity`, `c41_within_patient`, `c45_partial_id`, `c47_heterogeneity`, `c54_synthetic_scm`, `c55_identification_graph` and `make_fig_shrinkage`.
 
@@ -61,7 +64,7 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c1_tier1_ate.py` | `tier1_ate.json` | disease side: concept-to-malignancy effects by doubly robust AIPW |
 | `c41_within_patient.py` | `c41_within_patient.json` | disease side: conditional logistic regression stratified by patient |
 | `c47_heterogeneity.py` | `c47_heterogeneity.json` | common-odds-ratio check for the within-patient model |
-| `c29_disjoint_train.py` | `c29_disjoint_split.json` | trains the EfficientNet-B3 trio under the frozen partition |
+| `c29_disjoint_train.py` | `c29_disjoint_split.json` | trains the EfficientNet-B3 trio under the frozen partition; Inv checkpoints are selected among epochs with both penalties on |
 | `c8_backbone2_train.py` | checkpoints | trains the ResNet-50 trio |
 | `c2_cace_artifact.py` | `tier2_cace_artifact.json` | artifact overlays and edit precomputation |
 | `c30_disjoint_audit.py` | `c30_disjoint_audit.json` | artifact criterion on the audit cohort |
@@ -119,10 +122,16 @@ PY=/path/to/python bash code/run_c62.sh   # construct (no model), then evaluate 
 | `c63_route_exploratory.py` | `c63_route_exploratory.json`, `c63_route_scores.npz` | exploratory: each pair restricted to images on which both controls pass the independent check; stores every per-image response |
 | `c64_route_screens.py` | `c64_route_screens.json` | exploratory and model-free: the observable screens under the six-descriptor footprint, and off-target concept changes |
 | `c65_route_robustness.py` | `c65_route_robustness.json` | exploratory, from the stored responses: the margins at which verdicts change, other bootstrap seeds, leave one patient out, the two cross pairs |
+| `run_retrain_b3inv.sh` | `c62_evaluation_inv_retrained.json`, `c63_route_exploratory_inv_retrained.json`, `c63_route_scores_inv_retrained.npz`, `c65_route_robustness_inv_retrained.json` | the second run: the unchanged plan, script and construction applied to the trio with the EfficientNet-B3 Inv checkpoint of `checkpoints-v1.1` |
 
 `c63` scores the locked images again; `c64` and `c65` read no new model output.
 
-**Results.** The run followed the plan without deviation. Every control matched the magnitude footprint exactly, and all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. The concept edit's response cancels from every difference of two route sums, so the cycle test compares the controls with each other. On the primary set (73 to 77 images, 52 to 54 patients), with a simultaneous 95% band over 48 differences and a 0.5-logit margin, routes disagree in 3 of 12 model-by-target cells (ERM and Slim, all through the radial scale pair), agree in 2 (the invariance model at both low doses) and are indeterminate in 7. A disagreement rejects the magnitude-only working form jointly with control neutrality; it does not test the six-descriptor footprint. Agreement certifies no route sum, because a bias shared by all routes cancels. Two disagreements are robust to the bootstrap seed and to leaving out any patient; the third (Slim, lowest contrast dose) is borderline. Under the six-descriptor footprint and the library's screens, no constructed control passes all three screens.
+**Results.** The plan was run twice, each time without deviation. Every control matched the magnitude footprint exactly, and all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. The concept edit's response cancels from every difference of two route sums, so the cycle test compares the controls with each other. The decision uses a simultaneous 95% band over 48 differences and a 0.5-logit margin.
+
+- First run (registered outcome; EfficientNet-B3 Inv checkpoint of `checkpoints-v1.0`; files without suffix): on the primary set (73 to 77 images, 52 to 54 patients) routes disagree in 3 of 12 model-by-target cells (ERM and Slim, all through the radial scale pair), agree in 2 (the Inv model at both low doses) and are indeterminate in 7. The two highest-dose disagreements are robust to the bootstrap seed and to leaving out any patient; the third (Slim, lowest contrast dose) is borderline.
+- Second run (the unchanged plan applied after the Inv checkpoint was retrained; files with the suffix `_inv_retrained`): the score floor reads all three models, so the primary set changes to 44 to 47 images from 32 or 33 patients. Routes disagree in 3 of 12 cells, one per classifier (ERM and Inv at the highest contrast dose, Slim at the highest variegation dose), none agree and 9 are indeterminate. The ERM and Inv disagreements are robust to the bootstrap seed and to leaving out any patient; the Slim one depends on single patients.
+
+A disagreement rejects the magnitude-only working form jointly with control neutrality; it does not test the six-descriptor footprint. Agreement would certify no route sum, because a bias shared by all routes cancels. Under the six-descriptor footprint and the library's screens, no constructed control passes all three screens.
 
 ## License
 
