@@ -18,6 +18,7 @@ Usage:  python code/verify_paper3.py            (prints one line per check and a
 from __future__ import annotations
 
 import json
+import numpy as np
 import os
 import re
 import statistics
@@ -308,6 +309,28 @@ if d:
           text="two cells disagree, none agrees and ten are indeterminate", where="supp")
     ni = [d["secondary_independent"]["targets"][t]["n_images"] for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2")]
     check("route test: independent subsets 16, 1, 0, 0", "/".join(map(str, ni)), "16/1/0/0", text="16, 1, 0 and 0 images", where="supp")
+    cs = [comp["causal|%s|D_%s" % (t, q)]["est"] for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2")
+          for q in ("rad4-hue4", "rad16-hue16", "rad4-rad16", "hue4-hue16")]
+    check("route test: Inv differences at most 0.42 logits", max(abs(x) for x in cs), 0.42, 5e-3,
+          text="no difference exceeds 0.42 logits")
+    isum = [comp["causal|%s|S_%s" % (t, k)]["est"] for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2")
+            for k in ("rad4", "rad16", "hue4", "hue16")]
+    check("route test: Inv route sums -0.15 to +0.54", (min(isum), max(isum)), (-0.15, 0.54), 5e-3,
+          text="from −0.15 to +0.54 logits")
+    ipc = [comp["causal|%s|PC_%s" % (t, k)]["est"] for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2")
+           for k in ("hue", "flip", "jitter", "noise")]
+    check("route test: Inv placebo corrections reach +0.65", max(ipc), 0.65, 5e-3, text="placebo corrections reach +0.65")
+    nf = [d["secondary_all_g1"]["cells"]["causal|%s" % t]["class"] for t in ("contrast@0", "color_var@0")]
+    check("route test: without the floor both Inv cells indeterminate", "/".join(nf), "indeterminate/indeterminate",
+          text="without which both cells are indeterminate")
+t34 = load("c34_ctrl_vs_ctrl")
+if t34:
+    med = {}
+    for q in t34["pairs"]:
+        med.setdefault(q["model"], []).append(abs(q["diff"]))
+    got = "%.1f/%.1f/%.1f" % tuple(float(np.median(med[m])) for m in ("ERM", "Slim", "Inv"))
+    check("diagnostic (T): per-model median disagreement 8.7, 9.9, 1.2", got, "8.7/9.9/1.2",
+          text="median disagreements of 8.7, 9.9 and 1.2 logits for ERM, Slim and Inv")
 d = load("c63_route_exploratory")
 if d:
     q = d["components"]["slim|contrast@0|D_rad4-rad16"]
