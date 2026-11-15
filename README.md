@@ -1,4 +1,6 @@
-# Causal_Audits_of_SLC
+# Causal_Audits_of_SLC_v2
+
+This repository extends https://github.com/dqtoan87/Causal_Audits_of_SLC. Its history is identical up to commit 93dfd52; later commits add the pre-registered route test described at the end of this file.
 
 Analysis code and cached results for a causal audit of skin-lesion classifiers. The audit has two tiers. The artifact tier asks whether a classifier's malignant score moves under performed acquisition edits (hair and ruler overlays), judged against a stated tolerance with a three-way interval rule. The concept tier asks whether a library of performed edits identifies the classifier's response to a clinical concept, decided by the connectivity of an audit graph.
 
@@ -98,6 +100,18 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 `c51_independent_rebuild.py`, `c58_rebuild_trace.py` and `c59_rebuild_generator.py` compare this pipeline with a separate clean-room reimplementation of the same audit. They read that reimplementation's files from a sibling directory, passed with `--other`, which is not part of this repository, so they do not run on their own here. Their cached outputs are included.
 
 `verify_paper3.py` checks the load-bearing numbers of the manuscript against the files in `results/`. It reads the manuscript text from `paper/`, which is not part of this repository.
+
+## Pre-registered route test (c62)
+
+`code/c62_route_test.py` asks whether exact routes can be built on held-out images under a footprint made of the four magnitude descriptors (altered-pixel fraction, mean absolute change, spatial support, lesion coverage), and whether the route sums of different controls agree on the audited EfficientNet-B3 classifiers. Every control keeps the concept edit's per-pixel change magnitude, so it matches that footprint exactly. The controls form a two-by-two design: change direction (radial, hue) by patch scale (4, 16 px). Under the additive working form for this footprint, and if the controls are latently neutral, all route sums are equal.
+
+The design, the locked image set (every malignant image of the selection fold: 78 images, 54 patients), the criteria and the decision rules are fixed in `results/c62_preregistration.json`. That file and the script were committed before the test was run on the locked set. The evaluation phase stops if the script differs from the registered SHA-256. All registered outcomes will be reported, whatever their direction.
+
+```bash
+PY=python code/run_c62.sh     # construct (no model), then evaluate and frontier
+```
+
+Outputs: `results/c62_construction.json` (exactness, neutrality, fine-footprint mismatch, independent CIELAB checks), `results/c62_evaluation.json` (route sums, pairwise differences, simultaneous band, decisions), `results/c62_frontier.json` (the smallest six-descriptor mismatch the two mechanisms reach).
 
 ## License
 
