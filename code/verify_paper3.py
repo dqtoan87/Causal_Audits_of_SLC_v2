@@ -283,16 +283,18 @@ if d:
           "%d/%d/%d" % (pr["summary"]["routes disagree"], pr["summary"]["routes agree"], pr["summary"]["indeterminate"]), "3/2/7",
           text="In three of the twelve cells")
     check("route test: no direction pair exceeds", pr["summary"]["direction_pair_exceeds"], 0,
-          text="no pair that differs only in direction exceeded the margin")
+          text="None did under the band, although 14 of the 24 direction differences")
+    dm = sum(1 for c, v in comp.items() if ("D_rad4-hue4" in c or "D_rad16-hue16" in c) and (v["ci"][0] > 0 or v["ci"][1] < 0))
+    check("route test: 14 of 24 direction differences exclude zero marginally", dm, 14, text="14 of the 24 direction differences")
     sa = [comp["%s|S_%s" % (c, k)]["est"] for c, v in pr["cells"].items() if v["class"] == "routes agree" for k in ("rad4", "rad16", "hue4", "hue16")]
-    check("route test: agreeing route sums within -0.01 and +0.21", (min(sa) >= -0.01) and (max(sa) <= 0.21), True,
-          text="between −0.01 and +0.21 logits")
+    check("route test: agreeing route sums 0.00 to +0.20", (round(min(sa), 2) + 0.0, round(max(sa), 2)), (0.0, 0.20), 1e-9,
+          text="route sums from 0.00 to +0.20 logits")
     check("route test: simultaneous critical value 3.30", pr["crit_simultaneous"], 3.30, 5e-3, text="critical value of the band was 3.30", where="supp")
     for cell, txt in (("slim|contrast@0", "+1.99 [+0.51, +3.47]"), ("erm|contrast@2", "+4.63 [+1.92, +7.34]"),
                       ("slim|color_var@2", "+5.27 [+1.84, +8.70]")):
         q = comp[cell + "|D_rad4-rad16"]
         nums = [float(x) for x in txt.replace("[", "").replace("]", "").replace(",", "").split()]
-        check("route test: Table 5 %s estimate" % cell, q["est"], nums[0], 5e-3, text=txt)
+        check("route test: Table S31 %s estimate" % cell, q["est"], nums[0], 5e-3, text=txt, where="supp")
         check("route test: Table 5 %s interval" % cell, tuple(q["sim"]), (nums[1], nums[2]), 5e-3)
     ps = []
     rs = []
@@ -322,7 +324,7 @@ if d:
     check("route test: Inv placebo corrections reach +0.65", max(ipc), 0.65, 5e-3, text="placebo corrections reach +0.65")
     nf = [d["secondary_all_g1"]["cells"]["causal|%s" % t]["class"] for t in ("contrast@0", "color_var@0")]
     check("route test: without the floor both Inv cells indeterminate", "/".join(nf), "indeterminate/indeterminate",
-          text="without which both cells are indeterminate")
+          text="two cells disagree, none agrees and ten are indeterminate")
 t34 = load("c34_ctrl_vs_ctrl")
 if t34:
     med = {}
@@ -331,6 +333,44 @@ if t34:
     got = "%.1f/%.1f/%.1f" % tuple(float(np.median(med[m])) for m in ("ERM", "Slim", "Inv"))
     check("diagnostic (T): per-model median disagreement 8.7, 9.9, 1.2", got, "8.7/9.9/1.2",
           text="median disagreements of 8.7, 9.9 and 1.2 logits for ERM, Slim and Inv")
+    got2 = "%.2f/%.2f/%.2f" % tuple(float(np.median(med[m])) for m in ("ERM", "Slim", "Inv"))
+    check("S6: per-model medians 8.66, 9.92, 1.18", got2, "8.66/9.92/1.18",
+          text="8.66 logits for ERM, 9.92 for Slim and 1.18 for Inv", where="supp")
+rb = load("c65_route_robustness")
+if rb:
+    check("robustness: stored responses reproduce the registered band", rb["reproduction_max_abs_difference"], 0.0, 1e-9)
+    s = rb["decisive"]["slim|contrast@0|D_rad4-rad16"]
+    check("robustness: borderline lower bound 0.510", s["sim_lower_unrounded"], 0.510, 5e-4, text="lower bound of 0.510")
+    check("robustness: borderline under 10 of 20 seeds", s["seed_exceeds"], 10, text="under 10 of 20 other seeds")
+    check("robustness: borderline in 32 of 54 leave-one-out", (s["lopo_exceeds"], s["lopo_n"]), (32, 54), 0,
+          text="in 32 of 54 leave-one-patient-out subsets")
+    rob = [rb["decisive"][k] for k in ("erm|contrast@2|D_rad4-rad16", "slim|color_var@2|D_rad4-rad16")]
+    check("robustness: two rejections hold for 20 of 20 seeds and all 54 subsets",
+          "/".join("%d-%d" % (q["seed_exceeds"], q["lopo_exceeds"]) for q in rob), "20-54/20-54",
+          text="hold under 20 of 20 other bootstrap seeds and in every leave-one-patient-out subset")
+    for cell, txt in (("slim|contrast@0", "disagree (0.51; 5.62)"), ("erm|contrast@2", "disagree (1.92; 7.34)"),
+                      ("slim|color_var@2", "disagree (1.84; 8.70)"), ("causal|contrast@0", "agree (0.00; 0.34)"),
+                      ("causal|color_var@0", "agree (0.00; 0.27)")):
+        c = rb["cells"][cell]
+        check("Table 5 frontiers %s" % cell, (c["disagrees_below_margin"], c["agrees_above_margin"]),
+              tuple(float(x) for x in txt.split("(")[1].rstrip(")").split("; ")), 5e-3, text=txt)
+sc = load("c64_route_screens")
+if sc:
+    fr = sc["frontier"]
+    nval = sum(s["valid"] for part in ("registered", "frontier") for t in sc[part] for s in sc[part][t].values())
+    check("screens: no constructed control passes all three", nval, 0, text="No constructed control passes all three screens")
+    check("screens: optimised radial bottlenecks 0.56 and 0.06", (fr["contrast@2"]["rad"]["rho"], fr["color_var@2"]["rad"]["rho"]),
+          (0.56, 0.06), 5e-3, text="bottlenecks of 0.56 and 0.06")
+    check("screens: proxy shift 20 and 29%", (100 * fr["contrast@2"]["rad"]["proxy_shift"], 100 * fr["color_var@2"]["rad"]["proxy_shift"]),
+          (20, 29), 0.5, text="mean proxy shift is 20 and 29%")
+    check("screens: 30 and 71% of the edit's shift", (100 * fr["contrast@2"]["rad"]["proxy_ratio"], 100 * fr["color_var@2"]["rad"]["proxy_ratio"]),
+          (30, 71), 0.5, text="30 and 71% of the concept edit's own shift")
+    check("screens: hue misses balance by 9.2 and 10.9", (fr["contrast@0"]["hue"]["rho"], fr["color_var@0"]["hue"]["rho"]),
+          (9.2, 10.9), 0.05, text="factors of 9.2 and 10.9")
+    rg = sc["registered"]
+    check("screens: off-target 4.9 and 5.3% at the lowest contrast dose",
+          (100 * rg["contrast@0"]["rad4"]["offtarget_median_rel_control"], 100 * rg["contrast@0"]["rad16"]["offtarget_median_rel_control"]),
+          (4.9, 5.3), 0.05, text="4.9 and 5.3% at the lowest contrast dose", where="supp")
 d = load("c63_route_exploratory")
 if d:
     q = d["components"]["slim|contrast@0|D_rad4-rad16"]
@@ -693,7 +733,7 @@ if d:
 d = load("c10_multiplacebo")
 if d:
     check("multi-placebo sample: 82 malignant audit images", d["n_common"], 82,
-          text="82 malignant audit images")
+          text="82 malignant audit images", where="supp")
     check("multi-placebo intervals are patient-clustered", d.get("resampling_unit"), "patient",
           text="with the patient as the resampling unit", where="supp")
     check("multi-placebo: 44 patients", d.get("n_patients_common"), 44)

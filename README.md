@@ -1,6 +1,6 @@
 # Causal_Audits_of_SLC_v2
 
-This repository extends https://github.com/dqtoan87/Causal_Audits_of_SLC. Its history is identical up to commit 93dfd52; later commits add the pre-registered route test described at the end of this file.
+This repository extends https://github.com/dqtoan87/Causal_Audits_of_SLC. Its history is identical up to commit 93dfd52; later commits add a pre-specified route test on held-out images, described at the end of this file.
 
 Analysis code and cached results for a causal audit of skin-lesion classifiers. The audit has two tiers. The artifact tier asks whether a classifier's malignant score moves under performed acquisition edits (hair and ruler overlays), judged against a stated tolerance with a three-way interval rule. The concept tier asks whether a library of performed edits identifies the classifier's response to a clinical concept, decided by the connectivity of an audit graph.
 
@@ -12,6 +12,8 @@ code/          analysis scripts, shared modules, the runner and the verifier
 results/       cached JSON and NPZ outputs, one per script, plus the frozen manifests
 log/           one log per script and run_all.log for the last full run
 requirements.txt  exact package versions
+checkpoints/   audited checkpoints, downloaded from the release below (not tracked)
+paper/         the manuscript, read by the verifier (not included)
 ```
 
 Model checkpoints are published as assets of the release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC/releases/tag/checkpoints-v1.0), with a `SHA256SUMS` file. Download them into `checkpoints/` at the repository root:
@@ -32,8 +34,10 @@ The two datasets are public and are not redistributed here.
 
 | Dataset | Expected at | Set the path in |
 | --- | --- | --- |
-| ISIC-2024 (SLICE-3D) | `<DATA_ROOT>/data_ISIC2024/` with `train-metadata.csv` and the image archive | `DATA_ROOT` in `code/lib/train_XAI_new_v01.py`, and `META` / `DATA_CSV` at the top of `c1`, `c8`, `c29`, `c35` |
-| PAD-UFES-20 | `PAD-UFES-20/` with `metadata.csv` and `imgs_part_1..3/` | `ROOT` at the top of `code/c46_padufes_artifact.py` |
+| ISIC-2024 (SLICE-3D) | `<DATA_ROOT>/data_ISIC2024/train-metadata.csv`, and the images unpacked as `<DATA_ROOT>/data_ISIC2024/train-image/image/<isic_id>.jpg` | `DATA_ROOT` in `code/lib/train_XAI_new_v01.py`; `DATA_CSV` in `code/c1_tier1_ate.py`; `META` in `code/c8_backbone2_train.py`, `code/c29_disjoint_train.py` and `code/c35_selection_isolation.py`; `ISIC_META` in `code/verify_paper3.py` |
+| PAD-UFES-20 | `<ROOT>/metadata.csv` and `<ROOT>/imgs_part_1..3/` | `ROOT` in `code/c46_padufes_artifact.py` |
+
+These variables hold the absolute paths of the machine on which the results were produced. Replace them with your own paths before running. Every other path is resolved relative to the repository root, and the route test (`c62` to `c65`) reads the ISIC-2024 images through `DATA_ROOT`.
 
 ## Frozen inputs
 
@@ -101,21 +105,26 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 
 `verify_paper3.py` checks the load-bearing numbers of the manuscript against the files in `results/`. It reads the manuscript text from `paper/`, which is not part of this repository.
 
-## Pre-registered route test (c62)
+## Pre-specified route test on held-out images (c62 to c65)
 
-`code/c62_route_test.py` asks whether exact routes can be built on held-out images under a footprint made of the four magnitude descriptors (altered-pixel fraction, mean absolute change, spatial support, lesion coverage), and whether the route sums of different controls agree on the audited EfficientNet-B3 classifiers. Every control keeps the concept edit's per-pixel change magnitude, so it matches that footprint exactly. The controls form a two-by-two design: change direction (radial, hue) by patch scale (4, 16 px). Under the additive working form for this footprint, and if the controls are latently neutral, all route sums are equal.
+`code/c62_route_test.py` asks whether exact routes can be built on held-out images under a footprint made of the four magnitude descriptors (altered-pixel fraction, mean absolute change, spatial support, lesion coverage), and whether the route sums of different controls agree on the audited EfficientNet-B3 classifiers. Every control keeps the concept edit's per-pixel change magnitude, so it matches that footprint exactly. The controls form a two-by-two design: change direction (radial, hue) by patch scale (4, 16 px).
 
-The design, the locked image set (every malignant image of the selection fold: 78 images, 54 patients), the criteria and the decision rules are fixed in `results/c62_preregistration.json`. That file and the script were committed before the test was run on the locked set. The evaluation phase stops if the script differs from the registered SHA-256. All registered outcomes will be reported, whatever their direction.
+The plan is in `results/c62_preregistration.json`. It fixes the locked image set (every malignant image of the selection fold: 78 images from 54 patients), the gates, the analysis sets, the score floor, the 0.5-logit margin and the decision rule. It was committed with the script in commit 40b6367, before any response to an edited image of the locked set was computed; GitHub's activity log records the push at 02:21:30 UTC on 2026-11-15. It is a locked plan in this repository, not an entry in an external registry. The evaluation phase stops if `code/c62_route_test.py` differs from the SHA-256 recorded in the plan.
 
 ```bash
-PY=python code/run_c62.sh     # construct (no model), then evaluate and frontier
+PY=/path/to/python bash code/run_c62.sh   # construct (no model), then evaluate and frontier; logs in log/c62_*.log
 ```
 
-Outputs: `results/c62_construction.json` (exactness, neutrality, fine-footprint mismatch, independent CIELAB checks), `results/c62_evaluation.json` (route sums, pairwise differences, simultaneous band, decisions), `results/c62_frontier.json` (the smallest six-descriptor mismatch the two mechanisms reach).
+| Script | Output in `results/` | Computes |
+| --- | --- | --- |
+| `c62_route_test.py` | `c62_preregistration.json`, `c62_construction.json`, `c62_evaluation.json`, `c62_frontier.json` | the pre-specified test: construction without a model, cycle test on the audited classifiers, six-descriptor frontier |
+| `c63_route_exploratory.py` | `c63_route_exploratory.json`, `c63_route_scores.npz` | exploratory: each pair restricted to images on which both controls pass the independent check; stores every per-image response |
+| `c64_route_screens.py` | `c64_route_screens.json` | exploratory and model-free: the observable screens under the six-descriptor footprint, and off-target concept changes |
+| `c65_route_robustness.py` | `c65_route_robustness.json` | exploratory, from the stored responses: the margins at which verdicts change, other bootstrap seeds, leave one patient out, the two cross pairs |
 
-**Registered results.** The run followed the registration without deviation. Every control matched the magnitude footprint exactly; all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. On the primary set (73 to 77 images, 52 to 54 patients), with a simultaneous 95% band over the 48 route differences and a 0.5-logit margin, routes disagree in 3 of the 12 model-by-target cells (ERM and Slim, all through the radial scale pair), agree in 2 (the invariance model at both low doses) and are indeterminate in 7. No direction pair exceeds the margin under the band. Most high-dose images fail the independent CIELAB check of neutrality, so a disagreement there rejects the working form only jointly with neutrality. In the frontier phase, radial controls came within 0.1% of the concept edit on all six descriptors for 13 and 15 of the 78 images at the two high doses; hue controls never came within 10%.
+`c63` scores the locked images again; `c64` and `c65` read no new model output.
 
-**Exploratory follow-up (not registered).** `code/c63_route_exploratory.py` repeats each pair on images on which both of its controls also pass the independent check, and stores every per-image response in `results/c63_route_scores.npz`. The low-dose disagreement for Slim persists there (2.32 logits on 49 images); the high-dose cells have too few qualifying images.
+**Results.** The run followed the plan without deviation. Every control matched the magnitude footprint exactly, and all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. The concept edit's response cancels from every difference of two route sums, so the cycle test compares the controls with each other. On the primary set (73 to 77 images, 52 to 54 patients), with a simultaneous 95% band over 48 differences and a 0.5-logit margin, routes disagree in 3 of 12 model-by-target cells (ERM and Slim, all through the radial scale pair), agree in 2 (the invariance model at both low doses) and are indeterminate in 7. A disagreement rejects the magnitude-only working form jointly with control neutrality; it does not test the six-descriptor footprint. Agreement certifies no route sum, because a bias shared by all routes cancels. Two disagreements are robust to the bootstrap seed and to leaving out any patient; the third (Slim, lowest contrast dose) is borderline. Under the six-descriptor footprint and the library's screens, no constructed control passes all three screens.
 
 ## License
 
