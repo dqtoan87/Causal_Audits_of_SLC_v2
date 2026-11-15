@@ -113,6 +113,10 @@ PY=python code/run_c62.sh     # construct (no model), then evaluate and frontier
 
 Outputs: `results/c62_construction.json` (exactness, neutrality, fine-footprint mismatch, independent CIELAB checks), `results/c62_evaluation.json` (route sums, pairwise differences, simultaneous band, decisions), `results/c62_frontier.json` (the smallest six-descriptor mismatch the two mechanisms reach).
 
+**Registered results.** The run followed the registration without deviation. Every control matched the magnitude footprint exactly; all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. On the primary set (73 to 77 images, 52 to 54 patients), with a simultaneous 95% band over the 48 route differences and a 0.5-logit margin, routes disagree in 3 of the 12 model-by-target cells (ERM and Slim, all through the radial scale pair), agree in 2 (the invariance model at both low doses) and are indeterminate in 7. No direction pair exceeds the margin under the band. Most high-dose images fail the independent CIELAB check of neutrality, so a disagreement there rejects the working form only jointly with neutrality. In the frontier phase, radial controls came within 0.1% of the concept edit on all six descriptors for 13 and 15 of the 78 images at the two high doses; hue controls never came within 10%.
+
+**Exploratory follow-up (not registered).** `code/c63_route_exploratory.py` repeats each pair on images on which both of its controls also pass the independent check, and stores every per-image response in `results/c63_route_scores.npz`. The low-dose disagreement for Slim persists there (2.32 logits on 49 images); the high-dose cells have too few qualifying images.
+
 ## License
 
 MIT, see `LICENSE`.

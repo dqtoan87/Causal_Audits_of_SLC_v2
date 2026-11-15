@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 """Check the numbers paper3.md and supplementary3.md print against the results this tree produced.
 
-Every check does two things. It recomputes the quantity from P2_clear/results and compares it with
+Every check does two things. It recomputes the quantity from this tree's results/ and compares it with
 the value the manuscript prints, at the precision printed. And, where a check names the text it
 backs, it confirms that this exact text is present in the manuscript or the supplement, so a
 number edited in the paper without a matching result (or the reverse) is caught.
 
 Tables 4 (main text) and S29 (supplement) are parsed from the markdown and compared cell by cell.
 
-Reads only P2_clear/results, the two manuscripts, and two read-only external sources when they
+Reads only this tree's results/, the two manuscripts, and two read-only external sources when they
 are present: the training log of the audited checkpoints and the ISIC-2024 metadata file.
 Exit status is non-zero if any check fails.
 
@@ -267,6 +267,62 @@ import math as _m
 _Phi = lambda z: 0.5 * (1 + _m.erf(z / _m.sqrt(2)))
 check("signed exceedance size at eps/se = 0.25 is 0.032", _Phi(-1.959964) + _Phi(-1.959964 - 0.5), 0.032, 5e-4,
       text="0.032 at *ε*/*se* = 0.25", where="supp")
+d = load("c62_evaluation")
+if d:
+    reg, con = load("c62_preregistration"), load("c62_construction")
+    pr, comp = d["primary"], d["primary"]["components"]
+    check("route test: 78 locked images from 54 patients", (reg["locked_set"]["n_images"], reg["locked_set"]["n_patients"]), (78, 54), 0,
+          text="78 malignant images of the selection fold, from 54 patients")
+    a4 = [con["summary"][t]["n_all_three_g1"] for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2")]
+    check("route test: all four controls pass G1 on 74 to 78 images", (min(a4), max(a4)), (74, 78), 0, text="74 to 78 of the 78 images")
+    ex = sorted(v["est"] for v in comp.values() if v.get("decision_sim") == "exceeds")
+    check("route test: disagreements 1.99 to 5.27 logits", (ex[0], ex[-1]), (1.99, 5.27), 5e-3, text="1.99 to 5.27 logits")
+    check("route test: abstract 2.0 to 5.3 logits", (ex[0], ex[-1]), (2.0, 5.3), 0.05, text="2.0 to 5.3 logits")
+    check("route test: 3 disagree / 2 agree / 7 indeterminate",
+          "%d/%d/%d" % (pr["summary"]["routes disagree"], pr["summary"]["routes agree"], pr["summary"]["indeterminate"]), "3/2/7",
+          text="In three of the twelve cells")
+    check("route test: no direction pair exceeds", pr["summary"]["direction_pair_exceeds"], 0,
+          text="no pair that differs only in direction exceeded the margin")
+    sa = [comp["%s|S_%s" % (c, k)]["est"] for c, v in pr["cells"].items() if v["class"] == "routes agree" for k in ("rad4", "rad16", "hue4", "hue16")]
+    check("route test: agreeing route sums within -0.01 and +0.21", (min(sa) >= -0.01) and (max(sa) <= 0.21), True,
+          text="between −0.01 and +0.21 logits")
+    check("route test: simultaneous critical value 3.30", pr["crit_simultaneous"], 3.30, 5e-3, text="critical value of the band was 3.30", where="supp")
+    for cell, txt in (("slim|contrast@0", "+1.99 [+0.51, +3.47]"), ("erm|contrast@2", "+4.63 [+1.92, +7.34]"),
+                      ("slim|color_var@2", "+5.27 [+1.84, +8.70]")):
+        q = comp[cell + "|D_rad4-rad16"]
+        nums = [float(x) for x in txt.replace("[", "").replace("]", "").replace(",", "").split()]
+        check("route test: Table 5 %s estimate" % cell, q["est"], nums[0], 5e-3, text=txt)
+        check("route test: Table 5 %s interval" % cell, tuple(q["sim"]), (nums[1], nums[2]), 5e-3)
+    ps = []
+    rs = []
+    for m in ("erm", "slim"):
+        for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2"):
+            S = [comp["%s|%s|S_%s" % (m, t, k)]["est"] for k in ("rad4", "rad16", "hue4", "hue16")]
+            PC = [comp["%s|%s|PC_%s" % (m, t, k)]["est"] for k in ("hue", "flip", "jitter", "noise")]
+            rs.append(max(S) - min(S)); ps.append(max(PC) - min(PC))
+    check("route test: route sums spread 0.9 to 5.3", (min(rs), max(rs)), (0.9, 5.3), 0.05, text="spread by 0.9 to 5.3 logits")
+    check("route test: placebos spread 2.0 to 4.5", (min(ps), max(ps)), (2.0, 4.5), 0.05, text="spread by 2.0 to 4.5 logits", where="supp")
+    sall = d["secondary_all_g1"]["summary"]
+    check("route test: without the floor 2 disagree, 0 agree, 10 indeterminate",
+          "%d/%d/%d" % (sall["routes disagree"], sall["routes agree"], sall["indeterminate"]), "2/0/10",
+          text="two cells disagree, none agrees and ten are indeterminate", where="supp")
+    ni = [d["secondary_independent"]["targets"][t]["n_images"] for t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2")]
+    check("route test: independent subsets 16, 1, 0, 0", "/".join(map(str, ni)), "16/1/0/0", text="16, 1, 0 and 0 images", where="supp")
+d = load("c63_route_exploratory")
+if d:
+    q = d["components"]["slim|contrast@0|D_rad4-rad16"]
+    check("exploratory: Slim persists at 2.32 on 49 images", (q["est"], q["n_images"]), (2.32, 49), 5e-3, text="2.32 logits on 49 images")
+    check("exploratory: decision exceeds", q["decision_sim"], "exceeds")
+    check("exploratory: critical value 2.80", d["crit_simultaneous"], 2.80, 5e-3, text="critical value 2.80", where="supp")
+d = load("c62_frontier")
+if d:
+    tks = ("contrast@0", "contrast@2", "color_var@0", "color_var@2")
+    fine = [sum(r["targets"][t]["rad"]["fine_feasible"] for r in d["images"]) for t in tks]
+    check("frontier: radial within 0.1% on 13 and 15 images at the high doses, none at the low doses", "/".join(map(str, fine)), "0/13/0/15",
+          text="for 13 and 15 of the 78 images at the two high doses")
+    h10 = sum(1 for t in tks for r in d["images"] if r["targets"][t]["hue"]["neutral_converged"]
+              and max(abs(r["targets"][t]["hue"]["rel_dE"]), abs(r["targets"][t]["hue"]["rel_hf"])) <= 0.10)
+    check("frontier: hue never within 10%", h10, 0, text="The hue controls never came within 10%")
 d = load("c56_simultaneous36")
 if d:
     check("36-component critical value 3.11 (headline band)", d["crit_36"], 3.11, 5e-3, text="1.96 to 3.11")
