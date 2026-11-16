@@ -22,8 +22,9 @@ MASTER="$LOG/run_all.log"
 
 mkdir -p "$LOG" "$RES" "$BASE/paper/figures"
 
-# analysis scripts, in dependency order (c25 before c45, c34 before c55)
+# analysis scripts, in dependency order (the prediction cache first; c25 before c45, c34 before c55)
 SCRIPTS=(
+  c44_cache_preds
   c54_synthetic_scm
   c2_cace_artifact
   c3_cace_concept
@@ -55,7 +56,18 @@ SCRIPTS=(
   c59_rebuild_generator
   c52_overlay_perceptual
   c55_identification_graph
+  # post hoc checks; c67 and c69 read the route-test results and need the first-run Inv checkpoint
+  # in checkpoints/archived_b3inv_ep1 (release checkpoints-v1.0)
+  c66_overlay_occlusion
+  c70_occlusion_mask_sensitivity
+  c68_floor_sets
+  c71_rule_checks
+  c72_library_proxy_split
+  c67_route_sensitivity
+  c69_route_clip_sensitivity
+  c73_route_robustness_table
   make_figures_split
+  make_fig_edit_examples
   make_fig_shrinkage
 )
 

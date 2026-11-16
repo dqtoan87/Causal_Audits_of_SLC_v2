@@ -283,16 +283,18 @@ def p3_fig1_dag():
     a2.text(0.72, 0.86, r"$\theta^{\,\mathrm{do}}$", ha="center", va="center", fontsize=MD, bbox=box)
     _rung(a2, 0.86, 0.18, 0.63, "T1  transfer\nassumed, untested", "assumed", ASSC)
     a2.text(0.0, 0.98, "artifact side", fontsize=SM, weight="bold", ha="left", color="0.30")
-    a2.text(0.0, 0.63, "concept side", fontsize=SM, weight="bold", ha="left", color="0.30")
-    a2.text(0.09, 0.46, r"$R(e)$", ha="center", va="center", fontsize=MD, bbox=obs)
-    a2.text(0.44, 0.46, r"$g+h$", ha="center", va="center", fontsize=MD, bbox=box)
-    a2.text(0.72, 0.46, r"$h^{\ast}$", ha="center", va="center", fontsize=MD, bbox=box)
-    a2.text(0.95, 0.46, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
-    _rung(a2, 0.46, 0.19, 0.36, "C1  working form\ngranted; probed by\ndiagnostic (T)", "assumed", ASSC)
-    _rung(a2, 0.46, 0.52, 0.67, "C2  identification\nfrom the library\nnot satisfied", "tested", BADC)
-    _rung(a2, 0.46, 0.77, 0.90, "C3  a: assumed\nb: fixed level not\nmet by the edit", "tested", BADC)
-    a2.text(0.52, 0.27, "C0 gates C2: it selects\nthe branch of Statement 1", ha="center", va="center",
-            fontsize=SM, color="0.30")
+    a2.text(0.0, 0.66, "concept side", fontsize=SM, weight="bold", ha="left", color="0.30")
+    a2.text(0.09, 0.47, r"$R(e)$", ha="center", va="center", fontsize=MD, bbox=obs)
+    a2.text(0.45, 0.47, r"$g+h$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.84, 0.47, r"$h^{\ast}$", ha="center", va="center", fontsize=MD, bbox=box)
+    _rung(a2, 0.47, 0.19, 0.37, "C1  a: factorization\nb: no interaction\ngranted; a probed", "assumed", ASSC)
+    _rung(a2, 0.47, 0.53, 0.77, "C2  a route in $G_0$\nnot satisfied\n(C0 gates it)", "tested", BADC)
+    a2.text(0.09, 0.13, r"$R(e^{\ast})$", ha="center", va="center", fontsize=MD, bbox=obs)
+    a2.text(0.84, 0.13, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
+    _rung(a2, 0.13, 0.20, 0.77, "C3  a: assumed, untested\nb: fixed level not met by the edit", "tested", BADC)
+    a2.annotate("", xy=(0.84, 0.19), xytext=(0.84, 0.41),
+                arrowprops=dict(arrowstyle="<->", lw=0.9, color="0.45", ls=(0, (2, 2))))
+    a2.text(0.865, 0.30, r"differ by" "\n" r"$g(M(e^{\ast}))$", ha="left", va="center", fontsize=SM, color="0.30")
     fig.text(0.5, 0.190, "Green box: estimated from the audited images.   Amber dashed rung: "
              "granted or assumed, not established.   Red rung: not satisfied by the design.",
              ha="center", va="center", fontsize=SM, color="0.25")
@@ -302,8 +304,8 @@ def p3_fig1_dag():
     fig.text(0.5, 0.100, "The graph gives no directed path U \u2192 Y. It does not give $f(T_A(X)) = f(X)$; "
              "that step is the requirement the audit imposes.", ha="center", va="center",
              fontsize=SM, color=SPUR)
-    fig.text(0.5, 0.055, "C and Y are associated through Dis, not by an effect of C on Y. Z \u2192 U makes "
-             "artifacts informative about the label.", ha="center", va="center", fontsize=SM)
+    fig.text(0.5, 0.055, "C and Y are associated through Dis, not by an effect of C on Y. U \u2190 Z \u2192 Y lets "
+             "an artifact carry information about the label.", ha="center", va="center", fontsize=SM)
     fig.text(0.5, 0.012, "$T_A$ is applied to the image, so the model-side response is estimated "
              r"rather than identified; $\mathrm{do}(U)$ is not available on an archived image.",
              ha="center", va="center", fontsize=SM)

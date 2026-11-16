@@ -28,9 +28,10 @@ Protocol, following the original:
      all images, and random TCAV scores pile up at 0 or 1 instead of clustering around 0.5. The null mean is
      still around 0.5 but its variance is very large, so this test has low power here.
 
-Point to keep in mind when reading the results: building the CAV from the paper's own concept edits is the
-most favourable treatment possible for TCAV. The concept direction is taken directly from the intervention the
-paper performs, so the CAV cannot be faulted for failing to represent the concept.
+Point to keep in mind when reading the results: the CAV is built from the paper's own concept edits, so the
+concept direction is taken from the intervention the paper performs. It therefore carries the edit's footprint
+as well as its concept change. Accuracy is reported on all activations and on the half not used to fit each
+direction.
 
 Out -> results/c49_tcav.json
 Run:  python Causal_XAI_v3/code/c49_tcav.py
@@ -139,8 +140,7 @@ def main():
            "note": ("TCAV on the same checkpoints, concepts and audit images as the concept tier. "
                     "The CAV is trained to separate activations of concept-edited images from "
                     "activations of the originals, so the concept direction comes from the very "
-                    "intervention the paper performs. This is the most favourable construction "
-                    "available to TCAV. Significance is against N_RAND random CAVs from permuted "
+                    "intervention the paper performs. Significance is against N_RAND random CAVs from permuted "
                     "labels, the standard TCAV control."),
            "models": {}}
 
@@ -160,11 +160,13 @@ def main():
             def one(labels_, half):
                 cl = LogisticRegression(max_iter=2000, C=1.0).fit(X[half], labels_[half])
                 vv = cl.coef_[0]; vv = vv / (np.linalg.norm(vv) + 1e-12)
-                return float(((G0 @ vv) > 0).mean()), float(cl.score(X, labels_))
-            scores, accs = [], []
+                rest = np.setdiff1d(np.arange(len(X)), half)     # activations not used to fit this direction
+                return (float(((G0 @ vv) > 0).mean()), float(cl.score(X, labels_)),
+                        float(cl.score(X[rest], labels_[rest])))
+            scores, accs, accs_ho = [], [], []
             for r in range(N_CAV):
                 h = rng.permutation(len(X))[: len(X) // 2]
-                sc, ac = one(y, h); scores.append(sc); accs.append(ac)
+                sc, ac, ho = one(y, h); scores.append(sc); accs.append(ac); accs_ho.append(ho)
             null = []
             for r in range(N_RAND):
                 h = rng.permutation(len(X))[: len(X) // 2]
@@ -173,6 +175,7 @@ def main():
             t, p = stats.ttest_ind(scores, null, equal_var=False)
             entry["concepts"][c] = {
                 "cav_accuracy_mean": float(accs.mean()),
+                "cav_accuracy_heldout_mean": float(np.mean(accs_ho)),
                 "tcav_mean": float(scores.mean()),
                 "tcav_sd": float(scores.std(ddof=1)),
                 "tcav_range": [float(scores.min()), float(scores.max())],
@@ -197,6 +200,8 @@ def main():
                       "n_significant": sum(e["significant"] for e in allc),
                       "tcav_mean_range": [min(e["tcav_mean"] for e in allc),
                                           max(e["tcav_mean"] for e in allc)],
+                      "cav_accuracy_heldout_range": [min(e["cav_accuracy_heldout_mean"] for e in allc),
+                                                     max(e["cav_accuracy_heldout_mean"] for e in allc)],
                       "cav_accuracy_range": [min(e["cav_accuracy_mean"] for e in allc),
                                              max(e["cav_accuracy_mean"] for e in allc)],
                       "null_sd_range": [min(e["null_sd"] for e in allc),

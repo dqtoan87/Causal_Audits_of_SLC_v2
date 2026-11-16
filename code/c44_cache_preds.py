@@ -10,11 +10,14 @@ analysis that reads it is consistent.
 
 File contents: labels, names (18 edits), and p0_*, pe_* for the three EfficientNet-B3 models.
 
-Out -> results/c19_preds.npz
-Run:  python code/c44_cache_preds.py
+Out -> results/c19_preds.npz, and results/c19_preds_manifest.json with the SHA-256 of every checkpoint
+       and of the audit-cohort manifest the cache was built from
+Run:  python code/c44_cache_preds.py   (code/run_all.sh calls it first)
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import sys
 import time
@@ -29,6 +32,7 @@ import audit_cohort                # noqa: E402
 p1, DEVICE = c13.p1, c13.DEVICE
 RES = os.path.join(os.path.dirname(HERE), "results")
 OUT = os.path.join(RES, "c19_preds.npz")
+MANIFEST = os.path.join(RES, "c19_preds_manifest.json")
 
 
 def main():
@@ -56,7 +60,15 @@ def main():
         print(f"  [{m}] mean p0 {p0.mean():.3f}  ({time.time()-t0:.0f}s)", flush=True)
 
     np.savez_compressed(OUT, **out)
-    print(f"saved -> {OUT}  ({time.time()-t0:.0f}s)")
+    # record what the cache was built from, so a cache built from other weights can be detected
+    sha = lambda f: hashlib.sha256(open(f, "rb").read()).hexdigest()
+    man = {"cache": os.path.basename(OUT), "cache_sha256": sha(OUT),
+           "checkpoints": {m: {"file": os.path.basename(c13.CKPTS[m]), "sha256": sha(c13.CKPTS[m])}
+                           for m in c13.ORDER},
+           "audit_cohort_sha256": sha(os.path.join(RES, "audit_cohort.json")),
+           "n_images": int(len(imgs01)), "n_edits": int(len(names))}
+    json.dump(man, open(MANIFEST, "w"), indent=1)
+    print(f"saved -> {OUT} and {MANIFEST}  ({time.time()-t0:.0f}s)")
 
 
 if __name__ == "__main__":

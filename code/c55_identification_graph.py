@@ -144,7 +144,8 @@ def smd_matrix(mean, var):
     d = mean[:, None, :] - mean[None, :, :]
     sd = np.sqrt(0.5 * (var[:, None, :] + var[None, :, :]))
     with np.errstate(divide="ignore", invalid="ignore"):
-        z = np.where(sd > 1e-12, np.abs(d) / sd, 0.0)
+        # zero pooled variance: distance 0 only if the means agree (c71_rule_checks finds no such pair)
+        z = np.where(sd > 1e-12, np.abs(d) / sd, np.where(d == 0.0, 0.0, np.inf))
     return z.max(axis=2)
 
 

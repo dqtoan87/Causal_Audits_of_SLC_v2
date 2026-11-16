@@ -4,7 +4,7 @@
  "dose": 1.0,
  "n_random_cavs": 20,
  "seed": 42,
- "note": "TCAV on the same checkpoints, concepts and audit images as the concept tier. The CAV is trained to separate activations of concept-edited images from activations of the originals, so the concept direction comes from the very intervention the paper performs. This is the most favourable construction available to TCAV. Significance is against N_RAND random CAVs from permuted labels, the standard TCAV control.",
+ "note": "TCAV on the same checkpoints, concepts and audit images as the concept tier. The CAV is trained to separate activations of concept-edited images from activations of the originals, so the concept direction comes from the very intervention the paper performs. Significance is against N_RAND random CAVs from permuted labels, the standard TCAV control.",
  "models": {
   "dj_erm_b3": {
    "label": "EfficientNet-B3 ERM",
@@ -12,6 +12,7 @@
    "concepts": {
     "contrast": {
      "cav_accuracy_mean": 0.864071038251366,
+     "cav_accuracy_heldout_mean": 0.7281420765027322,
      "tcav_mean": 0.8,
      "tcav_sd": 0.41039134083406165,
      "tcav_range": [
@@ -31,6 +32,7 @@
     },
     "color_var": {
      "cav_accuracy_mean": 0.8560109289617485,
+     "cav_accuracy_heldout_mean": 0.7120218579234974,
      "tcav_mean": 0.85,
      "tcav_sd": 0.36634754853252327,
      "tcav_range": [
@@ -56,6 +58,7 @@
    "concepts": {
     "contrast": {
      "cav_accuracy_mean": 0.8546448087431694,
+     "cav_accuracy_heldout_mean": 0.7092896174863389,
      "tcav_mean": 0.8743169398907102,
      "tcav_sd": 0.14413019810360467,
      "tcav_range": [
@@ -75,6 +78,7 @@
     },
     "color_var": {
      "cav_accuracy_mean": 0.8631147540983607,
+     "cav_accuracy_heldout_mean": 0.7262295081967214,
      "tcav_mean": 0.839071038251366,
      "tcav_sd": 0.2104952840677798,
      "tcav_range": [
@@ -100,6 +104,7 @@
    "concepts": {
     "contrast": {
      "cav_accuracy_mean": 0.8610655737704918,
+     "cav_accuracy_heldout_mean": 0.7224043715846995,
      "tcav_mean": 0.4972677595628415,
      "tcav_sd": 0.3559625262674159,
      "tcav_range": [
@@ -119,6 +124,7 @@
     },
     "color_var": {
      "cav_accuracy_mean": 0.8416666666666666,
+     "cav_accuracy_heldout_mean": 0.683879781420765,
      "tcav_mean": 0.5254098360655737,
      "tcav_sd": 0.3257060049090953,
      "tcav_range": [
@@ -144,6 +150,7 @@
    "concepts": {
     "contrast": {
      "cav_accuracy_mean": 0.9366120218579235,
+     "cav_accuracy_heldout_mean": 0.873224043715847,
      "tcav_mean": 0.25,
      "tcav_sd": 0.4442616583193193,
      "tcav_range": [
@@ -163,6 +170,7 @@
     },
     "color_var": {
      "cav_accuracy_mean": 0.9259562841530056,
+     "cav_accuracy_heldout_mean": 0.851912568306011,
      "tcav_mean": 0.15,
      "tcav_sd": 0.36634754853252327,
      "tcav_range": [
@@ -188,6 +196,7 @@
    "concepts": {
     "contrast": {
      "cav_accuracy_mean": 0.9349726775956283,
+     "cav_accuracy_heldout_mean": 0.8699453551912569,
      "tcav_mean": 0.9989071038251367,
      "tcav_sd": 0.003363863449459525,
      "tcav_range": [
@@ -207,6 +216,7 @@
     },
     "color_var": {
      "cav_accuracy_mean": 0.9288251366120217,
+     "cav_accuracy_heldout_mean": 0.8576502732240436,
      "tcav_mean": 0.9579234972677597,
      "tcav_sd": 0.11549944882862992,
      "tcav_range": [
@@ -232,6 +242,7 @@
    "concepts": {
     "contrast": {
      "cav_accuracy_mean": 0.8673497267759563,
+     "cav_accuracy_heldout_mean": 0.7781420765027323,
      "tcav_mean": 0.6945355191256831,
      "tcav_sd": 0.35991810641819594,
      "tcav_range": [
@@ -251,6 +262,7 @@
     },
     "color_var": {
      "cav_accuracy_mean": 0.8512295081967214,
+     "cav_accuracy_heldout_mean": 0.7469945355191256,
      "tcav_mean": 0.8456284153005464,
      "tcav_sd": 0.22549370503769794,
      "tcav_range": [
@@ -278,6 +290,10 @@
    0.15,
    0.9989071038251367
   ],
+  "cav_accuracy_heldout_range": [
+   0.683879781420765,
+   0.873224043715847
+  ],
   "cav_accuracy_range": [
    0.8416666666666666,
    0.9366120218579235
@@ -287,5 +303,5 @@
    0.5104177855340405
   ]
  },
- "runtime_sec": 63.7
+ "runtime_sec": 73.9
 }

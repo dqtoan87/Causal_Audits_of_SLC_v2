@@ -454,7 +454,11 @@ def smd(a, b):
     """Standardized mean difference (paired): (mean_ctrl − mean_concept)/pooled SD."""
     a, b = np.asarray(a, float), np.asarray(b, float)
     sd = np.sqrt(0.5 * (a.var(ddof=1) + b.var(ddof=1)))
-    return float((a.mean() - b.mean()) / sd) if sd > 1e-12 else 0.0
+    d = a.mean() - b.mean()
+    if sd > 1e-12:
+        return float(d / sd)
+    # zero pooled variance: balanced only if the means agree (c71_rule_checks finds no such pair here)
+    return 0.0 if d == 0.0 else float(np.copysign(np.inf, d))
 
 
 def rel_proxy_shift(base, px):

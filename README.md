@@ -9,7 +9,7 @@ code/          analysis scripts, shared modules, the runner and the verifier
   lib/         vendored training modules
 results/       cached JSON and NPZ outputs, one per script, plus the frozen manifests
 log/           one log per script; run_retrain_b3inv.log for the last re-run of the analyses;
-               e2e_fresh_copy_run.txt for a run in a fresh directory
+               e2e_fresh_copy_run.txt and e2e_posthoc_fresh_copy_run.txt for runs in fresh directories
 requirements.txt  exact package versions
 checkpoints/   audited checkpoints, downloaded from the release below (not tracked)
 paper/         the manuscript, read by the verifier (not included)
@@ -25,7 +25,12 @@ sha256sum -c SHA256SUMS
 
 The release holds the six audited classifiers (`dj_{erm,slim,causal}_{b3,r50}.pt`), the two PAD-UFES-20 classifiers (`pad_{erm,slim}.pt`) and the checkpoints of the selection analysis (`sel_{blind,leaky}_{erm,slim,causal}.pt`). Analyses that read only cached predictions run without them (see below).
 
-In `checkpoints-v1.1` the EfficientNet-B3 Inv classifier (`dj_causal_b3.pt`) is selected only among epochs in which both invariance penalties are on (epoch 7). The release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/releases/tag/checkpoints-v1.0) keeps the checkpoint that the original selection rule saved at epoch 1, inside the penalty warm-up. It is needed only to reproduce the first run of the route test below; its other thirteen files are identical to those of `checkpoints-v1.1`.
+In `checkpoints-v1.1` the EfficientNet-B3 Inv classifier (`dj_causal_b3.pt`) is selected only among epochs in which both invariance penalties are on (epoch 7). The release [`checkpoints-v1.0`](https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/releases/tag/checkpoints-v1.0) keeps the checkpoint that the original selection rule saved at epoch 1, inside the penalty warm-up. It is needed only for the first run of the route test below and for `c67` and `c69`, which read it from `checkpoints/archived_b3inv_ep1/dj_causal_b3.pt`; its other thirteen files are identical to those of `checkpoints-v1.1`.
+
+```bash
+mkdir -p checkpoints/archived_b3inv_ep1 && cd checkpoints/archived_b3inv_ep1
+gh release download checkpoints-v1.0 --repo dqtoan87/Causal_Audits_of_SLC_v2 --pattern dj_causal_b3.pt
+```
 
 ## Setup
 
@@ -53,7 +58,7 @@ bash code/run_all.sh                                   # all analyses in depende
 PY=/path/to/python setsid nohup bash code/run_all.sh > log/nohup.out 2>&1 < /dev/null &   # detached
 ```
 
-`run_all.sh` audits the released PAD-UFES-20 checkpoints (`c46 --use-saved`), which is how the reported numbers were produced, and runs `c51`, `c58` and `c59` only when `OTHER` points at the reimplementation. It runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), regenerates the figures, and then calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes. `c29_disjoint_train.py` selects each Inv checkpoint among the epochs with both penalties on, and `C29_ONLY=dj_causal_b3` trains one job only. After any checkpoint changes, run `c44_cache_preds.py` before `run_all.sh`: it writes `results/c19_preds.npz`, which `c26`, `c32`, `c38` and the shrinkage figure read, and `run_all.sh` does not call it. `code/run_retrain_b3inv.sh` records how the EfficientNet-B3 Inv checkpoint was retrained and every analysis that reads it was run again, including the second run of the route test. `log/e2e_fresh_copy_run.txt` records a run of the released code and checkpoints in a fresh directory, compared file by file with `results/`.
+`run_all.sh` audits the released PAD-UFES-20 checkpoints (`c46 --use-saved`), which is how the reported numbers were produced, and runs `c51`, `c58` and `c59` only when `OTHER` points at the reimplementation. It first rebuilds the prediction cache, runs the analysis scripts in dependency order (`c25` before `c45`, `c34` before `c55`), then the post hoc checks (`c66` to `c73`), regenerates the figures, and calls the verifier. A failing script is logged with its traceback and the sequence continues. Training is not part of the run: the audited checkpoints are frozen and every reported number is about those weights. To retrain, run `c29_disjoint_train.py` and `c8_backbone2_train.py` first; retrained weights need not reproduce the reported magnitudes. `c29_disjoint_train.py` selects each Inv checkpoint among the epochs with both penalties on, and `C29_ONLY=dj_causal_b3` trains one job only. `c44_cache_preds.py` writes `results/c19_preds.npz`, which `c26`, `c32`, `c38` and the shrinkage figure read, and `results/c19_preds_manifest.json` with the SHA-256 of the checkpoints it read, so a cache built from other weights can be detected. `code/run_retrain_b3inv.sh` records how the EfficientNet-B3 Inv checkpoint was retrained and every analysis that reads it was run again, including the second run of the route test. `log/e2e_fresh_copy_run.txt` records a run of the released code and checkpoints in a fresh directory, compared file by file with `results/`. `log/e2e_posthoc_fresh_copy_run.txt` records a second fresh-directory run of the post hoc scripts and of `c12`, `c25`, `c49` and `c55`: its 13 result files equal the committed ones to a relative tolerance of 1e-9.
 
 Scripts that read only cached predictions and need neither a GPU nor raw images include `c26_hair_dose_prob`, `c32_absdp_patient_ci`, `c38_shrinkage_sensitivity`, `c41_within_patient`, `c45_partial_id`, `c47_heterogeneity`, `c54_synthetic_scm`, `c55_identification_graph` and `make_fig_shrinkage`.
 
@@ -93,12 +98,19 @@ Scripts that read only cached predictions and need neither a GPU nor raw images 
 | `c55_identification_graph.py` | `c55_identification_graph.json` | the audit graph, its connectivity and the approximate-route bounds |
 | `c54_synthetic_scm.py` | `c54_synthetic_scm.json` | synthetic response model with a known concept component |
 | `c38_shrinkage_sensitivity.py` | `c38_shrinkage_sensitivity.json` | shrinkage slopes with clustered intervals |
-| `c44_cache_preds.py` | `c19_preds.npz` | cached baseline and edited predictions |
-| `c49_tcav.py` | `c49_tcav.json` | concept activation vectors on the same checkpoints and concepts |
+| `c44_cache_preds.py` | `c19_preds.npz`, `c19_preds_manifest.json` | cached baseline and edited predictions, with the checksums of the checkpoints they came from |
+| `c49_tcav.py` | `c49_tcav.json` | concept activation vectors on the same checkpoints and concepts; accuracy on all activations and on the half not used to fit each direction |
+| `c66_overlay_occlusion.py` | `c66_overlay_occlusion.json` | exploratory: the artifact criterion with overlays restricted to skin or to a proxy lesion region |
+| `c70_occlusion_mask_sensitivity.py` | `c70_occlusion_mask_sensitivity.json` | exploratory: the skin-only criterion under other lesion regions, and a comparison matched in altered pixels |
+| `c68_floor_sets.py` | `c68_floor_sets.json` | the images that pass the 0.1 score floor under each scoring path, by identifier |
+| `c71_rule_checks.py` | `c71_rule_checks.json` | zero denominators of the balance SMD, the 57-image floor set, multiplicity of the concept-activation test |
+| `c72_library_proxy_split.py` | `c72_library_proxy_split.json` | the proxy-neutrality screen with the two concept proxies kept apart |
 | `c51_independent_rebuild.py` | `c51_independent_rebuild.json` | comparison against a separate reimplementation (see the note below) |
 | `c58_rebuild_trace.py` | `c58_rebuild_trace.json` | layer-by-layer trace of the one cell on which the reimplementation disagrees (see the note below) |
 | `c59_rebuild_generator.py` | `c59_rebuild_generator.json` | reruns the reimplementation's own loader, overlay generator, inference and checkpoints, and compares them with its cached predictions (see the note below) |
-| `make_figures_split.py`, `make_fig_shrinkage.py` | `paper/figures/` | figures |
+| `make_figures_split.py`, `make_fig_edit_examples.py`, `make_fig_shrinkage.py` | `paper/figures/` | figures; `make_fig_edit_examples.py` draws the performed edits on two CC0 images |
+
+The balance SMD of `c12` and `c55` is zero for a zero pooled variance only when the two means agree, and infinite otherwise; `c71` finds no zero denominator in the library or among the route-test controls.
 
 `c15_symmetry.py` and `audit_cohort.py`, `frozen_split.py`, `audited_models.py` are shared modules. `p2_source_guard.py` stops the data-reading figure scripts when the tree lacks its frozen manifest.
 
@@ -122,14 +134,18 @@ PY=/path/to/python bash code/run_c62.sh   # construct (no model), then evaluate 
 | `c63_route_exploratory.py` | `c63_route_exploratory.json`, `c63_route_scores.npz` | exploratory: each pair restricted to images on which both controls pass the independent check; stores every per-image response |
 | `c64_route_screens.py` | `c64_route_screens.json` | exploratory and model-free: the observable screens under the six-descriptor footprint, and off-target concept changes |
 | `c65_route_robustness.py` | `c65_route_robustness.json` | exploratory, from the stored responses: the margins at which verdicts change, other bootstrap seeds, leave one patient out, the two cross pairs |
+| `c67_route_sensitivity.py` | `c67_route_sensitivity.json` | exploratory: the score floor applied per model or fixed, full precision, mixed batches, saturation at the clipping bound |
+| `c69_route_clip_sensitivity.py` | `c69_route_clip_sensitivity.json` | exploratory: clip levels 1e-4 to 1e-8 read from the head's log-odds in bf16 and fp32, the floor read in fp32, the probability scale, the largest log-odds |
+| `c73_route_robustness_table.py` | `c73_route_robustness_table.json` | the decisive differences under every post hoc variant, and the robust cells of each run |
 | `run_retrain_b3inv.sh` | `c62_evaluation_inv_retrained.json`, `c63_route_exploratory_inv_retrained.json`, `c63_route_scores_inv_retrained.npz`, `c65_route_robustness_inv_retrained.json` | the second run: the unchanged plan, script and construction applied to the trio with the EfficientNet-B3 Inv checkpoint of `checkpoints-v1.1` |
 
 `c63` scores the locked images again; `c64` and `c65` read no new model output.
 
-**Results.** The plan was run twice, each time without deviation. Every control matched the magnitude footprint exactly, and all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. The concept edit's response cancels from every difference of two route sums, so the cycle test compares the controls with each other. The decision uses a simultaneous 95% band over 48 differences and a 0.5-logit margin.
+**Results.** The plan's procedure was run twice without deviation; the second run applied it to the retrained Inv checkpoint. Every control matched the magnitude footprint to numerical precision (one pixel in the altered-pixel fraction, a relative 1e-5 elsewhere), and all four controls passed the exactness and neutrality gate on 74 to 78 of the 78 images per target. The concept edit's response cancels from every difference of two route sums, so the cycle test compares the controls with each other. The decision uses a simultaneous 95% band over 48 differences and a 0.5-logit margin.
 
 - First run (registered outcome; EfficientNet-B3 Inv checkpoint of `checkpoints-v1.0`; files without suffix): on the primary set (73 to 77 images, 52 to 54 patients) routes disagree in 3 of 12 model-by-target cells (ERM and Slim, all through the radial scale pair), agree in 2 (the Inv model at both low doses) and are indeterminate in 7. The two highest-dose disagreements are robust to the bootstrap seed and to leaving out any patient; the third (Slim, lowest contrast dose) is borderline.
 - Second run (the unchanged plan applied after the Inv checkpoint was retrained; files with the suffix `_inv_retrained`): the score floor reads all three models, so the primary set changes to 44 to 47 images from 32 or 33 patients. Routes disagree in 3 of 12 cells, one per classifier (ERM and Inv at the highest contrast dose, Slim at the highest variegation dose), none agree and 9 are indeterminate. The ERM and Inv disagreements are robust to the bootstrap seed and to leaving out any patient; the Slim one depends on single patients.
+- Across every post hoc variant (seeds, leave one patient out, score floor, full precision, mixed batches, clip levels 1e-4 to 1e-8; `c65`, `c67`, `c69`, `c73`), two of the three disagreements of each run hold. Only ERM at the highest contrast dose holds in both runs. Every decision is made on the clipped logit scale; the unclipped log-odds are not stable across numerics.
 
 A disagreement rejects the magnitude-only working form jointly with control neutrality; it does not test the six-descriptor footprint. Agreement would certify no route sum, because a bias shared by all routes cancels. Under the six-descriptor footprint and the library's screens, no constructed control passes all three screens.
 
