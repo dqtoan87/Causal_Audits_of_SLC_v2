@@ -67,9 +67,9 @@ ok        benign redraw: component coverage min 98.8%                           
 ok        benign redraw: crit 2.99 to 3.23                                                                                                         got 2.989 to 3.227         paper 2.99 to 3.23
 ok        benign redraw: crit median 3.08                                                                                                          got 3.0806                 paper 3.08
 ok        benign redraw: frontier median 0.0470                                                                                                    got 0.046994               paper 0.047
-ok        benign redraw: frontier min 0.0280                                                                                                       got 0.027961               paper 0.028
+ok        benign redraw: frontier min 0.0279 (rounded down)                                                                                        got 0.0279                 paper 0.0279
 ok        benign redraw: every tolerance below 0.027 in every draw                                                                                 got 0.027961               paper >= 0.027
-ok        benign redraw: frontier central range 0.033 to 0.066                                                                                     got 0.03264 to 0.06618     paper 0.033 to 0.066
+ok        benign redraw: frontier central range 0.032 to 0.066 (lower end rounded down)                                                            got 0.032 to 0.06618       paper 0.032 to 0.066
 ok        benign redraw: all 18 exceed 0.05 jointly in 38% of draws                                                                                got 38.2                   paper 38.2
 ok        benign redraw: frame 4,150 benign from 198 patients                                                                                      got 4150 to 198            paper 4150 to 198
 ok        benign redraw: 500 draws                                                                                                                 got 500                    paper 500
@@ -84,22 +84,22 @@ ok        route test: 12 of 24 direction differences exclude zero marginally    
 ok        route test: 7 direction differences exceed on marginal intervals                                                                         got 7                      paper 7
 ok        route test: simultaneous critical value 3.37                                                                                             got 3.37485                paper 3.37
 ok        route test: primary sets 44 to 47 images from 32 or 33 patients                                                                          got 44-47/32-33            paper 44-47/32-33
-ok        Table 5 images (patients), both runs, contrast@0                                                                                         got | 45 (32) / 75 (53) |  paper | 45 (32) / 75 (53) |
-ok        Table 5 verdicts, second / first run, erm contrast@0                                                                                     got indeterminate / indeterminate paper indeterminate / indeterminate
-ok        Table 5 verdicts, second / first run, slim contrast@0                                                                                    got indeterminate / disagree paper indeterminate / disagree
-ok        Table 5 verdicts, second / first run, causal contrast@0                                                                                  got indeterminate / agree  paper indeterminate / agree
-ok        Table 5 images (patients), both runs, contrast@2                                                                                         got | 44 (32) / 73 (52) |  paper | 44 (32) / 73 (52) |
-ok        Table 5 verdicts, second / first run, erm contrast@2                                                                                     got disagree / disagree    paper disagree / disagree
-ok        Table 5 verdicts, second / first run, slim contrast@2                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
-ok        Table 5 verdicts, second / first run, causal contrast@2                                                                                  got disagree / indeterminate paper disagree / indeterminate
-ok        Table 5 images (patients), both runs, color_var@0                                                                                        got | 47 (33) / 77 (54) |  paper | 47 (33) / 77 (54) |
-ok        Table 5 verdicts, second / first run, erm color_var@0                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
-ok        Table 5 verdicts, second / first run, slim color_var@0                                                                                   got indeterminate / indeterminate paper indeterminate / indeterminate
-ok        Table 5 verdicts, second / first run, causal color_var@0                                                                                 got indeterminate / agree  paper indeterminate / agree
-ok        Table 5 images (patients), both runs, color_var@2                                                                                        got | 46 (32) / 76 (54) |  paper | 46 (32) / 76 (54) |
-ok        Table 5 verdicts, second / first run, erm color_var@2                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
-ok        Table 5 verdicts, second / first run, slim color_var@2                                                                                   got disagree / disagree    paper disagree / disagree
-ok        Table 5 verdicts, second / first run, causal color_var@2                                                                                 got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 images (patients), first / second run, contrast@0                                                                                got | 75 (53) / 45 (32) |  paper | 75 (53) / 45 (32) |
+ok        Table 5 verdicts, first / second run, erm contrast@0                                                                                     got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, first / second run, slim contrast@0                                                                                    got disagree / indeterminate paper disagree / indeterminate
+ok        Table 5 verdicts, first / second run, causal contrast@0                                                                                  got agree / indeterminate  paper agree / indeterminate
+ok        Table 5 images (patients), first / second run, contrast@2                                                                                got | 73 (52) / 44 (32) |  paper | 73 (52) / 44 (32) |
+ok        Table 5 verdicts, first / second run, erm contrast@2                                                                                     got disagree / disagree    paper disagree / disagree
+ok        Table 5 verdicts, first / second run, slim contrast@2                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, first / second run, causal contrast@2                                                                                  got indeterminate / disagree paper indeterminate / disagree
+ok        Table 5 images (patients), first / second run, color_var@0                                                                               got | 77 (54) / 47 (33) |  paper | 77 (54) / 47 (33) |
+ok        Table 5 verdicts, first / second run, erm color_var@0                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, first / second run, slim color_var@0                                                                                   got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, first / second run, causal color_var@0                                                                                 got agree / indeterminate  paper agree / indeterminate
+ok        Table 5 images (patients), first / second run, color_var@2                                                                               got | 76 (54) / 46 (32) |  paper | 76 (54) / 46 (32) |
+ok        Table 5 verdicts, first / second run, erm color_var@2                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, first / second run, slim color_var@2                                                                                   got disagree / disagree    paper disagree / disagree
+ok        Table 5 verdicts, first / second run, causal color_var@2                                                                                 got indeterminate / indeterminate paper indeterminate / indeterminate
 ok        both runs: ERM highest contrast and Slim highest variegation disagree in both                                                            got erm|contrast@2,slim|color_var@2 paper erm|contrast@2,slim|color_var@2
 ok        first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed                                                             got erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0 paper erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0
 ok        both runs: 73 to 77 images per target, then 44 to 47                                                                                     got 73-77 / 44-47          paper 73-77 / 44-47
@@ -114,9 +114,9 @@ ok        route test: without the floor the same three cells disagree, nine inde
 ok        route test: independent subsets 11, 0, 0, 0                                                                                              got 11/0/0/0               paper 11/0/0/0
 ok        first run: 3 disagree / 2 agree / 7 indeterminate                                                                                        got 3/2/7                  paper 3/2/7
 ok        first run: critical value 3.30                                                                                                           got 3.3041                 paper 3.3
-ok        first run: slim|contrast@0                                                                                                               got +1.99 [+0.51, +3.47]   paper +1.99 [+0.51, +3.47]
-ok        first run: erm|contrast@2                                                                                                                got +4.63 [+1.92, +7.34]   paper +4.63 [+1.92, +7.34]
-ok        first run: slim|color_var@2                                                                                                              got +5.27 [+1.84, +8.70]   paper +5.27 [+1.84, +8.70]
+ok        first run: slim|contrast@0 (lower end rounded down)                                                                                      got +1.99 [+0.50, +3.47]   paper +1.99 [+0.50, +3.47]
+ok        first run: erm|contrast@2 (lower end rounded down)                                                                                       got +4.63 [+1.91, +7.34]   paper +4.63 [+1.91, +7.34]
+ok        first run: slim|color_var@2 (lower end rounded down)                                                                                     got +5.27 [+1.83, +8.70]   paper +5.27 [+1.83, +8.70]
 ok        first run: without the floor 2 disagree, 0 agree, 10 indeterminate                                                                       got 2/0/10                 paper 2/0/10
 ok        first run: 73 to 77 images from 52 to 54 patients                                                                                        got 73-77/52-54            paper 73-77/52-54
 ok        diagnostic (T): per-model median disagreement 7.8, 9.5, 11.4                                                                             got 7.8/9.5/11.4           paper 7.8/9.5/11.4
@@ -143,7 +143,7 @@ ok        Table 5 cell erm|color_var@2                                          
 ok        Table 5 cell slim|color_var@2                                                                                                            got 1                      paper 1
 ok        Table 5 cell causal|color_var@2                                                                                                          got 1                      paper 1
 ok        cross pairs: 4, 5 and 2 outside, none inside                                                                                             got 4/5/2 0                paper 4/5/2 0
-ok        first run: borderline lower bound 0.510                                                                                                  got 0.50979                paper 0.51
+ok        first run: borderline lower bound 0.509 (rounded down)                                                                                   got 0.509                  paper 0.509
 ok        first run: borderline under 10 of 20 seeds                                                                                               got 10                     paper 10
 ok        first run: borderline in 31 of the 53 subsets                                                                                            got 31 to 53               paper 31 to 53
 ok        first run: the two highest-dose disagreements hold for 20 of 20 seeds and every in-cell subset                                           got 20-52/52/20-54/54      paper 20-52/52/20-54/54
@@ -233,7 +233,7 @@ ok        balanced and neutral sets are disjoint                                
 ok        88 performed edits                                                                                                                       got 88                     paper 88
 ok        four exactly matched pairs                                                                                                               got 4                      paper 4
 ok        coincide for exactly four pairs in those pairs                                                                                           got 8                      paper 8
-ok        length-two route rho 9.7 to 13.3                                                                                                         got 9.655 to 13.27         paper 9.7 to 13.3
+ok        length-two route rho 9.6 to 13.3 (lower end rounded down)                                                                                got 9.6 to 13.27           paper 9.6 to 13.3
 ok        best route rho 1.17 to 2.13                                                                                                              got 1.166 to 2.131         paper 1.17 to 2.13
 ok        three targets: bottleneck above one in 98.5 to 100% of resamples                                                                         got 98.48 to 100           paper 98.5 to 100
 ok        color variegation at top dose: above one in 89.9%                                                                                        got 89.86                  paper 89.9
@@ -400,7 +400,7 @@ ok        Fig. 2 file present                                                   
 ok        artifact: the cell decision equals the magnitude decision in all 18 cells                                                                got 18 18                  paper 18 18
 ok        artifact: in every stored band the magnitude ends bound the signed ends in all 18 cells                                                  got 18/18 18/18 18/18 18/18 paper 18/18 18/18 18/18 18/18
 ok        marginal bound 0.0627 (plain) and 0.063 (stratified), rounded down                                                                       got 0.0627 0.063           paper 0.0627 0.063
-ok        exact match: residual mismatch at most 6.3e-7 relative and one pixel on one image                                                        got 6.3e-07 1 1            paper 6.3e-07 1 1
+ok        exact match: residual mismatch at most 6.3e-7 relative and one pixel on one image                                                        got 6.4e-07 1 1            paper 6.4e-07 1 1
 ok        exact match: radial 50 to 67 images, hue 17 to 38                                                                                        got 50-67 17-38            paper 50-67 17-38
 ok        exact match: second-run decisive differences +4.83, +6.46, +6.24 on 35, 35, 41 images                                                    got +4.83/35 +6.46/35 +6.24/41 paper +4.83/35 +6.46/35 +6.24/41
 ok        exact match: lower bounds 1.46, 2.41, 1.20 under the 30-image rule (rounded down)                                                        got 1.46 2.41 1.20         paper 1.46 2.41 1.20
@@ -416,7 +416,7 @@ ok        deterministic full precision: +4.61 [0.73] and +6.48 [1.85]           
 ok        skin tone: the CIELAB fields exist in the metadata                                                                                       got 1                      paper 1
 ok        second fresh-directory run: 14 files equal, every script rc=0, c74 included                                                              got 14 0 True True         paper 14 0 True True
 ok        seed band: seed 42 reproduces c56 exactly                                                                                                got 0.0e+00 0.0e+00        paper 0.0e+00 0.0e+00
-ok        seed band: frontier 0.041 to 0.055 (rounded down), 17 or 18 cells at 0.05, crit 3.08 to 3.12                                             got 0.041 0.055 17/18 3.08 3.12 paper 0.041 0.055 17/18 3.08 3.12
+ok        seed band: frontier 0.041 to 0.056, 17 or 18 cells at 0.05, crit 3.08 to 3.12                                                            got 0.041 0.056 17/18 3.08 3.12 paper 0.041 0.056 17/18 3.08 3.12
 ok        seed band: argmin cells and magnitude order in every band                                                                                got 6 1 True               paper 6 1 True
 ok        abstract: 17 of 18 cells exceed jointly at 0.05                                                                                          got 17                     paper 17
 ok        exact identity: 48/48 differences nonzero on bit-exact sets in both runs; smallest 0.012 and 0.008                                       got 48 48 48 48 0.012 0.008 paper 48 48 48 48 0.012 0.008
@@ -426,10 +426,17 @@ ok        three analyses (first_run): recomputation reproduces c74              
 ok        bit-exact Inv: 26 of 27 leave-one-patient-out subsets exceed; smallest lower bound 0.47                                                  got 26/27 0.47             paper 26/27 0.47
 ok        bit-exact decisive differences: 35 to 41 images from 27 or 28 patients                                                                   got 35-41 27-28            paper 35-41 27-28
 ok        Table S38 rows match c76                                                                                                                 got 2                      paper 2
-ok        independent features: natural NN median 8.28, q95 11.38; norms within 1.35 (unedited 1.28)                                               got 8.28 11.38 1.35 1.28   paper 8.28 11.38 1.35 1.28
+ok        independent features: natural NN median 8.28, q95 11.38; norms within 1.35 (unedited 1.28)                                               got 8.28 11.38 1.36 1.28   paper 8.28 11.38 1.36 1.28
 ok        independent features: low doses 0.52 to 0.95, high doses 1.30 to 1.63; radial 45 to 65%, hue 78 to 84%, radial low 0%                    got 0.52-0.95 1.30-1.63 45-65 78-84 0 paper 0.52-0.95 1.30-1.63 45-65 78-84 0
 ok        independent features: the concept edit moves 0.92 and 0.98, beyond q95 on 0 and 9%                                                       got 0.92 0.98 0 9          paper 0.92 0.98 0 9
-ok        post hoc manifest: every listed hash matches; scripts c63 to c77                                                                         got 0 c63-c77 15           paper 0 c63-c77 15
+ok        batch context: plan protocol reproduces stored scores                                                                                    got 0.0e+00                paper 0.0e+00
+ok        batch context: one image per batch bf16, median 0.016, q95 0.066, 2.0% above 0.5                                                         got 0.016 0.066 2.0        paper 0.016 0.066 2.0
+ok        batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max dD 1.95                                                             got 0.081 5.2 0.002 0.8 1.95 paper 0.081 5.2 0.002 0.8 1.95
+ok        batch context: ERM and Inv highest contrast disagree under every protocol; Slim cells move                                               got causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2
+ok        near-natural: ERM/Inv 16 images, 13 patients, +4.06 and +4.27, undecided; only Slim c@2 disagrees (all 48, both runs)                    got 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2 paper 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2
+ok        near-natural: threshold equals c77 q95; 30-image rule: none (second), Slim both contrast doses (first)                                   got 11.38 none | slim|contrast@0,slim|contrast@2 paper 11.38 none | slim|contrast@0,slim|contrast@2
+ok        post hoc manifest: every listed hash matches; scripts c63 to c79                                                                         got 0 c63-c79 17           paper 0 c63-c79 17
 ok        third fresh-directory run: c75 to c77, 3 files equal                                                                                     got 3 0 3                  paper 3 0 3
+ok        fourth fresh-directory run: c78 and c79, 2 files equal; 56 files in all                                                                  got 2 0 2                  paper 2 0 2
 =========================================================================================================================================================================================
-431 checks, 431 ok, 0 not ok
+438 checks, 438 ok, 0 not ok

@@ -21,7 +21,8 @@ OUT = os.path.join(BASE, "results", "posthoc_manifest.sha256")
 SCRIPTS = ["c63_route_exploratory", "c64_route_screens", "c65_route_robustness", "c66_overlay_occlusion",
            "c67_route_sensitivity", "c68_floor_sets", "c69_route_clip_sensitivity", "c70_occlusion_mask_sensitivity",
            "c71_rule_checks", "c72_library_proxy_split", "c73_route_robustness_table", "c74_route_exact_match",
-           "c75_seed_band", "c76_route_exact_detail", "c77_route_feature_shift"]
+           "c75_seed_band", "c76_route_exact_detail", "c77_route_feature_shift",
+           "c78_batch_context", "c79_route_near_natural"]
 
 
 def sha(path):

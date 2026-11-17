@@ -70,6 +70,8 @@ SCRIPTS=(
   c75_seed_band
   c76_route_exact_detail
   c77_route_feature_shift
+  c78_batch_context
+  c79_route_near_natural
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage
