@@ -87,17 +87,22 @@ def main():
 
     target = float(np.mean(h(dC_edit)))                # what a valid estimator must return
     eta = lambda: rng.normal(0.0, 0.15, N)             # residual, so no regime is noiseless
-    R_edit = g(M_edit, L0, ALPHA_EDIT) + h(dC_edit) + eta()
+    R0_edit = g(M_edit, L0, ALPHA_EDIT) + h(dC_edit)  # structural response R0, before the noise
+    R_edit = R0_edit + eta()
 
     regimes = {}
 
     def add(name, note, M_c, dC_c, prx_c, alpha_c, overlap=1.0):
         R_c = g(M_c, L0, alpha_c) + h(dC_c) + eta()
         est = float(np.mean(R_edit) - np.mean(R_c))
+        # the same contrast on the structural responses R0 (no noise): what the estimator targets
+        est0 = float(np.mean(R0_edit) - np.mean(g(M_c, L0, alpha_c) + h(dC_c)))
         sc = screen(M_edit, M_c, prx_edit, prx_c, overlap)
         regimes[name] = {"note": note, "screen": sc, "estimate": est, "target": target,
                          "error": est - target,
-                         "abs_error_frac_of_target": abs(est - target) / abs(target)}
+                         "abs_error_frac_of_target": abs(est - target) / abs(target),
+                         "estimate_noise_free": est0, "error_noise_free": est0 - target,
+                         "abs_error_frac_of_target_noise_free": abs(est0 - target) / abs(target)}
         print(f"  {name:26s} admissible={str(sc['admissible']):5s} "
               f"maxSMD={sc['max_abs_smd']:6.3f} ratio={sc['proxy_ratio']:+.3f} "
               f"est={est:+.3f} target={target:+.3f} err={est-target:+.3f}", flush=True)
@@ -211,6 +216,9 @@ def main():
     Rlib = {k: float(np.mean(g(M, L0, ALPHA_EDIT) + h(c) + eta())) for k, (M, c) in lib.items()}
     keys = list(lib)
     S_chain = (Rlib[keys[0]] - Rlib[keys[1]]) + (Rlib[keys[2]] - Rlib[keys[3]])
+    # the same route sum on the structural responses R0: equation (9) says it equals the target exactly
+    R0lib = {k: float(np.mean(g(M, L0, ALPHA_EDIT) + h(c))) for k, (M, c) in lib.items()}
+    S_chain0 = (R0lib[keys[0]] - R0lib[keys[1]]) + (R0lib[keys[2]] - R0lib[keys[3]])
     # no edit in this library shares the concept edit's footprint except its own bridge, and the
     # placebo route does not exist because no neutral control sits at footprint A
     d_placebo = float(max(abs(smd(M_b[:, k], M_edit[:, k])) for k in range(6)))
@@ -233,6 +241,8 @@ def main():
         "nearest_neutral_control_footprint_distance_max_smd": d_placebo,
         "placebo_route_exists": False,
         "chained_route_estimate": S_chain,
+        "chained_route_noise_free": S_chain0,
+        "chained_route_noise_free_abs_error": abs(S_chain0 - target),
         "target": target,
         "abs_error": abs(S_chain - target),
         "bootstrap_ci95": ci,
@@ -269,7 +279,10 @@ def main():
                  "B instantiates each clause of Statement 1 and Statement 2, and reports the "
                  "interval left by an explicit component-range restriction."),
         "response_model": {"beta": BETA.tolist(), "gamma": GAMMA, "alpha_edit": ALPHA_EDIT,
-                           "form": "dl = M@beta - alpha*L0 + gamma*tanh(1.5*dC) + eta"},
+                           "form": "dl = M@beta - alpha*L0 + gamma*tanh(1.5*dC) + eta",
+                           "noise_free": ("fields ending in _noise_free use the structural response R0 = "
+                                          "M@beta - alpha*L0 + gamma*tanh(1.5*dC), to which Statement 1 "
+                                          "applies; the other estimates add the realized noise eta")},
         "target_h": target, "regimes": regimes, "identified_set": partB,
         "constructive_repair": partC,
         "runtime_sec": round(time.time() - t0, 1),

@@ -104,12 +104,14 @@ ok        both runs: ERM highest contrast and Slim highest variegation disagree 
 ok        first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed                                                             got erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0 paper erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0
 ok        both runs: 73 to 77 images per target, then 44 to 47                                                                                     got 73-77 / 44-47          paper 73-77 / 44-47
 ok        route test: dropping the floor adds 30 or 31 images per target                                                                           got 30 to 31               paper 30 to 31
-ok        route test: Table S31 erm|contrast@2 rad4-rad16                                                                                          got +5.02 [+1.20, +8.83]   paper +5.02 [+1.20, +8.83]
-ok        route test: Table S31 slim|color_var@2 rad4-rad16                                                                                        got +6.16 [+0.62, +11.69]  paper +6.16 [+0.62, +11.69]
-ok        route test: Table S31 causal|contrast@2 rad4-rad16                                                                                       got +6.62 [+1.99, +11.24]  paper +6.62 [+1.99, +11.24]
-ok        route test: Table S31 causal|contrast@2 rad4-hue4                                                                                        got +4.90 [+1.02, +8.79]   paper +4.90 [+1.02, +8.79]
+ok        route test: Table S31 erm|contrast@2 rad4-rad16 (ends rounded outward)                                                                   got +5.02 [+1.20, +8.83]   paper +5.02 [+1.20, +8.83]
+ok        route test: Table S31 slim|color_var@2 rad4-rad16 (ends rounded outward)                                                                 got +6.16 [+0.62, +11.70]  paper +6.16 [+0.62, +11.70]
+ok        route test: Table S31 causal|contrast@2 rad4-rad16 (ends rounded outward)                                                                got +6.62 [+1.99, +11.25]  paper +6.62 [+1.99, +11.25]
+ok        route test: Table S31 causal|contrast@2 rad4-hue4 (ends rounded outward)                                                                 got +4.90 [+1.01, +8.79]   paper +4.90 [+1.01, +8.79]
+ok        Table S31: all 96 differences and 24 cell verdicts of both runs                                                                          got 24                     paper 24
 ok        route test: route sums spread 0.5 to 6.7                                                                                                 got 0.5345 to 6.676        paper 0.5 to 6.7
 ok        route test: placebos spread 3.1 to 6.7                                                                                                   got 3.121 to 6.692         paper 3.1 to 6.7
+ok        first run: route sums spread 0.1 to 5.4, placebos 0.6 to 4.5 (outward)                                                                   got 1                      paper 1
 ok        route test: without the floor the same three cells disagree, nine indeterminate                                                          got 3/0/9 True             paper 3/0/9 True
 ok        route test: independent subsets 11, 0, 0, 0                                                                                              got 11/0/0/0               paper 11/0/0/0
 ok        first run: 3 disagree / 2 agree / 7 indeterminate                                                                                        got 3/2/7                  paper 3/2/7
@@ -131,17 +133,29 @@ ok        robustness: its seed lower bounds 0.55 to 0.70                        
 ok        robustness: its smallest subset bound 0.06                                                                                               got 0.06                   paper 0.06
 ok        robustness: critical value across seeds 3.35 to 3.39                                                                                     got 3.347 to 3.389         paper 3.35 to 3.39
 ok        Table 5 cell erm|contrast@0                                                                                                              got 1                      paper 1
+ok        Table S35 cell erm|contrast@0, both runs                                                                                                 got 1                      paper 1
 ok        Table 5 cell slim|contrast@0                                                                                                             got 1                      paper 1
+ok        Table S35 cell slim|contrast@0, both runs                                                                                                got 1                      paper 1
 ok        Table 5 cell causal|contrast@0                                                                                                           got 1                      paper 1
+ok        Table S35 cell causal|contrast@0, both runs                                                                                              got 1                      paper 1
 ok        Table 5 cell erm|contrast@2                                                                                                              got 1                      paper 1
+ok        Table S35 cell erm|contrast@2, both runs                                                                                                 got 1                      paper 1
 ok        Table 5 cell slim|contrast@2                                                                                                             got 1                      paper 1
+ok        Table S35 cell slim|contrast@2, both runs                                                                                                got 1                      paper 1
 ok        Table 5 cell causal|contrast@2                                                                                                           got 1                      paper 1
+ok        Table S35 cell causal|contrast@2, both runs                                                                                              got 1                      paper 1
 ok        Table 5 cell erm|color_var@0                                                                                                             got 1                      paper 1
+ok        Table S35 cell erm|color_var@0, both runs                                                                                                got 1                      paper 1
 ok        Table 5 cell slim|color_var@0                                                                                                            got 1                      paper 1
+ok        Table S35 cell slim|color_var@0, both runs                                                                                               got 1                      paper 1
 ok        Table 5 cell causal|color_var@0                                                                                                          got 1                      paper 1
+ok        Table S35 cell causal|color_var@0, both runs                                                                                             got 1                      paper 1
 ok        Table 5 cell erm|color_var@2                                                                                                             got 1                      paper 1
+ok        Table S35 cell erm|color_var@2, both runs                                                                                                got 1                      paper 1
 ok        Table 5 cell slim|color_var@2                                                                                                            got 1                      paper 1
+ok        Table S35 cell slim|color_var@2, both runs                                                                                               got 1                      paper 1
 ok        Table 5 cell causal|color_var@2                                                                                                          got 1                      paper 1
+ok        Table S35 cell causal|color_var@2, both runs                                                                                             got 1                      paper 1
 ok        cross pairs: 4, 5 and 2 outside, none inside                                                                                             got 4/5/2 0                paper 4/5/2 0
 ok        first run: borderline lower bound 0.509 (rounded down)                                                                                   got 0.509                  paper 0.509
 ok        first run: borderline under 10 of 20 seeds                                                                                               got 10                     paper 10
@@ -283,6 +297,9 @@ ok        largest half-split disagreement 0.32                                  
 ok        simulated target 1.117                                                                                                                   got 1.11702                paper 1.117
 ok        valid regime within 0.8%                                                                                                                 got 0.762019               paper 0.8
 ok        model-state regime biased 6.7%                                                                                                           got 6.73874                paper 6.7
+ok        structural biases 135.8, 48.6, 6.9 and 42.9%; valid regime exact on R0                                                                   got 0.0 135.7 48.6 6.9 42.9 paper 0.0 135.7 48.6 6.9 42.9
+ok        R4 structural error equals the bias formula +0.077                                                                                       got +0.077 +0.077          paper +0.077 +0.077
+ok        designed route exact on R0                                                                                                               got 0                      paper 0
 ok        proxy-blind regime biased 42.5%                                                                                                          got 42.4932                paper 42.5
 ok        screens admit R1, R4, R5 and reject R2, R3                                                                                               got ARRAA                  paper ARRAA
 ok        designed length-four route +1.111                                                                                                        got 1.1108                 paper 1.111
@@ -374,7 +391,7 @@ ok        robust: first run, ERM highest contrast and Slim highest variegation u
 ok        robust: both first-run minima come from the floor passed under both Inv checkpoints                                                      got floor passed under both Inv checkpoints | floor passed under both Inv checkpoints paper floor passed under both Inv checkpoints | floor passed under both Inv checkpoints
 ok        robust: first-run Slim lowest contrast fails under 10 of 20 seeds                                                                        got 10                     paper 10
 ok        Table 5: first-run robustness labels                                                                                                     got                        paper 
-ok        bounded deviation: robust cells need eps_R above 0.60 and 0.99                                                                           got 0.6 to 0.99            paper 0.6 to 0.99
+ok        bounded deviation (plan-locked run): robust cells need eps_R above 0.95 and 0.91                                                         got 0.95 to 0.91           paper 0.95 to 0.91
 ok        no cell agrees: smallest agreement margin 2.09 (rounded up, as in Table 5)                                                               got 2.09                   paper 2.09
 ok        region: the reference region reproduces c66                                                                                              got True True              paper True True
 ok        dose-matched: 2.46 vs 2.36% altered; ratio 0.77 to 1.41, median 0.99; 18 cells                                                           got 2.46 2.36 0.77 1.41 0.99 18 paper 2.46 2.36 0.77 1.41 0.99 18
@@ -406,6 +423,7 @@ ok        exact match: second-run decisive differences +4.83, +6.46, +6.24 on 35
 ok        exact match: lower bounds 1.46, 2.41, 1.20 under the 30-image rule (rounded down)                                                        got 1.46 2.41 1.20         paper 1.46 2.41 1.20
 ok        exact match: critical values 2.82 and 3.11 (30-image rule), 3.82 and 3.52 (all 48), plan 3.37 and 3.30                                   got 2.82 3.11 3.82 3.52 3.37 3.30 paper 2.82 3.11 3.82 3.52 3.37 3.30
 ok        exact match, all 48: second-run ERM indeterminate at 0.26; Inv direction pair 18 images, [-2.40, +12.60]; first-run Inv cv@0 agrees      got indeterminate 0.26 18 [-2.40, +12.60] indeterminate routes agree paper indeterminate 0.26 18 [-2.40, +12.60] indeterminate routes agree
+ok        exact match (main text): two and one cells with all 48, three and four under the 30-image rule                                           got 2 1 3 4                paper 2 1 3 4
 ok        exact match, all 48: one cell disagrees in the second run, two in the first                                                              got 1 2                    paper 1 2
 ok        exact match: decisions under the 30-image rule and with all 48 differences                                                               got causal|contrast@2,erm|contrast@2,slim|color_var@2,slim|contrast@2 | erm|contrast@2,slim|color_var@2,slim|contrast@2 | causal|contrast@2 | erm|contrast@2,slim|color_var@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2,slim|contrast@2 | erm|contrast@2,slim|color_var@2,slim|contrast@2 | causal|contrast@2 | erm|contrast@2,slim|color_var@2
 ok        exact match: 9 and 21 differences analysed; smallest n 6                                                                                 got 9 21 6                 paper 9 21 6
@@ -435,8 +453,24 @@ ok        batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max d
 ok        batch context: ERM and Inv highest contrast disagree under every protocol; Slim cells move                                               got causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2
 ok        near-natural: ERM/Inv 16 images, 13 patients, +4.06 and +4.27, undecided; only Slim c@2 disagrees (all 48, both runs)                    got 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2 paper 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2
 ok        near-natural: threshold equals c77 q95; 30-image rule: none (second), Slim both contrast doses (first)                                   got 11.38 none | slim|contrast@0,slim|contrast@2 paper 11.38 none | slim|contrast@0,slim|contrast@2
-ok        post hoc manifest: every listed hash matches; scripts c63 to c79                                                                         got 0 c63-c79 17           paper 0 c63-c79 17
+ok        post hoc manifest: every listed hash matches; scripts c63 to c81                                                                         got 0 c63-c81 19           paper 0 c63-c81 19
 ok        third fresh-directory run: c75 to c77, 3 files equal                                                                                     got 3 0 3                  paper 3 0 3
 ok        fourth fresh-directory run: c78 and c79, 2 files equal; 56 files in all                                                                  got 2 0 2                  paper 2 0 2
+ok        fifth fresh-directory run: c54, c80 and c81, 5 files equal                                                                               got 5 0 3                  paper 5 0 3
+ok        c80: reproduces the plan's band to 5e-7                                                                                                  got 4.79299e-07            paper <= 5e-07
+ok        c80: joint coverage 77.7 and 73.3%; marginal at least 95.7%                                                                              got 77.7 73.2 95.7         paper 77.7 73.2 95.7
+ok        c80: false disagreement 1.7/4.8 (zero), 3.5/3.0 (margin, estimate side)                                                                  got 1.7 4.8 3.5 3.0        paper 1.7 4.8 3.5 3.0
+ok        c80: least favorable 21.7/26.6, bound 22.3/26.8, opposite sides 20.3/25.2                                                                got 21.7 26.6 22.3 26.8 20.3 25.2 paper 21.7 26.6 22.3 26.8 20.3 25.2
+ok        c80: kappa 1.42 and 1.47; recalibrated: first run ERM c@2 only (LB 0.78), second run none                                                got 1.42 1.47 erm|contrast@2 0.78 0 1/2/9 paper 1.42 1.47 erm|contrast@2 0.78 0 1/2/9
+ok        c80: recalibrated ERM bound gives eps_R above 0.39                                                                                       got 0.39                   paper 0.39
+ok        c80: first-run Slim lower bounds 0.39 and -0.12 (rounded down)                                                                           got 0.39 -0.12             paper 0.39 -0.12
+ok        c80: coverage by model                                                                                                                   got 85.5 92.4 95.6 82.5 90.1 93.7 paper 85.5 92.4 95.6 82.5 90.1 93.7
+ok        c80: power, median v80 2 and 4 logits; ERM decisive 4; epoch-1 Inv 1                                                                     got 2 4 4.0 [1.0]          paper 2 4 4.0 [1.0]
+ok        c80: outer critical values median 3.29 and 3.31                                                                                          got 3.29 3.31              paper 3.29 3.31
+ok        library: 88 edits in one batch per image; duplicate labels return identical responses on 83 images                                       got 88 True 83 0.0         paper 88 True 83 0.0
+ok        route test: 24 edited versions per batch in both runs                                                                                    got 1                      paper 1
+ok        plan commit given by its full SHA                                                                                                        got 1                      paper 1
+ok        abstract at most 250 words                                                                                                               got 250                    paper <= 250
+ok        no 'registered outcome' wording; T1 is Q-almost sure only                                                                                got 0                      paper 0
 =========================================================================================================================================================================================
-438 checks, 438 ok, 0 not ok
+472 checks, 472 ok, 0 not ok

@@ -72,6 +72,8 @@ SCRIPTS=(
   c77_route_feature_shift
   c78_batch_context
   c79_route_near_natural
+  c80_route_null_calibration
+  c81_protocol_checks
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage

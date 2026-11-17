@@ -22,7 +22,8 @@ SCRIPTS = ["c63_route_exploratory", "c64_route_screens", "c65_route_robustness",
            "c67_route_sensitivity", "c68_floor_sets", "c69_route_clip_sensitivity", "c70_occlusion_mask_sensitivity",
            "c71_rule_checks", "c72_library_proxy_split", "c73_route_robustness_table", "c74_route_exact_match",
            "c75_seed_band", "c76_route_exact_detail", "c77_route_feature_shift",
-           "c78_batch_context", "c79_route_near_natural"]
+           "c78_batch_context", "c79_route_near_natural", "c80_route_null_calibration",
+           "c81_protocol_checks"]
 
 
 def sha(path):

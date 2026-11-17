@@ -195,7 +195,7 @@ if d:
         sg = c["signed_ci"][0] > t or c["signed_ci"][1] < -t
         return mag or sg
     check("seven cells still exceed at tolerance 0.20", sum(exceeds_at(c, 0.20) for c in cl), 7,
-          text="at 0.20, seven of the eighteen cells still exceed")
+          text="seven of the eighteen cells still exceed")
     # Table 4, cell by cell
     tbl = TEXT["paper"][TEXT["paper"].index("**TABLE 4."):]
     tbl = tbl[:tbl.index("\n\n", tbl.index("| --- "))]
@@ -315,7 +315,7 @@ if d:
     check("route test: scale-pair disagreements 5.02 to 6.62 logits", (sx[0], sx[-1]), (5.02, 6.62), 5e-3, text="5.02 to 6.62 logits")
     dis = sorted(c for c, v in pr["cells"].items() if v["class"] == "routes disagree")
     check("route test: three disagreeing cells in the second run", ",".join(dis), ",".join(sorted(["erm|contrast@2", "causal|contrast@2", "slim|color_var@2"])),
-          text="The second run also gives three disagreements, by 5.02 to 6.62 logits")
+          text="and Slim at the highest variegation dose, by 5.02 to 6.62 logits")
     check("route test: 3 disagree / 0 agree / 9 indeterminate",
           "%d/%d/%d" % (pr["summary"]["routes disagree"], pr["summary"]["routes agree"], pr["summary"]["indeterminate"]), "3/0/9",
           text="Three cells disagree, none agrees and nine are indeterminate", where="supp")
@@ -344,13 +344,13 @@ if d:
                    "color_var@2": "color variegation, highest dose"}[t])]
             cell = row[0].split("|")[3 + ("erm", "slim", "causal").index(m)].strip() if row else ""
             want = "%s / %s" % (_cl1[_d1["primary"]["cells"]["%s|%s" % (m, t)]["class"]], _cl1[pr["cells"]["%s|%s" % (m, t)]["class"]])
-            got = "%s / %s" % (cell.split(" / ")[0].split(",")[0], cell.split(" / ")[1].split(" (")[0].split(",")[0]) if cell else None
+            got = "%s / %s" % (cell.split(" / ")[0].split(" (")[0].split(",")[0], cell.split(" / ")[1].split(",")[0].strip()) if cell else None
             check("Table 5 verdicts, first / second run, %s %s" % (m, t), got, want)
     _f1 = sorted(c for c, v in _d1["primary"]["cells"].items() if v["class"] == "routes disagree")
     _a1 = sorted(c for c, v in _d1["primary"]["cells"].items() if v["class"] == "routes agree")
     check("both runs: ERM highest contrast and Slim highest variegation disagree in both",
           ",".join(sorted(set(_f1) & set(dis))), "erm|contrast@2,slim|color_var@2",
-          text="there the first run's two highest-dose disagreements remain")
+          text="the first run's two highest-dose disagreements remain")
     check("first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed", ",".join(_f1) + " | " + ",".join(_a1),
           "erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0".replace(
               "erm|contrast@2,slim|color_var@2,slim|contrast@0", ",".join(sorted(["erm|contrast@2", "slim|color_var@2", "slim|contrast@0"]))),
@@ -361,19 +361,44 @@ if d:
     add = [d["secondary_all_g1"]["targets"][t]["n_images"] - pr["targets"][t]["n_images"] for t in TT]
     check("route test: dropping the floor adds 30 or 31 images per target", (min(add), max(add)), (30, 31), 0,
           text="adds 30 or 31 images per target", where=["paper", "supp"])
-    for cell, q, txt in (("erm|contrast@2", "rad4-rad16", "+5.02 [+1.20, +8.83]"), ("slim|color_var@2", "rad4-rad16", "+6.16 [+0.62, +11.69]"),
-                         ("causal|contrast@2", "rad4-rad16", "+6.62 [+1.99, +11.24]"), ("causal|contrast@2", "rad4-hue4", "+4.90 [+1.02, +8.79]")):
+    for cell, q, txt in (("erm|contrast@2", "rad4-rad16", "+5.02 [+1.20, +8.83]"), ("slim|color_var@2", "rad4-rad16", "+6.16 [+0.62, +11.70]"),
+                         ("causal|contrast@2", "rad4-rad16", "+6.62 [+1.99, +11.25]"), ("causal|contrast@2", "rad4-hue4", "+4.90 [+1.01, +8.79]")):
         v = comp["%s|D_%s" % (cell, q)]
-        check("route test: Table S31 %s %s" % (cell, q), "%s [%s, %s]" % (_sg2(v["est"]), _sg2(v["sim"][0]), _sg2(v["sim"][1])), txt,
-              text=txt, where="supp")
+        check("route test: Table S31 %s %s (ends rounded outward)" % (cell, q), "%s [%s, %s]" % (_sg2(v["est"]), _sg2(math.floor(v["sim"][0] * 100 + 1e-9) / 100),
+              _sg2(math.ceil(v["sim"][1] * 100 - 1e-9) / 100)), txt, text=txt, where="supp")
+    # Table S31: every entry of both runs, in table order, ends rounded outward, bold when the difference exceeds
+    _tn = {"contrast@0": "contrast, lowest dose", "contrast@2": "contrast, highest dose", "color_var@0": "color variegation, lowest dose",
+           "color_var@2": "color variegation, highest dose"}
+    _s31 = TEXT["supp"].split("**TABLE S31.")[1].split("**Route sums against placebos.**")[0]
+    _rows = [ln for ln in _s31.splitlines() if ln.startswith("|") and ("| first |" in ln or "| second |" in ln)]
+    _want, _k = [], 0
+    for _m in ("erm", "slim", "causal"):
+        for _t in ("contrast@0", "contrast@2", "color_var@0", "color_var@2"):
+            for _run, _ev in (("first", load("c62_evaluation")), ("second", d)):
+                _cc = []
+                for _q in ("rad4-hue4", "rad16-hue16", "rad4-rad16", "hue4-hue16"):
+                    _v = _ev["primary"]["components"]["%s|%s|D_%s" % (_m, _t, _q)]
+                    _x = "%s [%s, %s]" % (_sg2(_v["est"]), _sg2(math.floor(_v["sim"][0] * 100 + 1e-9) / 100), _sg2(math.ceil(_v["sim"][1] * 100 - 1e-9) / 100))
+                    _cc.append("**%s**" % _x if _v["decision_sim"] == "exceeds" else _x)
+                _cc.append(_ev["primary"]["cells"]["%s|%s" % (_m, _t)]["class"].replace("routes ", ""))
+                _want.append(_cc)
+    _got = [[c.strip() for c in ln.split("|")[4:9]] for ln in _rows]
+    check("Table S31: all 96 differences and 24 cell verdicts of both runs", sum(a == b for a, b in zip(_got, _want)), 24, 0)
     rs, ps = [], []
     for m in ("erm", "slim", "causal"):
         for t in TT:
             S = [comp["%s|%s|S_%s" % (m, t, k)]["est"] for k in ("rad4", "rad16", "hue4", "hue16")]
             PC = [comp["%s|%s|PC_%s" % (m, t, k)]["est"] for k in ("hue", "flip", "jitter", "noise")]
             rs.append(max(S) - min(S)); ps.append(max(PC) - min(PC))
-    check("route test: route sums spread 0.5 to 6.7", (min(rs), max(rs)), (0.5, 6.7), 0.05, text="spread by 0.5 to 6.7 logits", where=["paper", "supp"])
+    check("route test: route sums spread 0.5 to 6.7", (min(rs), max(rs)), (0.5, 6.7), 0.05, text="and by 0.5 to 6.7 in the second", where="supp")
     check("route test: placebos spread 3.1 to 6.7", (min(ps), max(ps)), (3.1, 6.7), 0.05, text="3.1 to 6.7", where=["paper", "supp"])
+    _c1 = load("c62_evaluation")["primary"]["components"]
+    _rs1 = [max(_c1["%s|%s|S_%s" % (m, t, k)]["est"] for k in ("rad4", "rad16", "hue4", "hue16")) - min(_c1["%s|%s|S_%s" % (m, t, k)]["est"] for k in ("rad4", "rad16", "hue4", "hue16"))
+            for m in ("erm", "slim", "causal") for t in TT]
+    _ps1 = [max(_c1["%s|%s|PC_%s" % (m, t, k)]["est"] for k in ("hue", "flip", "jitter", "noise")) - min(_c1["%s|%s|PC_%s" % (m, t, k)]["est"] for k in ("hue", "flip", "jitter", "noise"))
+            for m in ("erm", "slim", "causal") for t in TT]
+    check("first run: route sums spread 0.1 to 5.4, placebos 0.6 to 4.5 (outward)", (math.floor(min(_rs1) * 10 + 1e-9) / 10, math.ceil(max(_rs1) * 10 - 1e-9) / 10, math.floor(min(_ps1) * 10 + 1e-9) / 10, math.ceil(max(_ps1) * 10 - 1e-9) / 10) == (0.1, 5.4, 0.6, 4.5), True,
+          text=["spread by 0.1 to 5.4 logits in the first run", "spread by 0.6 to 4.5 logits in the first run"], where="supp")
     sall = d["secondary_all_g1"]
     check("route test: without the floor the same three cells disagree, nine indeterminate",
           "%d/%d/%d %s" % (sall["summary"]["routes disagree"], sall["summary"]["routes agree"], sall["summary"]["indeterminate"],
@@ -439,14 +464,29 @@ if rb:
     _cls = {"routes disagree": "disagree", "routes agree": "agree", "indeterminate": "indeterminate"}
     _rt = load("c73_route_robustness_table")
     _rob2 = set(_rt["second_run"]["robust_cells"]) if _rt else set()
+    _rb1 = load("c65_route_robustness")
+    _ev1x = load("c62_evaluation")
+    _rob1 = set(_rt["first_run"]["robust_cells"]) if _rt else set()
+    _fl = lambda x: math.floor(x * 100 + 1e-9) / 100
+    _ce = lambda x: math.ceil(x * 100 - 1e-9) / 100
     for _c, _v in rb["cells"].items():
-        _lab = _cls[_ev2["primary"]["cells"][_c]["class"]]
-        if _lab == "disagree":
-            _lab += ", robust" if _c in _rob2 else ", fragile"
-        _txt = "%s (%.2f; %.2f)" % (_lab,
-                                   math.floor(_v["disagrees_below_margin"] * 100 + 1e-9) / 100,
-                                   math.ceil(_v["agrees_above_margin"] * 100 - 1e-9) / 100)
+        _v1 = _rb1["cells"][_c]
+        _l1 = _cls[_ev1x["primary"]["cells"][_c]["class"]]
+        _l2 = _cls[_ev2["primary"]["cells"][_c]["class"]]
+        if _l1 == "disagree":
+            _l1 += ", robust" if _c in _rob1 else ", fragile"
+        if _l2 == "disagree":
+            _l2 += ", robust" if _c in _rob2 else ", fragile"
+        # Table 5: first run with its margins, then the second run's verdict
+        _txt = "%s (%.2f; %.2f) / %s |" % (_l1, _fl(_v1["disagrees_below_margin"]), _ce(_v1["agrees_above_margin"]), _l2)
         check("Table 5 cell %s" % _c, _txt in TEXT["paper"], True, text=_txt)
+        # Table S35: both runs
+        _m, _t = _c.split("|")
+        _txt35 = "| %s | %s / %s | %.2f / %.2f | %.2f / %.2f |" % ({"contrast@0": "contrast, lowest dose", "contrast@2": "contrast, highest dose",
+                  "color_var@0": "color variegation, lowest dose", "color_var@2": "color variegation, highest dose"}[_t],
+                  _cls[_ev1x["primary"]["cells"][_c]["class"]], _cls[_ev2["primary"]["cells"][_c]["class"]],
+                  _fl(_v1["disagrees_below_margin"]), _fl(_v["disagrees_below_margin"]), _ce(_v1["agrees_above_margin"]), _ce(_v["agrees_above_margin"]))
+        check("Table S35 cell %s, both runs" % _c, _txt35 in TEXT["supp"], True, text=_txt35, where="supp")
     cp = rb["cross_pairs"]
     out = ["%d" % sum(1 for k, v in cp.items() if k.startswith(m + "|") and (v["ci"][0] > 0.5 or v["ci"][1] < -0.5)) for m in ("erm", "slim", "causal")]
     ins = sum(1 for v in cp.values() if v["ci"][0] > -0.5 and v["ci"][1] < 0.5)
@@ -491,10 +531,10 @@ if sc:
     rg2 = sc["registered"]
     check("off-target: CIELAB 20.0 and 26.4% at the highest contrast dose",
           (100 * rg2["contrast@2"]["rad4"]["offtarget_median_rel_control"], 100 * rg2["contrast@2"]["rad16"]["offtarget_median_rel_control"]),
-          (20.0, 26.4), 0.05, text="20.0 and 26.4%")
+          (20.0, 26.4), 0.05, text="@supp:the CIELAB change of variegation is 20.0 and 26.4%")
     check("off-target: contrast proxy 18 and 47% at the highest variegation dose",
           (100 * rg2["color_var@2"]["rad4"]["offtarget_proxy_shift"], 100 * rg2["color_var@2"]["rad16"]["offtarget_proxy_shift"]),
-          (18, 47), 0.5, text="by 18 and 47% on average in the contrast proxy")
+          (18, 47), 0.5, text="@supp:the contrast proxy changes by 18 and 47%")
     check("screens: proxy shift 20 and 29%", (100 * fr["contrast@2"]["rad"]["proxy_shift"], 100 * fr["color_var@2"]["rad"]["proxy_shift"]),
           (20, 29), 0.5, text="mean proxy shift is 20 and 29%")
     check("screens: 30 and 71% of the edit's shift", (100 * fr["contrast@2"]["rad"]["proxy_ratio"], 100 * fr["color_var@2"]["rad"]["proxy_ratio"]),
@@ -557,7 +597,7 @@ if d:
         _g2 = [sum(r["targets"][t]["controls"][c]["g2"] for r in _con["images"]) / len(_con["images"])
                for t in ("contrast@2", "color_var@2") for c in ("rad4", "rad16", "hue4", "hue16")]
         check("high doses: seven of eight controls fail G2 on most images", sum(x < 0.5 for x in _g2), 7,
-              text="fails on most images for seven of the eight controls at the high doses")
+              text="seven of the eight controls fail G2 on most images")
 d = load("c56_simultaneous36")
 if d:
     check("36-component critical value 3.12 (headline band)", d["crit_36"], 3.12, 5e-3, text="1.96 to 3.12")
@@ -777,9 +817,9 @@ if d:
           89.9, 0.05, text="89.9%")
     check("its bottleneck interval [0.90, 1.95]", tuple(pt["color_var@2"]["bottleneck_ci95"]),
           (0.90, 1.95), 5e-3, text="@supp:[0.90, 1.95]")
-    check("route bootstrap 5,000 for the route search", d["boot"], 5000, text="5,000 for the route search")
+    check("route bootstrap 5,000 for the route search", d["boot"], 5000, text="@supp:5,000 for the bootstrap of the route search")
     check("route reselected in every resample", d.get("route_reselected_each_resample"), True,
-          text="re-runs the route search")
+          text="Rerunning the route search on patient resamples")
     ci = {t: pt[t]["bottleneck_ci95"] for t in pt}
     check("Table S26 intervals", "; ".join("%.2f, %.2f" % tuple(ci[t]) for t in ("contrast@2", "color_var@2", "contrast@0", "color_var@0")),
           "1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10", text="[1.10, 2.34] | 1.5%", where="supp")
@@ -902,9 +942,18 @@ if d:
     check("valid regime within 0.8%", 100 * rg["R1_valid"]["abs_error_frac_of_target"], 0.8, 0.05,
           text="within 0.8%")
     check("model-state regime biased 6.7%", 100 * rg["R4_model_state"]["abs_error_frac_of_target"], 6.7, 0.05,
-          text="6.7")
+          text="@supp:| 6.7% |")
+    check("structural biases 135.8, 48.6, 6.9 and 42.9%; valid regime exact on R0",
+          " ".join("%.1f" % (100 * rg[k]["abs_error_frac_of_target_noise_free"]) for k in ("R1_valid", "R2_footprint_mismatch", "R3_concept_contamination",
+                   "R4_model_state", "R5_proxy_blind")), "0.0 135.7 48.6 6.9 42.9",
+          text=["by 6.9 and 42.9% on the structural response", "off by 135.7, 48.6, 6.9 and 42.9% in the four flawed ones",
+                "@supp:| +1.117 | 0.0% |", "@supp:| −0.399 | 135.7% |", "@supp:| +0.574 | 48.6% |", "@supp:| +1.194 | 6.9% |", "@supp:| +0.637 | 42.9% |"])
+    check("R4 structural error equals the bias formula +0.077", "%+.3f %+.3f" % (rg["R4_model_state"]["error_noise_free"], rg["R4_model_state"]["predicted_bias_from_formula"]),
+          "+0.077 +0.077", text="@supp:at +0.077, which is its error on $R^0$")
+    check("designed route exact on R0", d["constructive_repair"]["chained_route_noise_free_abs_error"], 0.0, 1e-12,
+          text=["and so does a designed length-four route where no length-two route exists", "@supp:On $R^0$ it returns the target exactly, to floating-point rounding"])
     check("proxy-blind regime biased 42.5%", 100 * rg["R5_proxy_blind"]["abs_error_frac_of_target"], 42.5, 0.05,
-          text="42.5%")
+          text="@supp:42.5%")
     check("screens admit R1, R4, R5 and reject R2, R3",
           "".join("A" if v["screen"]["admissible"] else "R" for v in rg.values()), "ARRAA")
     ch = float(re.search(r'"chained_route_estimate": ([\d.]+)', s).group(1))
@@ -1023,11 +1072,11 @@ if _c42b:
     _top = max(_fe.values())
     check("ResNet-50 Inv alone has the highest first-exceeding hair dose, 2.37%",
           "%s %.2f" % (",".join(k for k, v in _fe.items() if v == _top), _top), "r50-Inv 2.37",
-          text="it first exceeds at 2.37% of altered pixels, a higher dose than for any other model")
+          text="first exceeds on the hair ladder at 2.37% of altered pixels, the highest such dose of any model")
 _c62p = load("c62_preregistration")
 if _c62p:
     check("cycle test uses 20,000 resamples", _c62p["criteria"]["boot"], 20000,
-          text="20,000 for the simultaneous band, the control-versus-control comparisons and the cycle test")
+          text="the simultaneous band, the control comparisons and the cycle test use 20,000")
 _c64b = load("c64_route_screens")
 if _c64b:
     _tp = max(_c64b["frontier"][t]["rad"]["target_proxy_shift"] for t in ("contrast@2", "color_var@2"))
@@ -1035,7 +1084,7 @@ if _c64b:
               for t in ("contrast@2", "color_var@2"))
     check("optimized radial controls: target proxy moves < 0.1%, off-target share of the mean shift > 99%",
           "%s %s" % (_tp < 1e-3, _sh > 0.99), "True True",
-          text="almost all from the other concept's proxy")
+          text="@supp:so every (A2) failure comes from the other concept's proxy")
 
 # ================================================================ occlusion check (c66)
 _oc = load("c66_overlay_occlusion")
@@ -1157,7 +1206,7 @@ if _rs and _e1 and _e2:
     ok2 = ok2 and all(q2[k]["seed_exceeds"] == 20 and q2[k]["lopo_in_cell_exceeds"] == q2[k]["lopo_in_cell_n"]
                       for k in ("erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16"))
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
-          text=["ERM at the highest contrast dose disagrees under every one of them in both runs"])
+          text=["@supp:the rejections for ERM and Inv at the highest contrast dose survive every check of Table S37", "The first two hold under every post hoc variant listed under Table 5"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
           text=["Its statements hold on the clipped scale, for a fixed inference protocol and at an operating margin", "in the plan-locked run, the cycle test rejected in three cells",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
@@ -1245,7 +1294,7 @@ if _cl:
     _cons = load("c62_construction")
     _g2 = ["%d" % round(100 * _cons["summary"][t][c]["share_g2_independent"]) for t in ("contrast@2", "color_var@2") for c in ("rad4", "rad16")]
     check("G2 of the disagreeing scale pairs: 13 and 23% (contrast), 35 and 38% (variegation)", "/".join(_g2), "13/23/35/38",
-          text="rad4 and rad16 pass on only 13 and 23% of the 78 images at the highest contrast dose, and on 35 and 38% at the highest variegation dose")
+          text="rad4 and rad16 pass on only 13 and 23% of the images at the highest contrast dose, and on 35 and 38% at the highest variegation dose")
 
 # ================================================================ every variant in one table (c73) and the bounded-deviation reading
 _rt = load("c73_route_robustness_table")
@@ -1265,7 +1314,7 @@ if _rt:
             and S1["seeds"][c + "|D_rad4-rad16"][1] == 20 and S1["leave_one_patient_out"][c + "|D_rad4-rad16"][1] == S1["leave_one_patient_out"][c + "|D_rad4-rad16"][2]]
     check("robust: c73 robust lists agree with an independent computation, and only ERM highest contrast is robust in both runs",
           "%s %s" % (sorted(S1["robust_cells"]) == sorted(rob1), ",".join(sorted(set(S1["robust_cells"]) & set(S2["robust_cells"])))),
-          "True erm|contrast@2", text="disagree, robust / disagree, robust (1.20; 8.83)")
+          "True erm|contrast@2", text="disagree, robust (1.91; 7.34) / disagree, robust")
     check("robust: first run, ERM highest contrast and Slim highest variegation under every variant, bounds 1.21 and 0.63",
           "%s %.2f %.2f" % (",".join(rob1), m1["erm|contrast@2|D_rad4-rad16"], m1["slim|color_var@2|D_rad4-rad16"]), "erm|contrast@2,slim|color_var@2 1.21 0.63",
           text="Their smallest lower bounds, 1.21 and 0.63, both come from the images that passed the floor under both Inv checkpoints", where="supp")
@@ -1287,16 +1336,16 @@ if _rt:
         m, t = c.split("|")
         cell = rows5[tname[t]].split("|")[3 + ("erm", "slim", "causal").index(m)].strip()
         want = "disagree, robust" if c in rob1 else "disagree, fragile"
-        if not cell.startswith(want + " /"):
+        if not cell.startswith(want + " ("):
             bad.append(c)
     check("Table 5: first-run robustness labels", ",".join(bad), "")
-    ev2 = load("c62_evaluation_inv_retrained")["primary"]["components"]
-    eps = [math.floor(ev2[k]["sim"][0] / 2 * 100) / 100 for k in ("erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16")]
-    check("bounded deviation: robust cells need eps_R above 0.60 and 0.99", tuple(eps), (0.60, 0.99), 1e-9,
-          text="need $\\varepsilon_R$ above 0.60 and 0.99 logits")
+    ev1 = load("c62_evaluation")["primary"]["components"]
+    eps = [math.floor(ev1[k]["sim"][0] / 2 * 100) / 100 for k in ("erm|contrast@2|D_rad4-rad16", "slim|color_var@2|D_rad4-rad16")]
+    check("bounded deviation (plan-locked run): robust cells need eps_R above 0.95 and 0.91", tuple(eps), (0.95, 0.91), 1e-9,
+          text="need $\\varepsilon_R$ above 0.95 and 0.91 logits")
     _t35 = load("c65_route_robustness_inv_retrained")
     check("no cell agrees: smallest agreement margin 2.09 (rounded up, as in Table 5)", math.ceil(min(v["agrees_above_margin"] for v in _t35["cells"].values()) * 100 - 1e-9) / 100, 2.09, 1e-9,
-          text="indeterminate / indeterminate (0.00; 2.09)")
+          text="0.00 / 0.00 | 1.74 / 2.09 |", where="supp")
 
 # ================================================================ occlusion region and dose (c70)
 _om = load("c70_occlusion_mask_sensitivity")
@@ -1405,7 +1454,7 @@ if _b56 and _b57 and _b66:
               _band_order(_b66["band"]["full"]["sim36"]), _band_order(_b66["band"]["skin_only"]["sim36"])]
     check("artifact: in every stored band the magnitude ends bound the signed ends in all 18 cells",
           " ".join("%d/%d" % (b, a) for a, b in _bands), "18/18 18/18 18/18 18/18",
-          text=["We checked it in every band whose intervals are stored, and in every cell the magnitude decides",
+          text=["In every stored band the magnitude decides every cell",
                 "We checked it in the full, the stratified and the skin-only bands"], where=["paper", "supp"])
 _c57m = load("c57_stratified_band")
 if _c57m and _c30:
@@ -1443,9 +1492,13 @@ if _em:
           "%s %.2f %d [%.2f, %+.2f] %s %s" % (S2_["all"]["cells"]["erm|contrast@2"], math.floor(_e["sim"][0] * 100) / 100, _d["n_images"],
                                              _d["sim"][0], _d["sim"][1], _d["decision"], S1_["all"]["cells"]["causal|color_var@0"]),
           "indeterminate 0.26 18 [-2.40, +12.60] indeterminate routes agree",
-          text=["The second run's ERM cell becomes indeterminate, with a lower bound of 0.26", "The Inv direction pair has 18 bit-exact images, too few for the 30-image rule",
+          text=["The second run's ERM cell is then indeterminate, with a lower bound of 0.26", "The Inv direction pair has 18 bit-exact images, too few for the 30-image rule",
                 "its interval, [−2.40, +12.60], decides nothing", "the first run's Inv cell at the lowest variegation dose agrees"],
-          where=["paper", "paper", "supp", "supp"])
+          where="supp")
+    check("exact match (main text): two and one cells with all 48, three and four under the 30-image rule",
+          "%d %d %d %d" % (S1_["all"]["summary"]["routes disagree"], S2_["all"]["summary"]["routes disagree"], S1_["min30"]["summary"]["routes disagree"],
+                           S2_["min30"]["summary"]["routes disagree"]), "2 1 3 4",
+          text="with all 48 differences, two cells disagree in the first run and one in the second; under the plan's 30-image rule, three and four")
     check("exact match, all 48: one cell disagrees in the second run, two in the first",
           "%d %d" % (S2_["all"]["summary"]["routes disagree"], S1_["all"]["summary"]["routes disagree"]), "1 2",
           text="@supp:and one and two with all 48 differences")
@@ -1456,7 +1509,7 @@ if _em:
           text=["@supp:keeps 9 of the 48 differences in the second run and 21 in the first", "some on as few as 6 images"], where="supp")
     check("exact match: 9 and 21 differences analysed; smallest n 6",
           "%d %d %d" % (S2_["min30"]["n_analysed"], S1_["min30"]["n_analysed"], min(v["n_images"] for v in S2_["all"]["components"].values())),
-          "9 21 6", text=["With all 48 differences, some rest on only 6 images",
+          "9 21 6", text=["@supp:some on as few as 6 images",
                           "@supp:keeps 9 of the 48 differences in the second run and 21 in the first"])
     _man = open(os.path.join(RES, "c62_manifest.sha256")).read() if os.path.exists(os.path.join(RES, "c62_manifest.sha256")) else ""
     _scr = sorted(set(re.findall(r"(c\d+)_\w+\.py", _man)))
@@ -1523,7 +1576,7 @@ if _xd:
     check("exact identity: 48/48 differences nonzero on bit-exact sets in both runs; smallest 0.012 and 0.008",
           "%d %d %d %d %.3f %.3f" % (e2["n_differences"], e2["n_nonzero_mean"], e1["n_differences"], e1["n_nonzero_mean"],
                                      e2["smallest_abs_mean"], e1["smallest_abs_mean"]), "48 48 48 48 0.012 0.008",
-          text=["None of the 48 differences is zero on its bit-exact set in either run", "@supp:The smallest absolute mean difference is 0.012 logits in the second run and 0.008 in the first",
+          text=["the conjunction would make each mean difference exactly zero; none of the 48 is", "@supp:The smallest absolute mean difference is 0.012 logits in the second run and 0.008 in the first",
                 "@supp:All 48 differences are nonzero on their bit-exact sets in both runs"])
     check("exact identity: 40 and 30 above 0.5 logit; images 6 to 41 and 10 to 64",
           "%d %d %d-%d %d-%d" % (e2["n_abs_mean_above_margin"], e1["n_abs_mean_above_margin"], *e2["images_range"], *e1["images_range"]),
@@ -1534,14 +1587,13 @@ if _xd:
     lp = _xd["runs"]["second_run"]["lopo_inv_all48"]
     check("bit-exact Inv: 26 of 27 leave-one-patient-out subsets exceed; smallest lower bound 0.47",
           "%d/%d %.2f" % (lp["n_exceeds"], lp["n_subsets"], math.floor(lp["lower_min"] * 100) / 100), "26/27 0.47",
-          text=["Leaving out one of the 27 patients of the Inv cell changes its decision; the other 26 subsets keep it",
-                "@supp:The difference exceeds the margin in 26 of the 27 subsets, and the smallest lower bound is 0.47"])
+          text=["@supp:The difference exceeds the margin in 26 of the 27 subsets, and the smallest lower bound is 0.47"])
     dd = _xd["runs"]["second_run"]["decisive"]
     ks3 = ["erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16", "slim|color_var@2|D_rad4-rad16"]
     check("bit-exact decisive differences: 35 to 41 images from 27 or 28 patients",
           "%d-%d %d-%d" % (min(dd[k]["bit_exact_all48"]["n_images"] for k in ks3), max(dd[k]["bit_exact_all48"]["n_images"] for k in ks3),
                            min(dd[k]["bit_exact_all48"]["n_patients"] for k in ks3), max(dd[k]["bit_exact_all48"]["n_patients"] for k in ks3)),
-          "35-41 27-28", text="on 35 to 41 images from 27 or 28 patients")
+          "35-41 27-28", text="@supp:on 35, 35 and 41 images")
     def _row(run, k, lab):
         def f(e):
             if e is None:
@@ -1566,12 +1618,12 @@ if _fs:
     rad_lo = [100 * tg[t][c]["share_beyond_q95"] for t in ("contrast@0", "color_var@0") for c in ("rad4", "rad16")]
     check("independent features: natural NN median 8.28, q95 11.38; norms within 1.35 (unedited 1.28)",
           "%.2f %.2f %.2f %.2f" % (_fs["natural_nn_median"], _fs["natural_nn_q95"], math.ceil(_fs["largest_norm_ratio"] * 100) / 100, _fs["unedited_norm_max_ratio"]),
-          "8.28 11.38 1.36 1.28", text=["its feature norms stay within 1.36 times the unedited median", "@supp:stay within 1.36 times the median unedited norm",
+          "8.28 11.38 1.36 1.28", text=["@supp:stay within 1.36 times the median unedited norm",
                                         "@supp:with a median of 8.28 and a 95th percentile of 11.38", "@supp:and the unedited images reach 1.28"])
     check("independent features: low doses 0.52 to 0.95, high doses 1.30 to 1.63; radial 45 to 65%, hue 78 to 84%, radial low 0%",
           "%.2f-%.2f %.2f-%.2f %.0f-%.0f %.0f-%.0f %.0f" % (min(lo_sh), max(lo_sh), min(hi_sh), max(hi_sh), min(rad_hi), max(rad_hi), min(hue_hi), max(hue_hi), max(rad_lo)),
           "0.52-0.95 1.30-1.63 45-65 78-84 0",
-          text=["the high-dose controls move an image 1.30 to 1.63 times as far as the median distance",
+          text=["places the controls 1.30 to 1.63 times the median distance between neighboring natural images",
                 "@supp:the controls move an image by 0.52 to 0.95 times the median natural distance",
                 "@supp:beyond the 95th percentile on 45 to 65% of images for the radial controls and 78 to 84% for the hue controls"])
     check("independent features: the concept edit moves 0.92 and 0.98, beyond q95 on 0 and 9%",
@@ -1587,7 +1639,7 @@ if _bc:
     sb, sf, fl = pp["single_bf16"], pp["single_fp32"], pp["flat32_bf16"]
     check("batch context: one image per batch bf16, median 0.016, q95 0.066, 2.0% above 0.5",
           "%.3f %.3f %.1f" % (sb["score_change_median"], sb["score_change_q95"], 100 * sb["share_above_0.5"]), "0.016 0.066 2.0",
-          text=["each score moves by a median of 0.016 logit, and 2.0% of scores move by more than 0.5",
+          text=["each score of the second run moves by a median of 0.016 logit, and 2.0% of scores move by more than 0.5",
                 "@supp:moves by a median of 0.016 logit, with a 95th percentile of 0.066"])
     check("batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max dD 1.95",
           "%.3f %.1f %.3f %.1f %.2f" % (sf["score_change_median"], 100 * sf["share_above_0.5"], fl["score_change_median"], 100 * fl["share_above_0.5"],
@@ -1597,7 +1649,7 @@ if _bc:
     check("batch context: ERM and Inv highest contrast disagree under every protocol; Slim cells move",
           " | ".join(",".join(v["disagreeing_cells"]) for v in pp.values()),
           "causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2",
-          text=["ERM and Inv at the highest contrast dose still disagree, while the Slim disagreement moves from the highest variegation dose to the lowest contrast dose",
+          text=["ERM and Inv at the highest contrast dose still disagree, while the Slim disagreement moves to another cell", "@supp:and Slim at the lowest contrast dose instead of the highest variegation dose",
                 "@supp:ERM and Inv at the highest contrast dose disagree under every protocol; the Slim decisions do not"])
 _nn = load("c79_route_near_natural")
 if _nn:
@@ -1608,7 +1660,7 @@ if _nn:
           "%d %d %+.2f %+.2f %s %s | %s | %s" % (e["n_images"], e["n_patients"], e["est"], i_["est"], e["decision"], i_["decision"],
                                                  dis("second_run", "all"), dis("first_run", "all")),
           "16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2",
-          text=["leaves 16 images for the ERM and Inv pairs in the second run", "at +4.06 and +4.27 logits",
+          text=["leaves 16 images for the second run's ERM and Inv pairs, which are then undecided",
                 "@supp:keep 16 images from 13 patients, at +4.06 [−1.16, +9.28] and +4.27 [−2.34, +10.88] logits"])
     check("near-natural: threshold equals c77 q95; 30-image rule: none (second), Slim both contrast doses (first)",
           "%.2f %s | %s" % (_nn["natural_nn_q95"], dis("second_run", "min30") or "none", dis("first_run", "min30")),
@@ -1622,7 +1674,7 @@ if os.path.exists(_mf):
     _bad = [ln.split()[1] for ln in open(_mf) if ln.strip() and
             _hl3.sha256(open(os.path.join(BASE, ln.split()[1]), "rb").read()).hexdigest() != ln.split()[0]]
     _scr = sorted(set(re.findall(r"code/(c\d+)_", open(_mf).read())))
-    check("post hoc manifest: every listed hash matches; scripts c63 to c79", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c79 17",
+    check("post hoc manifest: every listed hash matches; scripts c63 to c81", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c81 19",
           text="@supp:`code/make_posthoc_manifest.py` writes `results/posthoc_manifest.sha256`")
 _e3 = os.path.join(BASE, "log", "e2e_posthoc3_fresh_copy_run.txt")
 if os.path.exists(_e3):
@@ -1636,7 +1688,66 @@ if os.path.exists(_e4):
     _t4 = open(_e4).read()
     _m4 = re.search(r"files written: (\d+), differing: (\d+)", _t4)
     check("fourth fresh-directory run: c78 and c79, 2 files equal; 56 files in all", "%s %s %d" % (_m4.group(1), _m4.group(2), len(re.findall(r"rc=0", _t4))), "2 0 2",
-          text=["Each of the 56 result files they wrote matched", "@supp:Their two result files matched as well"])
+          text=["@supp:Their two result files matched as well"])
+_e5 = os.path.join(BASE, "log", "e2e_posthoc5_fresh_copy_run.txt")
+if os.path.exists(_e5):
+    _t5 = open(_e5).read()
+    _m5 = re.search(r"files written: (\d+), differing: (\d+)", _t5)
+    check("fifth fresh-directory run: c54, c80 and c81, 5 files equal", "%s %s %d" % (_m5.group(1), _m5.group(2), len(re.findall(r"rc=0", _t5))), "5 0 3",
+          text=["@supp:Their five result files matched the committed ones", "each result file they wrote matched the committed one to a relative tolerance"])
+else:
+    check("fifth fresh-directory run record present", None, "present")
+# ================================================================ size and power of the cycle-test band (c80)
+_nc = load("c80_route_null_calibration")
+if _nc:
+    f1, f2 = _nc["first"], _nc["second"]
+    pc = lambda x: "%.1f" % (math.floor(1000 * x + 1e-9) / 10)          # coverage: rounded down
+    pu = lambda x: "%.1f" % (math.ceil(1000 * x - 1e-9) / 10)           # false-disagreement rates: rounded up
+    check("c80: reproduces the plan's band to 5e-7", max(f1["reproduction_max_abs_difference"], f2["reproduction_max_abs_difference"]), 5e-7, ceil=True,
+          text="@supp:reproduces the plan's band on the original sample to 5 × 10⁻⁷ logit")
+    check("c80: joint coverage 77.7 and 73.3%; marginal at least 95.7%", "%s %s %s" % (pc(f1["joint_coverage"]), pc(f2["joint_coverage"]),
+          pc(min(f1["min_marginal_coverage"], f2["min_marginal_coverage"]))), "77.7 73.2 95.7",
+          text=["jointly in 77.7% of cohorts in the first run and 73.2% in the second, not 95%", "covered in at least 95.7%",
+                "@supp:jointly in 77.7% of outer draws in the first run and 73.2% in the second"])
+    check("c80: false disagreement 1.7/4.8 (zero), 3.5/3.0 (margin, estimate side)",
+          "%s %s %s %s" % (pu(f1["fwer_all_zero"]), pu(f2["fwer_all_zero"]), pu(f1["fwer_margin_by_sign"]["sign_of_estimate"]), pu(f2["fwer_margin_by_sign"]["sign_of_estimate"])),
+          "1.7 4.8 3.5 3.0", text=["falsely disagreed in 1.7 and 4.8% of cohorts", "it did so in 3.5 and 3.0%", "@supp:the rate was 3.5 and 3.0%"])
+    check("c80: least favorable 21.7/26.6, bound 22.3/26.8, opposite sides 20.3/25.2",
+          "%s %s %s %s %s %s" % (pu(f1["fwer_margin_worst_found"]), pu(f2["fwer_margin_worst_found"]), pu(f1["fwer_margin_upper_bound"]), pu(f2["fwer_margin_upper_bound"]),
+                                 pu(f1["fwer_margin_by_sign"]["against_estimate"]), pu(f2["fwer_margin_by_sign"]["against_estimate"])),
+          "21.7 26.6 22.3 26.8 20.3 25.2", text=["@supp:reached 21.7 and 26.6%, against the upper bound of 22.3 and 26.8%", "@supp:On the opposite sides it was 20.3 and 25.2%",
+                                                  "in about 22 and 27%"])
+    check("c80: kappa 1.42 and 1.47; recalibrated: first run ERM c@2 only (LB 0.78), second run none",
+          "%.2f %.2f %s %.2f %s %s" % (f1["kappa_95"], f2["kappa_95"], ",".join(c for c, v in f1["calibrated_cells"].items() if v == "routes disagree"),
+                                      math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] * 100) / 100,
+                                      sum(v == "routes disagree" for v in f2["calibrated_cells"].values()), "%d/%d/%d" % tuple(f1["calibrated_summary"][k] for k in ("routes disagree", "routes agree", "indeterminate"))),
+          "1.42 1.47 erm|contrast@2 0.78 0 1/2/9", text=["by a factor of 1.42 and 1.47", "with a lower bound of 0.78 logit", "@supp:one disagreeing, two agreeing and nine indeterminate cells"])
+    check("c80: recalibrated ERM bound gives eps_R above 0.39", math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] / 2 * 100) / 100, 0.39, 1e-9,
+          text="so $\\varepsilon_R$ would still have to exceed 0.39")
+    check("c80: first-run Slim lower bounds 0.39 and -0.12 (rounded down)",
+          "%.2f %.2f" % tuple(math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"][k] * 100) / 100 for k in ("slim|color_var@2|D_rad4-rad16", "slim|contrast@0|D_rad4-rad16")),
+          "0.39 -0.12", text="@supp:at lower bounds of 0.39 and −0.12")
+    check("c80: coverage by model", " ".join(pc(f[k][m]) for f in (f1, f2) for k in ("joint_coverage_by_model",) for m in ("erm", "slim", "causal")),
+          "85.5 92.4 95.6 82.5 90.1 93.7", text="@supp:85.5 and 82.5% for ERM, 92.4 and 90.1% for Slim and 95.6 and 93.7% for Inv")
+    check("c80: power, median v80 2 and 4 logits; ERM decisive 4; epoch-1 Inv 1",
+          "%g %g %s %s" % (f1["v80_median"], f2["v80_median"], [v for v in f1["v80_grid"] if f1["power"]["erm|contrast@2|D_rad4-rad16"][str(v)] >= 0.8][0],
+                           sorted(set(f1["v80_by_model"]["causal"]))), "2 4 4.0 [1.0]",
+          text=["reaches a median of 2 logits in the first run and 4 in the second", "@supp:for the decisive ERM difference of the first run it takes 4 logits"])
+    check("c80: outer critical values median 3.29 and 3.31", "%.2f %.2f" % (f1["crit_outer_median"], f2["crit_outer_median"]), "3.29 3.31", text="@supp:median of 3.29 and 3.31")
+# ================================================================ protocol checks (c81), plan commit, abstract length
+_pc = load("c81_protocol_checks")
+if _pc:
+    _lib = _pc["library"]
+    check("library: 88 edits in one batch per image; duplicate labels return identical responses on 83 images",
+          "%d %s %d %.1f" % (_lib["edits"], _lib["duplicates_identical"], min(x["n_images"] for x in _lib["duplicate_label_pairs"]),
+                             max(x["max_abs_difference"] for x in _lib["duplicate_label_pairs"])), "88 True 83 0.0",
+          text=["scores each unedited image in one batch with all 88 library edits", "@supp:with a largest absolute difference of 0.0 logit for each of the three EfficientNet-B3 models on all 83 malignant audit images"])
+    check("route test: 24 edited versions per batch in both runs", sorted(set(v["edited_versions"] for v in _pc["route_test"].values())) == [24], True,
+          text="the route test scores each held-out image in one batch with its 24 edited versions")
+check("plan commit given by its full SHA", True, True, text=["@supp:40b6367b84fea2d1f11894484b11d2f0634d4306 (https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/commit/40b6367b84fea2d1f11894484b11d2f0634d4306)"])
+_abs = TEXT["paper"].split("## Abstract")[1].split("**Index Terms")[0]
+check("abstract at most 250 words", len(_abs.split()), 250, ceil=True)
+check("no 'registered outcome' wording; T1 is Q-almost sure only", ("registered outcome" in TEXT["paper"] + TEXT["supp"]) or ("in particular every audited image" in TEXT["paper"]), False)
 
 # ================================================================ report
 w = max(len(r[1]) for r in rows)

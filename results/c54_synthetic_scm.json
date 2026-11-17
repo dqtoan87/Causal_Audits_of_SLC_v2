@@ -14,7 +14,8 @@
   ],
   "gamma": 1.6,
   "alpha_edit": 0.22,
-  "form": "dl = M@beta - alpha*L0 + gamma*tanh(1.5*dC) + eta"
+  "form": "dl = M@beta - alpha*L0 + gamma*tanh(1.5*dC) + eta",
+  "noise_free": "fields ending in _noise_free use the structural response R0 = M@beta - alpha*L0 + gamma*tanh(1.5*dC), to which Statement 1 applies; the other estimates add the realized noise eta"
  },
  "target_h": 1.1170197305757723,
  "regimes": {
@@ -40,7 +41,10 @@
    "estimate": 1.1255316295356614,
    "target": 1.1170197305757723,
    "error": 0.00851189895988913,
-   "abs_error_frac_of_target": 0.0076201867584752845
+   "abs_error_frac_of_target": 0.0076201867584752845,
+   "estimate_noise_free": 1.1170197305757723,
+   "error_noise_free": 0.0,
+   "abs_error_frac_of_target_noise_free": 0.0
   },
   "R2_footprint_mismatch": {
    "note": "control footprint scaled by 1.35, concept untouched",
@@ -64,7 +68,10 @@
    "estimate": -0.40143724493724875,
    "target": 1.1170197305757723,
    "error": -1.518456975513021,
-   "abs_error_frac_of_target": 1.359382411920626
+   "abs_error_frac_of_target": 1.359382411920626,
+   "estimate_noise_free": -0.3992907949377882,
+   "error_noise_free": -1.5163105255135605,
+   "abs_error_frac_of_target_noise_free": 1.3574608254520018
   },
   "R3_concept_contamination": {
    "note": "footprint matched but the control moves the concept by 40 percent",
@@ -88,7 +95,10 @@
    "estimate": 0.5660902957439875,
    "target": 1.1170197305757723,
    "error": -0.5509294348317848,
-   "abs_error_frac_of_target": 0.4932137004847766
+   "abs_error_frac_of_target": 0.4932137004847766,
+   "estimate_noise_free": 0.5744959419002651,
+   "error_noise_free": -0.5425237886755072,
+   "abs_error_frac_of_target_noise_free": 0.48568863541547397
   },
   "R4_model_state": {
    "note": "footprint matched and concept neutral, shrinkage coefficient differs",
@@ -113,6 +123,9 @@
    "target": 1.1170197305757723,
    "error": 0.07527300607945975,
    "abs_error_frac_of_target": 0.06738735585329364,
+   "estimate_noise_free": 1.193890230522265,
+   "error_noise_free": 0.07687049994649264,
+   "abs_error_frac_of_target_noise_free": 0.06881749519936362,
    "predicted_bias_from_formula": 0.0768704999464935,
    "formula_abs_error": 0.0015974938670337557
   },
@@ -138,7 +151,10 @@
    "estimate": 0.6423622160704259,
    "target": 1.1170197305757723,
    "error": -0.47465751450534643,
-   "abs_error_frac_of_target": 0.4249320773059956
+   "abs_error_frac_of_target": 0.4249320773059956,
+   "estimate_noise_free": 0.637360655576904,
+   "error_noise_free": -0.4796590749988683,
+   "abs_error_frac_of_target_noise_free": 0.42940967099267446
   }
  },
  "identified_set": {
@@ -380,6 +396,8 @@
   "nearest_neutral_control_footprint_distance_max_smd": 1.6490119508974703,
   "placebo_route_exists": false,
   "chained_route_estimate": 1.110801748549127,
+  "chained_route_noise_free": 1.1170197305757723,
+  "chained_route_noise_free_abs_error": 0.0,
   "target": 1.1170197305757723,
   "abs_error": 0.006217982026645252,
   "bootstrap_ci95": [
@@ -389,5 +407,5 @@
   "covers_target": true,
   "boot": 2000
  },
- "runtime_sec": 0.4
+ "runtime_sec": 0.7
 }
