@@ -182,7 +182,7 @@ ok        36 band signed: 11 exceed / 1 within / 6 indet                        
 ok        R50 Inv malignant signed sim36 [-0.040, +0.029]                                                                                          got -0.0402 to 0.02876     paper -0.04 to 0.029
 ok        36 band critical value agrees with c40 (2.96 for 18)                                                                                     got 2.95684                paper 2.96
 ok        marginal bound 0.0627                                                                                                                    got 0.0627059              paper 0.0627
-ok        0.063 is 1.25 times the tolerance                                                                                                        got 1.25412                paper 1.25
+ok        0.063 is which is 1.25 times the tolerance the tolerance                                                                                 got 1.25412                paper 1.25
 ok        cached run: Inv benign 0.091 [0.063, 0.124]                                                                                              got 0.09059 to 0.06296     paper 0.091 to 0.063
 ok        cached run: Slim malignant 0.762 [0.707, 0.808]                                                                                          got 0.7615 to 0.8082       paper 0.762 to 0.808
 ok        seven realizations move magnitudes 3.2 to 24.9%                                                                                          got 3.17 to 24.91          paper 3.2 to 24.9
@@ -232,13 +232,13 @@ ok        neutral controls miss balance by at least 11 times                    
 ok        balanced and neutral sets are disjoint                                                                                                   got 1                      paper 1
 ok        88 performed edits                                                                                                                       got 88                     paper 88
 ok        four exactly matched pairs                                                                                                               got 4                      paper 4
-ok        eight distinct edits in those pairs                                                                                                      got 8                      paper 8
+ok        coincide for exactly four pairs in those pairs                                                                                           got 8                      paper 8
 ok        length-two route rho 9.7 to 13.3                                                                                                         got 9.655 to 13.27         paper 9.7 to 13.3
 ok        best route rho 1.17 to 2.13                                                                                                              got 1.166 to 2.131         paper 1.17 to 2.13
 ok        three targets: bottleneck above one in 98.5 to 100% of resamples                                                                         got 98.48 to 100           paper 98.5 to 100
 ok        color variegation at top dose: above one in 89.9%                                                                                        got 89.86                  paper 89.9
 ok        its bottleneck interval [0.90, 1.95]                                                                                                     got 0.8966 to 1.95         paper 0.9 to 1.95
-ok        route bootstrap 5,000 resamples                                                                                                          got 5000                   paper 5000
+ok        route bootstrap 5,000 for the route search                                                                                               got 5000                   paper 5000
 ok        route reselected in every resample                                                                                                       got 1                      paper 1
 ok        Table S26 intervals                                                                                                                      got 1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10 paper 1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10
 ok        Table S26 shares                                                                                                                         got 1.5, 10.1, 0.4, 0.0    paper 1.5, 10.1, 0.4, 0.0
@@ -276,7 +276,7 @@ ok        balance+overlap controls bracket no cell                              
 ok        whole library brackets 7 of 12                                                                                                           got 7                      paper 7
 ok        the whole library is the 15 constructed controls                                                                                         got [15, 15]               paper [15, 15]
 ok        balanced controls bracket the slope in 2 cells, the intercept in none                                                                    got 2/0                    paper 2/0
-ok        bracketing controls 4.4 to 21 times outside tolerance                                                                                    got 4.356 to 20.95         paper 4.4 to 21
+ok        bracketing controls between 4.4 and 21 times outside the footprint tolerance outside tolerance                                           got 4.356 to 20.95         paper 4.4 to 21
 ok        slope interval widths 0.04 to 0.40                                                                                                       got 0.0416 to 0.3968       paper 0.04 to 0.4
 ok        linear beats constant in ten of twelve                                                                                                   got 10                     paper 10
 ok        largest half-split disagreement 0.32                                                                                                     got 0.318347               paper 0.32
@@ -287,8 +287,8 @@ ok        proxy-blind regime biased 42.5%                                       
 ok        screens admit R1, R4, R5 and reject R2, R3                                                                                               got ARRAA                  paper ARRAA
 ok        designed length-four route +1.111                                                                                                        got 1.1108                 paper 1.111
 ok        its interval [1.085, 1.151]                                                                                                              got 1.085 to 1.151         paper 1.085 to 1.151
-ok        recovery within 0.6%                                                                                                                     got 0.556658               paper <= 0.6
-ok        nearest neutral control 1.65 SMD away                                                                                                    got 1.64901                paper 1.65
+ok        recovery within 0.6%%                                                                                                                    got 0.556658               paper <= 0.6
+ok        nearest neutral control 1.65 standardized mean differences away                                                                          got 1.64901                paper 1.65
 ok        no length-two route there                                                                                                                got false                  paper false
 ok        CAV accuracy 0.84 to 0.94 on all activations (S12)                                                                                       got 0.8417 to 0.9366       paper 0.84 to 0.94
 ok        CAV accuracy 0.68 to 0.87 on held-out activations                                                                                        got 0.6839 to 0.8732       paper 0.68 to 0.87
@@ -415,5 +415,21 @@ ok        route test: SHA-256 of the two Inv files                              
 ok        deterministic full precision: +4.61 [0.73] and +6.48 [1.85]                                                                              got +4.61 0.73 +6.48 1.85  paper +4.61 0.73 +6.48 1.85
 ok        skin tone: the CIELAB fields exist in the metadata                                                                                       got 1                      paper 1
 ok        second fresh-directory run: 14 files equal, every script rc=0, c74 included                                                              got 14 0 True True         paper 14 0 True True
+ok        seed band: seed 42 reproduces c56 exactly                                                                                                got 0.0e+00 0.0e+00        paper 0.0e+00 0.0e+00
+ok        seed band: frontier 0.041 to 0.055 (rounded down), 17 or 18 cells at 0.05, crit 3.08 to 3.12                                             got 0.041 0.055 17/18 3.08 3.12 paper 0.041 0.055 17/18 3.08 3.12
+ok        seed band: argmin cells and magnitude order in every band                                                                                got 6 1 True               paper 6 1 True
+ok        abstract: 17 of 18 cells exceed jointly at 0.05                                                                                          got 17                     paper 17
+ok        exact identity: 48/48 differences nonzero on bit-exact sets in both runs; smallest 0.012 and 0.008                                       got 48 48 48 48 0.012 0.008 paper 48 48 48 48 0.012 0.008
+ok        exact identity: 40 and 30 above 0.5 logit; images 6 to 41 and 10 to 64                                                                   got 40 30 6-41 10-64       paper 40 30 6-41 10-64
+ok        three analyses (second_run): recomputation reproduces c74                                                                                got 0e+00 0e+00            paper 0e+00 0e+00
+ok        three analyses (first_run): recomputation reproduces c74                                                                                 got 0e+00 0e+00            paper 0e+00 0e+00
+ok        bit-exact Inv: 26 of 27 leave-one-patient-out subsets exceed; smallest lower bound 0.47                                                  got 26/27 0.47             paper 26/27 0.47
+ok        bit-exact decisive differences: 35 to 41 images from 27 or 28 patients                                                                   got 35-41 27-28            paper 35-41 27-28
+ok        Table S38 rows match c76                                                                                                                 got 2                      paper 2
+ok        independent features: natural NN median 8.28, q95 11.38; norms within 1.35 (unedited 1.28)                                               got 8.28 11.38 1.35 1.28   paper 8.28 11.38 1.35 1.28
+ok        independent features: low doses 0.52 to 0.95, high doses 1.30 to 1.63; radial 45 to 65%, hue 78 to 84%, radial low 0%                    got 0.52-0.95 1.30-1.63 45-65 78-84 0 paper 0.52-0.95 1.30-1.63 45-65 78-84 0
+ok        independent features: the concept edit moves 0.92 and 0.98, beyond q95 on 0 and 9%                                                       got 0.92 0.98 0 9          paper 0.92 0.98 0 9
+ok        post hoc manifest: every listed hash matches; scripts c63 to c77                                                                         got 0 c63-c77 15           paper 0 c63-c77 15
+ok        third fresh-directory run: c75 to c77, 3 files equal                                                                                     got 3 0 3                  paper 3 0 3
 =========================================================================================================================================================================================
-415 checks, 415 ok, 0 not ok
+431 checks, 431 ok, 0 not ok

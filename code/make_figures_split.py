@@ -283,18 +283,27 @@ def p3_fig1_dag():
     a2.text(0.72, 0.86, r"$\theta^{\,\mathrm{do}}$", ha="center", va="center", fontsize=MD, bbox=box)
     _rung(a2, 0.86, 0.18, 0.63, "T1  transfer\nassumed, untested", "assumed", ASSC)
     a2.text(0.0, 0.98, "artifact side", fontsize=SM, weight="bold", ha="left", color="0.30")
-    a2.text(0.0, 0.66, "concept side", fontsize=SM, weight="bold", ha="left", color="0.30")
-    a2.text(0.09, 0.47, r"$R(e)$", ha="center", va="center", fontsize=MD, bbox=obs)
-    a2.text(0.45, 0.47, r"$g+h$", ha="center", va="center", fontsize=MD, bbox=box)
-    a2.text(0.84, 0.47, r"$h^{\ast}$", ha="center", va="center", fontsize=MD, bbox=box)
-    _rung(a2, 0.47, 0.19, 0.37, "C1  a: factorization\nb: no interaction\ngranted; a probed", "assumed", ASSC)
-    _rung(a2, 0.47, 0.53, 0.77, "C2  a route in $G_0$\nnot satisfied\n(C0 gates it)", "tested", BADC)
-    a2.text(0.09, 0.13, r"$R(e^{\ast})$", ha="center", va="center", fontsize=MD, bbox=obs)
-    a2.text(0.84, 0.13, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
-    _rung(a2, 0.13, 0.20, 0.77, "C3  a: assumed, untested\nb: fixed level not met by the edit", "tested", BADC)
-    a2.annotate("", xy=(0.84, 0.19), xytext=(0.84, 0.41),
+    a2.text(0.0, 0.71, "concept side", fontsize=SM, weight="bold", ha="left", color="0.30")
+    a2.text(0.06, 0.52, r"$R(e)$", ha="center", va="center", fontsize=MD, bbox=obs)
+    a2.text(0.33, 0.52, r"$g+h+q$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.62, 0.52, r"$g+h$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.90, 0.52, r"$h^{\ast}$", ha="center", va="center", fontsize=MD, bbox=box)
+    a2.text(0.62, 0.31, r"$\tau(M^{\ast})$", ha="center", va="center", fontsize=MD, bbox=box)
+    _rung(a2, 0.52, 0.12, 0.24, "C1a\ngranted", "assumed", ASSC)
+    _rung(a2, 0.52, 0.43, 0.55, "C1b\ngranted", "assumed", ASSC)
+    _rung(a2, 0.52, 0.69, 0.85, "C2  route in $G_0$\nnot satisfied\n(C0 gates it)", "tested", BADC)
+    a2.annotate("", xy=(0.545, 0.31), xytext=(0.36, 0.475),
+                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=BADC, mutation_scale=12))
+    a2.text(0.30, 0.355, "exact control\nnone certified", ha="center", va="center", fontsize=SM, color=BADC)
+    a2.annotate("", xy=(0.885, 0.475), xytext=(0.70, 0.31),
+                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=ASSC, ls=(0, (4, 2)), mutation_scale=12))
+    a2.text(0.80, 0.355, "C1b", ha="left", va="center", fontsize=SM, color=ASSC)
+    a2.text(0.06, 0.12, r"$R(e^{\ast})$", ha="center", va="center", fontsize=MD, bbox=obs)
+    a2.text(0.90, 0.12, r"$\theta^{C}$", ha="center", va="center", fontsize=MD, bbox=box)
+    _rung(a2, 0.12, 0.16, 0.84, "C3  a: assumed, untested\nb: fixed level not met by the edit", "tested", BADC)
+    a2.annotate("", xy=(0.975, 0.17), xytext=(0.975, 0.47),
                 arrowprops=dict(arrowstyle="<->", lw=0.9, color="0.45", ls=(0, (2, 2))))
-    a2.text(0.865, 0.30, r"differ by" "\n" r"$g(M(e^{\ast}))$", ha="left", va="center", fontsize=SM, color="0.30")
+    a2.text(0.96, 0.255, r"differ by" "\n" r"$g(M(e^{\ast}))$", ha="right", va="center", fontsize=SM, color="0.30")
     fig.text(0.5, 0.190, "Green box: estimated from the audited images.   Amber dashed rung: "
              "granted or assumed, not established.   Red rung: not satisfied by the design.",
              ha="center", va="center", fontsize=SM, color="0.25")
