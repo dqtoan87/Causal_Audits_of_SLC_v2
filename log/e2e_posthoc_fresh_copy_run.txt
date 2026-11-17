@@ -1,27 +1,24 @@
-# Second fresh-directory run: the post hoc scripts and the two scripts whose SMD rule changed (2026-11-16)
+# Fresh-directory run of the post hoc scripts and of the two scripts whose SMD rule treats a zero pooled variance explicitly (2026-11-17)
 # The directory held a copy of this tree's code, cached results and the released checkpoints (including the first-run
 # EfficientNet-B3 Inv checkpoint in checkpoints/archived_b3inv_ep1). Scripts ran in the order of code/run_all.sh.
-# c12 first stopped after writing its results, when saving a figure into a figure directory the copy lacked; it was
-# rerun with the directory present. c73 was rerun after its robust-cell list was corrected.
 # Results are compared with the committed files at a relative tolerance of 1e-9, ignoring timing and path fields.
 
 == run log
-=== post hoc fresh-directory run started 2026-11-16T21:44:38+07:00 ===
-c49_tcav                           rc=0     76s
-c12_matched_control                rc=1    287s
-c25_screen_full_sample             rc=0    455s
-c55_identification_graph           rc=0    326s
-c66_overlay_occlusion              rc=0    150s
-c70_occlusion_mask_sensitivity     rc=0    354s
-c68_floor_sets                     rc=0     56s
-c71_rule_checks                    rc=0      8s
-c72_library_proxy_split            rc=0    463s
-c67_route_sensitivity              rc=0    106s
-c69_route_clip_sensitivity         rc=0     64s
+=== post hoc fresh-directory run started 2026-11-17T10:03:58+07:00 ===
+c49_tcav                           rc=0     80s
+c12_matched_control                rc=0    278s
+c25_screen_full_sample             rc=0    432s
+c55_identification_graph           rc=0    311s
+c66_overlay_occlusion              rc=0    146s
+c70_occlusion_mask_sensitivity     rc=0    336s
+c68_floor_sets                     rc=0     53s
+c71_rule_checks                    rc=0      9s
+c72_library_proxy_split            rc=0    480s
+c67_route_sensitivity              rc=0    105s
+c69_route_clip_sensitivity         rc=0     62s
 c73_route_robustness_table         rc=0      0s
-=== finished 2026-11-16T22:23:43+07:00 ===
-c12_matched_control                rc=0    280s  (rerun: c12 with the figure directory present; c73 after its robust-cell fix)
-c73_route_robustness_table         rc=0      0s  (rerun: c12 with the figure directory present; c73 after its robust-cell fix)
+c74_route_exact_match              rc=0     10s
+=== finished 2026-11-17T10:42:20+07:00 ===
 
 == comparison
 c12_matched_control.json                      equal
@@ -37,4 +34,5 @@ c70_occlusion_mask_sensitivity.json           equal
 c71_rule_checks.json                          equal
 c72_library_proxy_split.json                  equal
 c73_route_robustness_table.json               equal
-files written: 13, differing: 0
+c74_route_exact_match.json                    equal
+files written: 14, differing: 0

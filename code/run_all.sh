@@ -66,6 +66,7 @@ SCRIPTS=(
   c67_route_sensitivity
   c69_route_clip_sensitivity
   c73_route_robustness_table
+  c74_route_exact_match
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage

@@ -467,7 +467,7 @@ if sc:
     check("screens: no constructed control passes all three", nval, 0, text="no constructed control passes all three screens")
     check("screens: optimised radial footprint-link scores 0.56 and 0.06",
           (fr["contrast@2"]["rad"]["footprint_link_score"], fr["color_var@2"]["rad"]["footprint_link_score"]),
-          (0.56, 0.06), 5e-3, text="footprint-link scores $d^M/\\varepsilon^M$ of 0.56 and 0.06")
+          (0.56, 0.06), 5e-3, text="with footprint-link scores of 0.56 and 0.06", where="supp")
     tonly = sorted("%s|%s|%s" % (part, t, c) for part in ("registered", "frontier") for t in sc[part] for c, s in sc[part][t].items() if s["valid_target_only"])
     check("screens: two controls pass under a target-only (A2)", "/".join(tonly),
           "frontier|color_var@2|rad/registered|color_var@2|rad16",
@@ -571,7 +571,7 @@ if d:
     check("36 band critical value agrees with c40 (2.96 for 18)", d["crit_18_magnitude_only"], 2.96, 5e-3)
 if cells:
     mlb = min(c["ci"][0] for c in cells.values())
-    check("marginal bound 0.063", mlb, 0.063, 5e-4, text="put the bound at 0.063")
+    check("marginal bound 0.0627", mlb, 0.0627, 5e-5, text="put the bound at 0.0627")
     check("0.063 is 1.25 times the tolerance", mlb / 0.05, 1.25, 5e-3, text="1.25 times")
 
 d = load("c32_absdp_patient_ci")
@@ -867,7 +867,7 @@ if d:
     check("balance+overlap controls bracket no cell", su["A1+A3"]["cells_bracketed"], 0)
     check("whole library brackets 7 of 12", su["all"]["cells_bracketed"], 7, text="7 of the 12")
     check("the whole library is the 15 constructed controls", str(su["all"]["set_size_range"]), "[15, 15]",
-          text="All 15 constructed controls together bracket both in 7 of the 12")
+          text=["exist in 7 of the 12 model-by-target cells", "the 15 constructed controls (the four uncalibrated placebos are excluded), it succeeds in 7 of twelve"], where=["paper", "supp"])
     _bal = [v for t in d["targets"].values() for v in t["sets"]["A1+A3"]["models"].values()]
     check("balanced controls bracket the slope in 2 cells, the intercept in none",
           "%d/%d" % (sum(v["alpha_bracketed"] for v in _bal), sum(v["beta_bracketed"] for v in _bal)), "2/0",
@@ -1155,7 +1155,7 @@ if _rs and _e1 and _e2:
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
           text=["ERM at the highest contrast dose disagrees under every one of them in both runs"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
-          text=["Every route-test statement holds on the clipped scale only", "survived every post hoc check in both runs, on the clipped scale",
+          text=["Every route-test statement holds on the clipped scale and for a fixed inference protocol", "Where footprints matched bit for bit, the decisive differences kept their size",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
     counts = [sum(v == "routes disagree" for v in x["cells"].values()) for x in allv1 + allv2]
     counts += [_e1["secondary_all_g1"]["summary"]["routes disagree"], _e2["secondary_all_g1"]["summary"]["routes disagree"]]
@@ -1261,10 +1261,15 @@ if _rt:
             and S1["seeds"][c + "|D_rad4-rad16"][1] == 20 and S1["leave_one_patient_out"][c + "|D_rad4-rad16"][1] == S1["leave_one_patient_out"][c + "|D_rad4-rad16"][2]]
     check("robust: c73 robust lists agree with an independent computation, and only ERM highest contrast is robust in both runs",
           "%s %s" % (sorted(S1["robust_cells"]) == sorted(rob1), ",".join(sorted(set(S1["robust_cells"]) & set(S2["robust_cells"])))),
-          "True erm|contrast@2", text="one disagreement survives every post hoc check in both runs")
+          "True erm|contrast@2", text="disagree, robust (1.20; 8.83) / disagree, robust")
     check("robust: first run, ERM highest contrast and Slim highest variegation under every variant, bounds 1.21 and 0.63",
           "%s %.2f %.2f" % (",".join(rob1), m1["erm|contrast@2|D_rad4-rad16"], m1["slim|color_var@2|D_rad4-rad16"]), "erm|contrast@2,slim|color_var@2 1.21 0.63",
-          text="with smallest lower bounds of 1.21 and 0.63", where="supp")
+          text="Their smallest lower bounds, 1.21 and 0.63, both come from the images that passed the floor under both Inv checkpoints", where="supp")
+    _argmin = [min((r["entries"][k][1], r["variant"]) for r in S1["rows"] if r["entries"])[1]
+               for k in ("erm|contrast@2|D_rad4-rad16", "slim|color_var@2|D_rad4-rad16")]
+    check("robust: both first-run minima come from the floor passed under both Inv checkpoints", " | ".join(_argmin),
+          "floor passed under both Inv checkpoints | floor passed under both Inv checkpoints",
+          text="both come from the images that passed the floor under both Inv checkpoints", where="supp")
     check("robust: first-run Slim lowest contrast fails under 10 of 20 seeds", 20 - S1["seeds"]["slim|contrast@0|D_rad4-rad16"][1], 10,
           text="It fails under 10 of 20 other seeds", where="supp")
     # Table 5: robust / fragile labels for both runs
@@ -1373,6 +1378,117 @@ if os.path.exists(ISIC_META):
           "CC-0|ACEMID MIA", text=["released under CC0 (attribution: ACEMID MIA)", "The two images of Fig. 2 are released under CC0"])
     check("ISIC-2024 per-image licenses are CC0, CC BY or CC BY-NC", ",".join(sorted(_all)), "CC-0,CC-BY,CC-BY-NC", text="CC0, CC BY or CC BY-NC")
 check("Fig. 2 file present", os.path.exists(os.path.join(BASE, "paper", "figures", "p3_fig_edits.png")), True, text="figures/p3_fig_edits.png")
+
+# ================================================================ magnitude decides the cell at equal tolerances
+_c30 = load("c30_disjoint_audit")
+if _c30:
+    _cells = [_c30["models"][b][n][g] for b in _c30["models"] for n in _c30["models"][b] if isinstance(_c30["models"][b][n], dict)
+              for g in ("all", "malignant", "benign") if g in _c30["models"][b][n]]
+    check("artifact: the cell decision equals the magnitude decision in all 18 cells",
+          "%d %d" % (len(_cells), sum(c["joint_verdict"] == c["verdict"] for c in _cells)), "18 18",
+          text=["The magnitude condition decides", "With equal tolerances, the cell decision is the magnitude decision on these intervals"])
+
+# the studentized bands do not guarantee the order of interval ends; check it in every band whose intervals are stored
+def _band_order(sim):
+    cs = sorted(set(k.rsplit("/", 1)[0] for k in sim if k.endswith("/mag")))
+    return len(cs), sum(sim[c + "/mag"][0] >= max(sim[c + "/sgn"][0], -sim[c + "/sgn"][1]) and
+                        sim[c + "/mag"][1] >= max(-sim[c + "/sgn"][0], sim[c + "/sgn"][1]) for c in cs)
+_bands = []
+_b56, _b57, _b66 = load("c56_simultaneous36"), load("c57_stratified_band"), load("c66_overlay_occlusion")
+if _b56 and _b57 and _b66:
+    _bands = [_band_order({k: v["sim36"] for k, v in _b56["components"].items()}),
+              _band_order({k: v["sim36"] for k, v in _b57["components"].items()}),
+              _band_order(_b66["band"]["full"]["sim36"]), _band_order(_b66["band"]["skin_only"]["sim36"])]
+    check("artifact: in every stored band the magnitude ends bound the signed ends in all 18 cells",
+          " ".join("%d/%d" % (b, a) for a, b in _bands), "18/18 18/18 18/18 18/18",
+          text=["We checked it in every band whose intervals are stored, and in every cell the magnitude decides",
+                "We checked it in the full, the stratified and the skin-only bands"], where=["paper", "supp"])
+_c57m = load("c57_stratified_band")
+if _c57m and _c30:
+    check("marginal bound 0.0627 (plain) and 0.063 (stratified), rounded down",
+          "%.4f %.3f" % (math.floor(_c30["models"]["b3"]["Inv"]["benign"]["ci"][0] * 1e4) / 1e4, math.floor(_c57m["marginal_min_lower_magnitude"] * 1e3) / 1e3),
+          "0.0627 0.063", text=["The marginal bound of 0.0627 is a per-cell statement", "is 0.063, against 0.0627 under the plain scheme",
+                                "is 0.0627, which is 1.25 times the tolerance"], where="supp")
+
+# ================================================================ exactly matched footprints (c74)
+_em = load("c74_route_exact_match")
+if _em:
+    rm = _em["residual_mismatch"]
+    check("exact match: residual mismatch at most 6.3e-7 relative and one pixel on one image",
+          "%.1e %d %d" % (_em["largest_relative_mismatch"], round(_em["largest_pixel_mismatch"]), sum(v["images_pixels_differ"] for v in rm.values())),
+          "6.3e-07 1 1", text=["at most $6.3 \\times 10^{-7}$ relative, and one pixel on one image"], where=["paper", "supp"])
+    rad = [v["n_exact"] for k, v in rm.items() if "|rad" in k]; hue = [v["n_exact"] for k, v in rm.items() if "|hue" in k]
+    check("exact match: radial 50 to 67 images, hue 17 to 38", "%d-%d %d-%d" % (min(rad), max(rad), min(hue), max(hue)), "50-67 17-38",
+          text="The radial controls match bit for bit on 50 to 67 of the 78 images, the hue controls on 17 to 38", where="supp")
+    S2_, S1_ = _em["runs"]["second_run"], _em["runs"]["first_run"]
+    k2 = S2_["min30"]["components"]
+    ks = ["erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16", "slim|color_var@2|D_rad4-rad16"]
+    check("exact match: second-run decisive differences +4.83, +6.46, +6.24 on 35, 35, 41 images",
+          " ".join("%+.2f/%d" % (k2[k]["est"], k2[k]["n_images"]) for k in ks), "+4.83/35 +6.46/35 +6.24/41",
+          text=["+4.83, +6.46 and +6.24 logits for ERM, Inv and Slim", "on 35, 35 and 41 images"], where=["paper", "supp"])
+    check("exact match: lower bounds 1.46, 2.41, 1.20 under the 30-image rule (rounded down)",
+          " ".join("%.2f" % (math.floor(k2[k]["sim"][0] * 100) / 100) for k in ks), "1.46 2.41 1.20",
+          text="with lower bounds of 1.46, 2.41 and 1.20", where="supp")
+    _ev2c = load("c62_evaluation_inv_retrained")["primary"]["crit_simultaneous"]; _ev1c = load("c62_evaluation")["primary"]["crit_simultaneous"]
+    check("exact match: critical values 2.82 and 3.11 (30-image rule), 3.82 and 3.52 (all 48), plan 3.37 and 3.30",
+          "%.2f %.2f %.2f %.2f %.2f %.2f" % (S2_["min30"]["crit"], S1_["min30"]["crit"], S2_["all"]["crit"], S1_["all"]["crit"], _ev2c, _ev1c),
+          "2.82 3.11 3.82 3.52 3.37 3.30",
+          text=["critical values 2.82 and 3.11, against 3.37 and 3.30", "which widens the band: critical values 3.82 and 3.52"], where="supp")
+    _e = S2_["all"]["components"]["erm|contrast@2|D_rad4-rad16"]; _d = S2_["all"]["components"]["causal|contrast@2|D_rad4-hue4"]
+    check("exact match, all 48: second-run ERM indeterminate at 0.26; Inv direction pair 18 images, [-2.40, +12.60]; first-run Inv cv@0 agrees",
+          "%s %.2f %d [%.2f, %+.2f] %s %s" % (S2_["all"]["cells"]["erm|contrast@2"], math.floor(_e["sim"][0] * 100) / 100, _d["n_images"],
+                                             _d["sim"][0], _d["sim"][1], _d["decision"], S1_["all"]["cells"]["causal|color_var@0"]),
+          "indeterminate 0.26 18 [-2.40, +12.60] indeterminate routes agree",
+          text=["The second run's ERM cell becomes indeterminate, with a lower bound of 0.26", "The Inv direction pair has 18 such images and is not decided",
+                "its interval, [−2.40, +12.60], decides nothing", "the first run's Inv cell at the lowest variegation dose agrees"],
+          where=["paper", "paper", "supp", "supp"])
+    check("exact match, all 48: one cell disagrees in the second run, two in the first",
+          "%d %d" % (S2_["all"]["summary"]["routes disagree"], S1_["all"]["summary"]["routes disagree"]), "1 2",
+          text="With bit-exact footprints and all 48 differences, one cell disagrees in the second run and two in the first")
+    dis = lambda r: ",".join(sorted(c for c, v in r["cells"].items() if v == "routes disagree"))
+    check("exact match: decisions under the 30-image rule and with all 48 differences",
+          " | ".join([dis(S2_["min30"]), dis(S1_["min30"]), dis(S2_["all"]), dis(S1_["all"])]),
+          "causal|contrast@2,erm|contrast@2,slim|color_var@2,slim|contrast@2 | erm|contrast@2,slim|color_var@2,slim|contrast@2 | causal|contrast@2 | erm|contrast@2,slim|color_var@2",
+          text=["keeps 9 of the 48 differences in the second run and 21 in the first", "some on as few as 6 images"], where="supp")
+    check("exact match: 9 and 21 differences analysed; smallest n 6",
+          "%d %d %d" % (S2_["min30"]["n_analysed"], S1_["min30"]["n_analysed"], min(v["n_images"] for v in S2_["all"]["components"].values())),
+          "9 21 6", text=["On the plan's family of 48 differences, some rest on only 6 images",
+                          "only 9 differences of the second run and 21 of the first remain"])
+    _man = open(os.path.join(RES, "c62_manifest.sha256")).read() if os.path.exists(os.path.join(RES, "c62_manifest.sha256")) else ""
+    _scr = sorted(set(re.findall(r"(c\d+)_\w+\.py", _man)))
+    check("route manifest lists the scripts c62 to c65 only", ",".join(_scr), "c62,c63,c64,c65",
+          text="lists the SHA-256 of the pre-specified route-test scripts, `c62` to `c65`", where="supp")
+    k1 = S1_["min30"]["components"]
+    check("exact match: first-run +4.38 and +5.58", "%+.2f %+.2f" % (k1[ks[0]]["est"], k1[ks[2]]["est"]), "+4.38 +5.58", text="+4.38 and +5.58 for ERM and Slim", where="supp")
+
+# ================================================================ checkpoint hashes, deterministic protocol, skin tone
+import hashlib as _hl2
+_h1 = _hl2.sha256(open(os.path.join(BASE, "checkpoints", "archived_b3inv_ep1", "dj_causal_b3.pt"), "rb").read()).hexdigest()
+_h2 = _hl2.sha256(open(os.path.join(BASE, "checkpoints", "dj_causal_b3.pt"), "rb").read()).hexdigest()
+check("route test: SHA-256 of the two Inv files", "%s %s" % (_h1[:8], _h2[:8]), "39de9dbc ebfbb47c",
+      text=["which begin 39de9dbc and ebfbb47c", _h1, _h2], where=["paper", "supp"])
+_rt2 = load("c73_route_robustness_table")
+if _rt2:
+    _row = [r for r in _rt2["second_run"]["rows"] if r["variant"] == "clip eta = 1e-06, fp32"][0]["entries"]
+    check("deterministic full precision: +4.61 [0.73] and +6.48 [1.85]",
+          "%+.2f %.2f %+.2f %.2f" % (_row["erm|contrast@2|D_rad4-rad16"][0], math.floor(_row["erm|contrast@2|D_rad4-rad16"][1] * 100) / 100,
+                                     _row["causal|contrast@2|D_rad4-rad16"][0], math.floor(_row["causal|contrast@2|D_rad4-rad16"][1] * 100) / 100),
+          "+4.61 0.73 +6.48 1.85", text="the two differences are +4.61 and +6.48 logits, with lower bounds 0.73 and 1.85")
+if os.path.exists(ISIC_META):
+    _hdr = open(ISIC_META).readline()
+    check("skin tone: the CIELAB fields exist in the metadata", "tbp_lv_Lext" in _hdr and "tbp_lv_Bext" in _hdr, True,
+          text="computed from the dataset's CIELAB fields `tbp_lv_Lext` and `tbp_lv_Bext`")
+
+# ================================================================ second fresh-directory run (post hoc scripts)
+_e2e = os.path.join(BASE, "log", "e2e_posthoc_fresh_copy_run.txt")
+if os.path.exists(_e2e):
+    _t = open(_e2e).read()
+    _m = re.search(r"files written: (\d+), differing: (\d+)", _t)
+    _rc = re.findall(r"^(c\d+)_\w+\s+rc=(\d+)", _t, re.M)
+    check("second fresh-directory run: 14 files equal, every script rc=0, c74 included",
+          "%s %s %s %s" % (_m.group(1), _m.group(2), all(r == "0" for _, r in _rc), "c74" in [c for c, _ in _rc]), "14 0 True True",
+          text=["Each of the 14 result files written there matched the committed file to the same tolerance",
+                "Each of the 14 result files written there matched the committed file to a relative tolerance of 10⁻⁹"], where=["paper", "supp"])
 
 # ================================================================ report
 w = max(len(r[1]) for r in rows)

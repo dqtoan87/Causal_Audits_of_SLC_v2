@@ -1,299 +1,419 @@
 verification of paper3.md and supplementary3.md against /mnt/data2/Toan/Causal_ML_XAI/Causal_XAI_v3/P3_clear/results
-=================================================================================================================================================
-ok        audit cohort: 183 images                                                                         got 183                    paper 183
-ok        audit cohort: 100 patients                                                                       got 100                    paper 100
-ok        audit cohort: 83 malignant                                                                       got 83                     paper 83
-ok        audit cohort: malignant images come from 44 patients                                             got 44                     paper 44
-ok        PAD-UFES-20 split 1,367 / 475 / 456                                                              got 1367/475/456           paper 1367/475/456
-ok        PAD-UFES-20 audit fold 278 patients                                                              got 278                    paper 278
-ok        PAD-UFES-20 audit-fold malignant rate 47.6%                                                      got 47.5877                paper 47.6
-ok        training fold holds 232 malignant cases                                                          got 232                    paper 232
-ok        ISIC-2024: 401,059 tiles                                                                         got 401059                 paper 401059
-ok        ISIC-2024: 1,042 patients                                                                        got 1042                   paper 1042
-ok        ISIC-2024: 393 malignant                                                                         got 393                    paper 393
-ok        ISIC-2024: prevalence 0.098%                                                                     got 0.0979906              paper 0.098
-ok        ISIC-2024: 1,068 histopathology-level diagnoses                                                  got 1068                   paper 1068
-ok        ISIC-2024: 114 indeterminate                                                                     got 114                    paper 114
-ok        selection AUROC, EfficientNet-B3 trio                                                            got 0.90/0.89/0.87         paper 0.90/0.89/0.87
-ok        selection AUROC, ResNet-50 trio                                                                  got 0.87/0.88/0.89         paper 0.87/0.88/0.89
-ok        Inv checkpoints saved at epochs with the penalties on: B3 epoch 7, R50 epoch 6                   got 7 on / 6 on            paper 7 on / 6 on
-ok        training the six checkpoints takes 2.1 hours                                                     got 2.06333                paper 2.1
-ok        eighteen artifact cells                                                                          got 18                     paper 18
-ok        every cell exceeds jointly                                                                       got 18                     paper 18
-ok        six cells do not exceed on the signed component                                                  got 6                      paper 6
-ok        two cells within the signed band                                                                 got 2                      paper 2
-ok        primary magnitudes 0.085 to 0.769                                                                got 0.08543 to 0.7692      paper 0.085 to 0.769
-ok        audit-cohort AUROC 0.856 to 0.893                                                                got 0.8556 to 0.8935       paper 0.856 to 0.893
-ok        hair alters 2.4% of pixels                                                                       got 2.35614                paper 2.4
-ok        identity edit alters no pixels                                                                   got 0                      paper 0
-ok        ERM malignant score under hair 0.733 to 0.070                                                    got 0.733 to 0.06954       paper 0.733 to 0.07
-ok        Slim malignant score under hair 0.859 to 0.170                                                   got 0.8595 to 0.1704       paper 0.859 to 0.17
-ok        Inv malignant score under hair 0.501 to 0.046                                                    got 0.5014 to 0.04631      paper 0.501 to 0.046
-ok        seven cells still exceed at tolerance 0.20                                                       got 7                      paper 7
-ok        Table 4: all 18 rows match c30 (values, intervals, verdicts)                                     got 18                     paper 18
-ok        secondary 18-magnitude band: critical value 2.96                                                 got 2.95684                paper 2.96
-ok        secondary 18-magnitude band: frontier 0.044                                                      got 0.0447338              paper >= 0.044
-ok        simultaneous replicates 20,000                                                                   got 20000                  paper 20000
-ok        nine cached-prediction cells: critical value 2.68                                                got 2.68101                paper 2.68
-ok        nine cached-prediction cells: Inv benign bound 0.049                                             got 0.0489829              paper 0.049
-ok        stratified band: critical value 3.12                                                             got 3.11867                paper 3.12
-ok        stratified band: frontier 0.041                                                                  got 0.0416996              paper >= 0.041
-ok        stratified band: frontier 0.0417 (supp)                                                          got 0.0416996              paper 0.0417
-ok        stratified band: strata 44 and 56                                                                got 44 to 56               paper 44 to 56
-ok        stratified band: 17 of 18 still exceed                                                           got 17                     paper 17
-ok        observed malignant share 45%                                                                     got 45.3552                paper 45
-ok        plain bootstrap share 34 to 57%                                                                  got 33.53 to 56.72         paper 34 to 57
-ok        stratified share 36 to 55%                                                                       got 36.26 to 54.63         paper 36 to 55
-ok        19 patients hold both labels, 57 images                                                          got 19 to 57               paper 19 to 57
-ok        trace: bright ruler moves the cell by 0.0003                                                     got 0.0003                 paper 0.0003
-ok        trace: single blend moves the cell by 0.0007                                                     got 0.0007                 paper 0.0007
-ok        trace: reimplementation inference on same edits gives 0.047                                      got 0.0474928              paper 0.047
-ok        trace: inference codes agree to 0.003                                                            got 0.00274364             paper 0.003
-ok        trace: rerun vs cache mean 0.016                                                                 got 0.0160629              paper 0.016
-ok        trace: rerun vs cache max 0.72                                                                   got 0.722138               paper 0.72
-ok        trace: 4.9% of images above 0.05                                                                 got 4.86486                paper 4.9
-ok        trace: 1.04 blends per touched pixel                                                             got 1.03978                paper 1.04
-ok        rerun: overlays reproduce the cached pixel fractions                                             got 1                      paper 1
-ok        rerun: cell 0.041                                                                                got 0.0407157              paper 0.041
-ok        rerun: interval [0.030, 0.052]                                                                   got 0.03016 to 0.05205     paper 0.03 to 0.052
-ok        rerun: cell indeterminate                                                                        got indeterminate          paper indeterminate
-ok        cache: cell within tolerance                                                                     got equivalence            paper equivalence
-ok        rerun keeps 17 of 18 cached decisions                                                            got 17                     paper 17
-ok        rerun vs cache, unedited, 0.016 to 0.033 on average                                              got 0.01606 to 0.03313     paper 0.016 to 0.033
-ok        rerun is deterministic                                                                           got 0                      paper 0
-ok        benign redraw: joint coverage 95.4%                                                              got 95.4                   paper 95.4
-ok        benign redraw: MC se 0.9 points                                                                  got 0.936846               paper 0.9
-ok        benign redraw: component coverage min 98.8%                                                      got 98.8                   paper 98.8
-ok        benign redraw: crit 2.99 to 3.23                                                                 got 2.989 to 3.227         paper 2.99 to 3.23
-ok        benign redraw: crit median 3.08                                                                  got 3.0806                 paper 3.08
-ok        benign redraw: frontier median 0.0470                                                            got 0.046994               paper 0.047
-ok        benign redraw: frontier min 0.0280                                                               got 0.027961               paper 0.028
-ok        benign redraw: every tolerance below 0.027 in every draw                                         got 0.027961               paper >= 0.027
-ok        benign redraw: frontier central range 0.033 to 0.066                                             got 0.03264 to 0.06618     paper 0.033 to 0.066
-ok        benign redraw: all 18 exceed 0.05 jointly in 38% of draws                                        got 38.2                   paper 38.2
-ok        benign redraw: frame 4,150 benign from 198 patients                                              got 4150 to 198            paper 4150 to 198
-ok        benign redraw: 500 draws                                                                         got 500                    paper 500
-ok        signed exceedance size at eps/se = 0.25 is 0.032                                                 got 0.0319475              paper 0.032
-ok        route test: 78 locked images from 54 patients                                                    got 78 to 54               paper 78 to 54
-ok        route test: all four controls pass G1 on 74 to 78 images                                         got 74 to 78               paper 74 to 78
-ok        route test: scale-pair disagreements 5.02 to 6.62 logits                                         got 5.015 to 6.618         paper 5.02 to 6.62
-ok        route test: abstract 5.0 to 6.6 logits                                                           got 5.015 to 6.618         paper 5 to 6.6
-ok        route test: one disagreeing cell per classifier                                                  got causal|contrast@2,erm|contrast@2,slim|color_var@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2
-ok        route test: 3 disagree / 0 agree / 9 indeterminate                                               got 3/0/9                  paper 3/0/9
-ok        route test: one direction pair exceeds, Inv at the highest contrast dose                         got 1 to 4.9               paper 1 to 4.9
-ok        route test: 12 of 24 direction differences exclude zero marginally                               got 12                     paper 12
-ok        route test: 7 direction differences exceed on marginal intervals                                 got 7                      paper 7
-ok        route test: simultaneous critical value 3.37                                                     got 3.37485                paper 3.37
-ok        route test: primary sets 44 to 47 images from 32 or 33 patients                                  got 44-47/32-33            paper 44-47/32-33
-ok        Table 5 images (patients) contrast@0                                                             got | 45 (32) |            paper | 45 (32) |
-ok        Table 5 images (patients) contrast@2                                                             got | 44 (32) |            paper | 44 (32) |
-ok        Table 5 images (patients) color_var@0                                                            got | 47 (33) |            paper | 47 (33) |
-ok        Table 5 images (patients) color_var@2                                                            got | 46 (32) |            paper | 46 (32) |
-ok        route test: dropping the floor adds 30 or 31 images per target                                   got 30 to 31               paper 30 to 31
-ok        route test: Table S31 erm|contrast@2 rad4-rad16                                                  got +5.02 [+1.20, +8.83]   paper +5.02 [+1.20, +8.83]
-ok        route test: Table S31 slim|color_var@2 rad4-rad16                                                got +6.16 [+0.62, +11.69]  paper +6.16 [+0.62, +11.69]
-ok        route test: Table S31 causal|contrast@2 rad4-rad16                                               got +6.62 [+1.99, +11.24]  paper +6.62 [+1.99, +11.24]
-ok        route test: Table S31 causal|contrast@2 rad4-hue4                                                got +4.90 [+1.02, +8.79]   paper +4.90 [+1.02, +8.79]
-ok        route test: route sums spread 0.5 to 6.7                                                         got 0.5345 to 6.676        paper 0.5 to 6.7
-ok        route test: placebos spread 3.1 to 6.7                                                           got 3.121 to 6.692         paper 3.1 to 6.7
-ok        route test: without the floor the same three cells disagree, nine indeterminate                  got 3/0/9 True             paper 3/0/9 True
-ok        route test: independent subsets 11, 0, 0, 0                                                      got 11/0/0/0               paper 11/0/0/0
-ok        first run: 3 disagree / 2 agree / 7 indeterminate                                                got 3/2/7                  paper 3/2/7
-ok        first run: critical value 3.30                                                                   got 3.3041                 paper 3.3
-ok        first run: slim|contrast@0                                                                       got +1.99 [+0.51, +3.47]   paper +1.99 [+0.51, +3.47]
-ok        first run: erm|contrast@2                                                                        got +4.63 [+1.92, +7.34]   paper +4.63 [+1.92, +7.34]
-ok        first run: slim|color_var@2                                                                      got +5.27 [+1.84, +8.70]   paper +5.27 [+1.84, +8.70]
-ok        first run: without the floor 2 disagree, 0 agree, 10 indeterminate                               got 2/0/10                 paper 2/0/10
-ok        first run: 73 to 77 images from 52 to 54 patients                                                got 73-77/52-54            paper 73-77/52-54
-ok        diagnostic (T): per-model median disagreement 7.8, 9.5, 11.4                                     got 7.8/9.5/11.4           paper 7.8/9.5/11.4
-ok        S6: per-model medians 7.80, 9.47, 11.40                                                          got 7.80/9.47/11.40        paper 7.80/9.47/11.40
-ok        robustness (second run): stored responses reproduce the band                                     got 0                      paper 0
-ok        robustness: ERM and Inv at the highest contrast dose hold for 20 of 20 seeds and all 32 subsets  got 20-32/32/20-32/32/20-32/32 paper 20-32/32/20-32/32/20-32/32
-ok        robustness: smallest lower bounds 0.79, 1.61 and 0.74                                            got 0.79/1.61/0.74         paper 0.79/1.61/0.74
-ok        robustness: Inv direction pair smallest bound 0.74                                               got 0.74                   paper 0.74
-ok        robustness: Slim highest variegation lower bound 0.62                                            got 0.623514               paper 0.62
-ok        robustness: Slim highest variegation in 17 of 32 subsets and 20 of 20 seeds                      got 17/32 20               paper 17/32 20
-ok        robustness: its seed lower bounds 0.55 to 0.70                                                   got 0.5508 to 0.7024       paper 0.55 to 0.7
-ok        robustness: its smallest subset bound 0.06                                                       got 0.06                   paper 0.06
-ok        robustness: critical value across seeds 3.35 to 3.39                                             got 3.347 to 3.389         paper 3.35 to 3.39
-ok        Table 5 cell erm|contrast@0                                                                      got 1                      paper 1
-ok        Table 5 cell slim|contrast@0                                                                     got 1                      paper 1
-ok        Table 5 cell causal|contrast@0                                                                   got 1                      paper 1
-ok        Table 5 cell erm|contrast@2                                                                      got 1                      paper 1
-ok        Table 5 cell slim|contrast@2                                                                     got 1                      paper 1
-ok        Table 5 cell causal|contrast@2                                                                   got 1                      paper 1
-ok        Table 5 cell erm|color_var@0                                                                     got 1                      paper 1
-ok        Table 5 cell slim|color_var@0                                                                    got 1                      paper 1
-ok        Table 5 cell causal|color_var@0                                                                  got 1                      paper 1
-ok        Table 5 cell erm|color_var@2                                                                     got 1                      paper 1
-ok        Table 5 cell slim|color_var@2                                                                    got 1                      paper 1
-ok        Table 5 cell causal|color_var@2                                                                  got 1                      paper 1
-ok        cross pairs: 4, 5 and 2 outside, none inside                                                     got 4/5/2 0                paper 4/5/2 0
-ok        first run: borderline lower bound 0.510                                                          got 0.50979                paper 0.51
-ok        first run: borderline under 10 of 20 seeds                                                       got 10                     paper 10
-ok        first run: borderline in 31 of the 53 subsets                                                    got 31 to 53               paper 31 to 53
-ok        first run: the two highest-dose disagreements hold for 20 of 20 seeds and every in-cell subset   got 20-52/52/20-54/54      paper 20-52/52/20-54/54
-ok        screens: no constructed control passes all three                                                 got 0                      paper 0
-ok        screens: optimised radial footprint-link scores 0.56 and 0.06                                    got 0.563 to 0.06418       paper 0.56 to 0.06
-ok        screens: two controls pass under a target-only (A2)                                              got frontier|color_var@2|rad/registered|color_var@2|rad16 paper frontier|color_var@2|rad/registered|color_var@2|rad16
-ok        screens: they move the contrast proxy by 47 and 58%                                              got 46.7 to 58.16          paper 47 to 58
-ok        screens: target proxy of every constructed control moves < 0.15%                                 got 1                      paper 1
-ok        C3b proxies: edit off-target CIELAB 25 and 78% (contrast)                                        got 25.19 to 78.39         paper 25 to 78
-ok        C3b proxies: edit off-target CIELAB 16 and 51% (variegation)                                     got 16.07 to 50.67         paper 16 to 51
-ok        off-target: CIELAB 20.0 and 26.4% at the highest contrast dose                                   got 19.95 to 26.42         paper 20 to 26.4
-ok        off-target: contrast proxy 18 and 47% at the highest variegation dose                            got 18.17 to 46.7          paper 18 to 47
-ok        screens: proxy shift 20 and 29%                                                                  got 20.31 to 29.1          paper 20 to 29
-ok        screens: 30 and 71% of the edit's shift                                                          got 30 to 71.17            paper 30 to 71
-ok        screens: every low-dose hue control passes (A2)                                                  got 1                      paper 1
-ok        screens: hue misses balance by 9.2 to 9.4 at the lowest contrast dose                            got 9.234 to 9.435         paper 9.2 to 9.4
-ok        screens: and by 10.8 to 10.9 at the lowest variegation dose                                      got 10.83 to 10.86         paper 10.8 to 10.9
-ok        screens: concept edit moves the contrast proxy by 16% on the images of the two candidates        got 15.6 to 15.6           paper 16 to 16
-ok        screens: off-target 4.9 and 5.3% at the lowest contrast dose                                     got 4.868 to 5.278         paper 4.9 to 5.3
-ok        route-test manifest: every listed file matches its SHA-256                                       got 0                      paper 0
-ok        exploratory (second run): nine differences analyzed, none decided                                got 9 9                    paper 9 9
-ok        exploratory (second run): main text says no pair is decided                                      got 0                      paper 0
-ok        exploratory (second run): critical value 2.86                                                    got 2.85863                paper 2.86
-ok        first run exploratory: Slim persists at 2.32 on 49 images                                        got 2.323 to 49            paper 2.32 to 49
-ok        first run exploratory: decision exceeds                                                          got exceeds                paper exceeds
-ok        frontier: radial within 0.1% on 13 and 15 images at the high doses, none at the low doses        got 0/13/0/15              paper 0/13/0/15
-ok        frontier: hue never within 10%                                                                   got 0                      paper 0
-ok        frontier: two inexact hue solutions, 0.007 and 0.22%                                             got 2: 0.007/0.22          paper 2: 0.007/0.22
-ok        frontier: pre-specified radial controls never within 0.1%                                        got 0                      paper 0
-ok        high doses: seven of eight controls fail G2 on most images                                       got 7                      paper 7
-ok        36-component critical value 3.12 (headline band)                                                 got 3.11823                paper 3.12
-ok        every cell exceeds every tolerance below 0.042 (36 components)                                   got 0.0422275              paper >= 0.042
-ok        36-component frontier 0.0422 (supp)                                                              got 0.0422275              paper 0.0422
-ok        36 band: 17 of 18 cells exceed jointly at 0.05                                                   got 17                     paper 17
-ok        36 band signed: 11 exceed / 1 within / 6 indet                                                   got 11/1/6                 paper 11/1/6
-ok        R50 Inv malignant signed sim36 [-0.040, +0.029]                                                  got -0.0402 to 0.02876     paper -0.04 to 0.029
-ok        36 band critical value agrees with c40 (2.96 for 18)                                             got 2.95684                paper 2.96
-ok        marginal bound 0.063                                                                             got 0.0627059              paper 0.063
-ok        0.063 is 1.25 times the tolerance                                                                got 1.25412                paper 1.25
-ok        cached run: Inv benign 0.091 [0.063, 0.124]                                                      got 0.09059 to 0.06296     paper 0.091 to 0.063
-ok        cached run: Slim malignant 0.762 [0.707, 0.808]                                                  got 0.7615 to 0.8082       paper 0.762 to 0.808
-ok        seven realizations move magnitudes 3.2 to 24.9%                                                  got 3.17 to 24.91          paper 3.2 to 24.9
-ok        no verdict changes across realizations                                                           got 1                      paper 1
-ok        smallest lower bound across realizations 0.058                                                   got 0.0584655              paper >= 0.058
-ok        seven realizations                                                                               got 7                      paper 7
-ok        altered-pixel fractions vary by at most 0.06 percentage points                                   got 0.0619568              paper <= 0.065
-ok        ResNet-50 Inv within tolerance under the ruler alone                                             got equivalence/equivalence/equivalence paper equivalence/equivalence/equivalence
-ok        dose grid: 144 cells                                                                             got 144                    paper 144
-ok        dose grid: 55 within tolerance                                                                   got 55                     paper 55
-ok        dose grid: 19 indeterminate                                                                      got 19                     paper 19
-ok        first exceedance 0.34 to 2.37%                                                                   got 0.3364 to 2.368        paper 0.34 to 2.37
-ok        identity edit within tolerance in all eighteen cells                                             got 18                     paper 18
-ok        non-identity: 37 of 126 within tolerance                                                         got 37 to 126              paper 37 to 126
-ok        dose grid spans 0.16 to 4.06%                                                                    got 0.1602 to 4.06         paper 0.16 to 4.06
-ok        second cohort: six cells exceed                                                                  got 6                      paper 6
-ok        second cohort: 0.069 to 0.096                                                                    got 0.06859 to 0.09643     paper 0.069 to 0.096
-ok        second cohort: both first exceed at 1.02%                                                        got ['hair_light']         paper ['hair_light']
-ok        photometric edits move the malignant score by at most 0.09                                       got 0.0894164              paper <= 0.095
-ok        photometric edits move the malignant logit by at most 1.7 (mean |change|, 183 images)            got 1.66002                paper <= 1.7
-ok        main hair edit moves it by up to 13.8 (mean |change|, 183 images)                                got 13.7638                paper 13.8
-ok        largest concept response 1.06 logits                                                             got 1.06461                paper 1.06
-ok        component-range width 26.57 logits                                                               got 26.5664                paper 26.57
-ok        width is 96.1% of the 27.63-logit range                                                          got 96.147                 paper 96.1
-ok        concept responses run −0.06 to +1.06                                                             got -0.06222 to 1.065      paper -0.06 to 1.06
-ok        clipped logit bound B = 13.8155                                                                  got 13.8155                paper 13.8155
-ok        87.1% of hair-edit predictions at the bound                                                      got 87.0674                paper 87.1
-ok        16.3% of edited predictions at the bound                                                         got 16.2922                paper 16.3
-ok        minimum detectable effect 0.48 to 1.79 logits                                                    got 0.4761 to 1.787        paper 0.48 to 1.79
-ok        numerical check on the 183-image cohort                                                          got 183                    paper 183
-ok        pipeline noise floor 0.303 logits                                                                got 0.30314                paper 0.303
-ok        fp32 changes the aggregate by −2.8 to +2.8%                                                      got -2.838 to 2.775        paper -2.8 to 2.8
-ok        batching changes it by −0.3 to +0.3%                                                             got -0.2765 to 0.2613      paper -0.3 to 0.3
-ok        patient-clustering comparison on the 183-image cohort                                            got 183                    paper 183
-ok        42 quantities, 39 agree                                                                          got 39/42                  paper 39/42
-ok        width ratio 0.86 to 1.41                                                                         got 0.8646 to 1.41         paper 0.86 to 1.41
-ok        ERM first dose step −0.395                                                                       got -0.394551              paper -0.395
-ok        Spearman −0.51 to −0.82                                                                          got -0.5053 to -0.8228     paper -0.51 to -0.82
-ok        weakest Spearman interval [−0.79, −0.04]                                                         got -0.7916 to -0.03693    paper -0.79 to -0.04
-ok        four threshold schemes                                                                           got 4                      paper 4
-ok        no valid control under any scheme                                                                got 0                      paper 0
-ok        balance tolerances span 0.05 to 0.30                                                             got 0.05 to 0.3            paper 0.05 to 0.3
-ok        19 candidate controls per target                                                                 got [19]                   paper [19]
-ok        best-balanced control: SMD 0.05, proxy 99%                                                       got 0.04598 to 99.22       paper 0.05 to 99
-ok        most neutral control: SMD 1.40                                                                   got 1.39652                paper 1.4
-ok        neutral controls miss balance by at least 11 times                                               got 11.1649                paper >= 11
-ok        balanced and neutral sets are disjoint                                                           got 1                      paper 1
-ok        88 performed edits                                                                               got 88                     paper 88
-ok        four exactly matched pairs                                                                       got 4                      paper 4
-ok        eight distinct edits in those pairs                                                              got 8                      paper 8
-ok        length-two route rho 9.7 to 13.3                                                                 got 9.655 to 13.27         paper 9.7 to 13.3
-ok        best route rho 1.17 to 2.13                                                                      got 1.166 to 2.131         paper 1.17 to 2.13
-ok        three targets: bottleneck above one in 98.5 to 100% of resamples                                 got 98.48 to 100           paper 98.5 to 100
-ok        color variegation at top dose: above one in 89.9%                                                got 89.86                  paper 89.9
-ok        its bottleneck interval [0.90, 1.95]                                                             got 0.8966 to 1.95         paper 0.9 to 1.95
-ok        route bootstrap 5,000 resamples                                                                  got 5000                   paper 5000
-ok        route reselected in every resample                                                               got 1                      paper 1
-ok        Table S26 intervals                                                                              got 1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10 paper 1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10
-ok        Table S26 shares                                                                                 got 1.5, 10.1, 0.4, 0.0    paper 1.5, 10.1, 0.4, 0.0
-ok        footprint parts 0.47 to 3.41                                                                     got 0.4657 to 3.41         paper 0.47 to 3.41
-ok        concept parts 2.66 to 6.52                                                                       got 2.657 to 6.516         paper 2.66 to 6.52
-ok        binding pair 10.24 logits                                                                        got 10.238                 paper 10.24
-ok        at 7.24 scored units                                                                             got 7.23625                paper 7.24
-ok        L^g >= 1.41                                                                                      got 1.41482                paper 1.41
-ok        dropping the binding pair gives 1.33                                                             got 1.32864                paper 1.33
-ok        conservative floor 0.96                                                                          got 0.959903               paper 0.96
-ok        median implied constant 0.71                                                                     got 0.712245               paper 0.71
-ok        quartiles 0.34 and 0.91                                                                          got 0.3386 to 0.9092       paper 0.34 to 0.91
-ok        twenty-one Lipschitz comparisons                                                                 got 21                     paper 21
-ok        half-widths 0.66, 1.00, 1.01, 4.82                                                               got 0.66, 1.00, 1.01, 4.82 paper 0.66, 1.00, 1.01, 4.82
-ok        full-width break-even 0.117 to 0.154 at three targets, color_var@2 vacuous                       got 0.117, 0.138, 0.154, 0.000 paper 0.117, 0.138, 0.154, 0.000
-ok        break-even uses full width (hw <= range/2)                                                       got 0.154483               paper 0.154483
-ok        break-even is 9.2 to 12.1 times below the floor                                                  got 9.158 to 12.1          paper 9.2 to 12.1
-ok        only the color_var@2 full width, 9.65, exceeds the 3.33 span                                     got 2.00, 2.03, 9.65 ['color_var@2'] paper 2.00, 2.03, 9.65 ['color_var@2']
-ok        span recomputed from c12 equals c55's                                                            got 3.33119                paper 3.33119
-ok        corrected scores span 3.33 logits, 0.96 to 4.29                                                  got 3.33/0.96/4.29         paper 3.33/0.96/4.29
-ok        interaction price eps_q >= 5.12                                                                  got 5.11901                paper 5.12
-ok        twenty-one control comparisons                                                                   got 21                     paper 21
-ok        all twenty-one exclude zero (patient)                                                            got 21                     paper 21
-ok        all twenty-one exclude zero (image)                                                              got 21                     paper 21
-ok        median disagreement 9.47 logits                                                                  got 9.47195                paper 9.47
-ok        disagreement 2.26 to 14.43                                                                       got 2.257 to 14.43         paper 2.26 to 14.43
-ok        every comparison follows globrot_m > noise_m > pixperm_m                                         got 1                      paper 1
-ok        the order as printed in S6                                                                       got 1                      paper 1
-ok        pairs per target 0/1/3/3                                                                         got {'contrast@2': 0, 'color_var@2': 1, 'contrast@0': 3, 'color_var@0': 3} paper {'contrast@2': 0, 'color_var@2': 1, 'contrast@0': 3, 'color_var@0': 3}
-ok        leave-one-family-out R^2 negative everywhere                                                     got -1.35902               paper <= 0
-ok        below −100 for one family in two of three models                                                 got 2                      paper 2
-ok        globrot R^2 −1,631.9 / −66.1 / −204.4                                                            got -1631.9/-66.1/-204.4   paper -1631.9/-66.1/-204.4
-ok        LOFO fit on 58 common images                                                                     got 58                     paper 58
-ok        balance+overlap controls bracket no cell                                                         got 0                      paper 0
-ok        whole library brackets 7 of 12                                                                   got 7                      paper 7
-ok        the whole library is the 15 constructed controls                                                 got [15, 15]               paper [15, 15]
-ok        balanced controls bracket the slope in 2 cells, the intercept in none                            got 2/0                    paper 2/0
-ok        bracketing controls 4.4 to 21 times outside tolerance                                            got 4.356 to 20.95         paper 4.4 to 21
-ok        slope interval widths 0.04 to 0.40                                                               got 0.0416 to 0.3968       paper 0.04 to 0.4
-ok        linear beats constant in ten of twelve                                                           got 10                     paper 10
-ok        largest half-split disagreement 0.32                                                             got 0.318347               paper 0.32
-ok        simulated target 1.117                                                                           got 1.11702                paper 1.117
-ok        valid regime within 0.8%                                                                         got 0.762019               paper 0.8
-ok        model-state regime biased 6.7%                                                                   got 6.73874                paper 6.7
-ok        proxy-blind regime biased 42.5%                                                                  got 42.4932                paper 42.5
-ok        screens admit R1, R4, R5 and reject R2, R3                                                       got ARRAA                  paper ARRAA
-ok        designed length-four route +1.111                                                                got 1.1108                 paper 1.111
-ok        its interval [1.085, 1.151]                                                                      got 1.085 to 1.151         paper 1.085 to 1.151
-ok        recovery within 0.6%                                                                             got 0.556658               paper <= 0.6
-ok        nearest neutral control 1.65 SMD away                                                            got 1.64901                paper 1.65
-ok        no length-two route there                                                                        got false                  paper false
-ok        CAV accuracy 0.84 to 0.94                                                                        got 0.8417 to 0.9366       paper 0.84 to 0.94
-ok        significant in 7 of 12 cells                                                                     got 7 of 12                paper 7 of 12
-ok        multi-placebo sample: 57 of 83 malignant audit images                                            got 57                     paper 57
-ok        multi-placebo intervals are patient-clustered                                                    got patient                paper patient
-ok        multi-placebo: 29 patients                                                                       got 29                     paper 29
-ok        Slim −0.34 under flip                                                                            got -0.341671              paper -0.34
-ok        Slim +5.14 under noise                                                                           got 5.13772                paper 5.14
-ok        sign changes for one of three models                                                             got 1                      paper 1
-ok        Table S29: all 12 rows match c10                                                                 got 12                     paper 12
-ok        marginal endpoints of the two runs differ by at most 0.0043                                      got 0.00433314             paper <= 0.00435
-ok        reported checkpoint gives 0.123 on both cohorts                                                  got 0.123/0.123            paper 0.123/0.123
-ok        between-lesion scale keeps 1,991 of 2,000 draws                                                  got 2000/1991              paper 2000/1991
-ok        S6: noise_m fails neutrality at both top doses, 20 and 18%                                       got 20/18                  paper 20/18
-ok        S6: pixperm_m overlap 92% at the contrast top dose                                               got 92                     paper 92
-ok        S6: hue_m passes neutrality only at the contrast top dose                                        got ['contrast@2']         paper ['contrast@2']
-ok        at most 8 of 183 bounded observations in any one shrinkage fit                                   got 8                      paper 8
-ok        ResNet-50 Inv alone has the highest first-exceeding hair dose, 2.37%                             got r50-Inv 2.37           paper r50-Inv 2.37
-ok        cycle test uses 20,000 resamples                                                                 got 20000                  paper 20000
-ok        optimized radial controls: target proxy moves < 0.1%, off-target share of the mean shift > 99%   got True True              paper True True
-=================================================================================================================================================
-295 checks, 295 ok, 0 not ok
+=========================================================================================================================================================================================
+ok        audit cohort: 183 images                                                                                                                 got 183                    paper 183
+ok        audit cohort: 100 patients                                                                                                               got 100                    paper 100
+ok        audit cohort: 83 malignant                                                                                                               got 83                     paper 83
+ok        audit cohort: malignant images come from 44 patients                                                                                     got 44                     paper 44
+ok        PAD-UFES-20 split 1,367 / 475 / 456                                                                                                      got 1367/475/456           paper 1367/475/456
+ok        PAD-UFES-20 audit fold 278 patients                                                                                                      got 278                    paper 278
+ok        PAD-UFES-20 audit-fold malignant rate 47.6%                                                                                              got 47.5877                paper 47.6
+ok        training fold holds 232 malignant cases                                                                                                  got 232                    paper 232
+ok        ISIC-2024: 401,059 tiles                                                                                                                 got 401059                 paper 401059
+ok        ISIC-2024: 1,042 patients                                                                                                                got 1042                   paper 1042
+ok        ISIC-2024: 393 malignant                                                                                                                 got 393                    paper 393
+ok        ISIC-2024: prevalence 0.098%                                                                                                             got 0.0979906              paper 0.098
+ok        ISIC-2024: 1,068 histopathology-level diagnoses                                                                                          got 1068                   paper 1068
+ok        ISIC-2024: 114 indeterminate                                                                                                             got 114                    paper 114
+ok        selection AUROC, EfficientNet-B3 trio                                                                                                    got 0.90/0.89/0.87         paper 0.90/0.89/0.87
+ok        selection AUROC, ResNet-50 trio                                                                                                          got 0.87/0.88/0.89         paper 0.87/0.88/0.89
+ok        Inv checkpoints saved at epochs with the penalties on: B3 epoch 7, R50 epoch 6                                                           got 7 on / 6 on            paper 7 on / 6 on
+ok        training the six checkpoints takes 2.1 hours                                                                                             got 2.06333                paper 2.1
+ok        eighteen artifact cells                                                                                                                  got 18                     paper 18
+ok        every cell exceeds jointly                                                                                                               got 18                     paper 18
+ok        six cells do not exceed on the signed component                                                                                          got 6                      paper 6
+ok        two cells within the signed band                                                                                                         got 2                      paper 2
+ok        primary magnitudes 0.085 to 0.769                                                                                                        got 0.08543 to 0.7692      paper 0.085 to 0.769
+ok        audit-cohort AUROC 0.856 to 0.893                                                                                                        got 0.8556 to 0.8935       paper 0.856 to 0.893
+ok        hair alters 2.4% of pixels                                                                                                               got 2.35614                paper 2.4
+ok        identity edit alters no pixels                                                                                                           got 0                      paper 0
+ok        ERM malignant score under hair 0.733 to 0.070                                                                                            got 0.733 to 0.06954       paper 0.733 to 0.07
+ok        Slim malignant score under hair 0.859 to 0.170                                                                                           got 0.8595 to 0.1704       paper 0.859 to 0.17
+ok        Inv malignant score under hair 0.501 to 0.046                                                                                            got 0.5014 to 0.04631      paper 0.501 to 0.046
+ok        seven cells still exceed at tolerance 0.20                                                                                               got 7                      paper 7
+ok        Table 4: all 18 rows match c30 (values, intervals, verdicts)                                                                             got 18                     paper 18
+ok        secondary 18-magnitude band: critical value 2.96                                                                                         got 2.95684                paper 2.96
+ok        secondary 18-magnitude band: frontier 0.044                                                                                              got 0.0447338              paper >= 0.044
+ok        simultaneous replicates 20,000                                                                                                           got 20000                  paper 20000
+ok        nine cached-prediction cells: critical value 2.68                                                                                        got 2.68101                paper 2.68
+ok        nine cached-prediction cells: Inv benign bound 0.049                                                                                     got 0.0489829              paper 0.049
+ok        stratified band: critical value 3.12                                                                                                     got 3.11867                paper 3.12
+ok        stratified band: frontier 0.041                                                                                                          got 0.0416996              paper >= 0.041
+ok        stratified band: frontier 0.0417 (supp)                                                                                                  got 0.0416996              paper 0.0417
+ok        stratified band: strata 44 and 56                                                                                                        got 44 to 56               paper 44 to 56
+ok        stratified band: 17 of 18 still exceed                                                                                                   got 17                     paper 17
+ok        observed malignant share 45%                                                                                                             got 45.3552                paper 45
+ok        plain bootstrap share 34 to 57%                                                                                                          got 33.53 to 56.72         paper 34 to 57
+ok        stratified share 36 to 55%                                                                                                               got 36.26 to 54.63         paper 36 to 55
+ok        19 patients hold both labels, 57 images                                                                                                  got 19 to 57               paper 19 to 57
+ok        trace: bright ruler moves the cell by 0.0003                                                                                             got 0.0003                 paper 0.0003
+ok        trace: single blend moves the cell by 0.0007                                                                                             got 0.0007                 paper 0.0007
+ok        trace: reimplementation inference on same edits gives 0.047                                                                              got 0.0474928              paper 0.047
+ok        trace: inference codes agree to 0.003                                                                                                    got 0.00274364             paper 0.003
+ok        trace: rerun vs cache mean 0.016                                                                                                         got 0.0160629              paper 0.016
+ok        trace: rerun vs cache max 0.72                                                                                                           got 0.722138               paper 0.72
+ok        trace: 4.9% of images above 0.05                                                                                                         got 4.86486                paper 4.9
+ok        trace: 1.04 blends per touched pixel                                                                                                     got 1.03978                paper 1.04
+ok        rerun: overlays reproduce the cached pixel fractions                                                                                     got 1                      paper 1
+ok        rerun: cell 0.041                                                                                                                        got 0.0407157              paper 0.041
+ok        rerun: interval [0.030, 0.052]                                                                                                           got 0.03016 to 0.05205     paper 0.03 to 0.052
+ok        rerun: cell indeterminate                                                                                                                got indeterminate          paper indeterminate
+ok        cache: cell within tolerance                                                                                                             got equivalence            paper equivalence
+ok        rerun keeps 17 of 18 cached decisions                                                                                                    got 17                     paper 17
+ok        rerun vs cache, unedited, 0.016 to 0.033 on average                                                                                      got 0.01606 to 0.03313     paper 0.016 to 0.033
+ok        rerun is deterministic                                                                                                                   got 0                      paper 0
+ok        benign redraw: joint coverage 95.4%                                                                                                      got 95.4                   paper 95.4
+ok        benign redraw: MC se 0.9 points                                                                                                          got 0.936846               paper 0.9
+ok        benign redraw: component coverage min 98.8%                                                                                              got 98.8                   paper 98.8
+ok        benign redraw: crit 2.99 to 3.23                                                                                                         got 2.989 to 3.227         paper 2.99 to 3.23
+ok        benign redraw: crit median 3.08                                                                                                          got 3.0806                 paper 3.08
+ok        benign redraw: frontier median 0.0470                                                                                                    got 0.046994               paper 0.047
+ok        benign redraw: frontier min 0.0280                                                                                                       got 0.027961               paper 0.028
+ok        benign redraw: every tolerance below 0.027 in every draw                                                                                 got 0.027961               paper >= 0.027
+ok        benign redraw: frontier central range 0.033 to 0.066                                                                                     got 0.03264 to 0.06618     paper 0.033 to 0.066
+ok        benign redraw: all 18 exceed 0.05 jointly in 38% of draws                                                                                got 38.2                   paper 38.2
+ok        benign redraw: frame 4,150 benign from 198 patients                                                                                      got 4150 to 198            paper 4150 to 198
+ok        benign redraw: 500 draws                                                                                                                 got 500                    paper 500
+ok        signed exceedance size at eps/se = 0.25 is 0.032                                                                                         got 0.0319475              paper 0.032
+ok        route test: 78 locked images from 54 patients                                                                                            got 78 to 54               paper 78 to 54
+ok        route test: all four controls pass G1 on 74 to 78 images                                                                                 got 74 to 78               paper 74 to 78
+ok        route test: scale-pair disagreements 5.02 to 6.62 logits                                                                                 got 5.015 to 6.618         paper 5.02 to 6.62
+ok        route test: three disagreeing cells in the second run                                                                                    got causal|contrast@2,erm|contrast@2,slim|color_var@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2
+ok        route test: 3 disagree / 0 agree / 9 indeterminate                                                                                       got 3/0/9                  paper 3/0/9
+ok        route test: one direction pair exceeds, Inv at the highest contrast dose                                                                 got 1 to 4.9               paper 1 to 4.9
+ok        route test: 12 of 24 direction differences exclude zero marginally                                                                       got 12                     paper 12
+ok        route test: 7 direction differences exceed on marginal intervals                                                                         got 7                      paper 7
+ok        route test: simultaneous critical value 3.37                                                                                             got 3.37485                paper 3.37
+ok        route test: primary sets 44 to 47 images from 32 or 33 patients                                                                          got 44-47/32-33            paper 44-47/32-33
+ok        Table 5 images (patients), both runs, contrast@0                                                                                         got | 45 (32) / 75 (53) |  paper | 45 (32) / 75 (53) |
+ok        Table 5 verdicts, second / first run, erm contrast@0                                                                                     got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, second / first run, slim contrast@0                                                                                    got indeterminate / disagree paper indeterminate / disagree
+ok        Table 5 verdicts, second / first run, causal contrast@0                                                                                  got indeterminate / agree  paper indeterminate / agree
+ok        Table 5 images (patients), both runs, contrast@2                                                                                         got | 44 (32) / 73 (52) |  paper | 44 (32) / 73 (52) |
+ok        Table 5 verdicts, second / first run, erm contrast@2                                                                                     got disagree / disagree    paper disagree / disagree
+ok        Table 5 verdicts, second / first run, slim contrast@2                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, second / first run, causal contrast@2                                                                                  got disagree / indeterminate paper disagree / indeterminate
+ok        Table 5 images (patients), both runs, color_var@0                                                                                        got | 47 (33) / 77 (54) |  paper | 47 (33) / 77 (54) |
+ok        Table 5 verdicts, second / first run, erm color_var@0                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, second / first run, slim color_var@0                                                                                   got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, second / first run, causal color_var@0                                                                                 got indeterminate / agree  paper indeterminate / agree
+ok        Table 5 images (patients), both runs, color_var@2                                                                                        got | 46 (32) / 76 (54) |  paper | 46 (32) / 76 (54) |
+ok        Table 5 verdicts, second / first run, erm color_var@2                                                                                    got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        Table 5 verdicts, second / first run, slim color_var@2                                                                                   got disagree / disagree    paper disagree / disagree
+ok        Table 5 verdicts, second / first run, causal color_var@2                                                                                 got indeterminate / indeterminate paper indeterminate / indeterminate
+ok        both runs: ERM highest contrast and Slim highest variegation disagree in both                                                            got erm|contrast@2,slim|color_var@2 paper erm|contrast@2,slim|color_var@2
+ok        first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed                                                             got erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0 paper erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0
+ok        both runs: 73 to 77 images per target, then 44 to 47                                                                                     got 73-77 / 44-47          paper 73-77 / 44-47
+ok        route test: dropping the floor adds 30 or 31 images per target                                                                           got 30 to 31               paper 30 to 31
+ok        route test: Table S31 erm|contrast@2 rad4-rad16                                                                                          got +5.02 [+1.20, +8.83]   paper +5.02 [+1.20, +8.83]
+ok        route test: Table S31 slim|color_var@2 rad4-rad16                                                                                        got +6.16 [+0.62, +11.69]  paper +6.16 [+0.62, +11.69]
+ok        route test: Table S31 causal|contrast@2 rad4-rad16                                                                                       got +6.62 [+1.99, +11.24]  paper +6.62 [+1.99, +11.24]
+ok        route test: Table S31 causal|contrast@2 rad4-hue4                                                                                        got +4.90 [+1.02, +8.79]   paper +4.90 [+1.02, +8.79]
+ok        route test: route sums spread 0.5 to 6.7                                                                                                 got 0.5345 to 6.676        paper 0.5 to 6.7
+ok        route test: placebos spread 3.1 to 6.7                                                                                                   got 3.121 to 6.692         paper 3.1 to 6.7
+ok        route test: without the floor the same three cells disagree, nine indeterminate                                                          got 3/0/9 True             paper 3/0/9 True
+ok        route test: independent subsets 11, 0, 0, 0                                                                                              got 11/0/0/0               paper 11/0/0/0
+ok        first run: 3 disagree / 2 agree / 7 indeterminate                                                                                        got 3/2/7                  paper 3/2/7
+ok        first run: critical value 3.30                                                                                                           got 3.3041                 paper 3.3
+ok        first run: slim|contrast@0                                                                                                               got +1.99 [+0.51, +3.47]   paper +1.99 [+0.51, +3.47]
+ok        first run: erm|contrast@2                                                                                                                got +4.63 [+1.92, +7.34]   paper +4.63 [+1.92, +7.34]
+ok        first run: slim|color_var@2                                                                                                              got +5.27 [+1.84, +8.70]   paper +5.27 [+1.84, +8.70]
+ok        first run: without the floor 2 disagree, 0 agree, 10 indeterminate                                                                       got 2/0/10                 paper 2/0/10
+ok        first run: 73 to 77 images from 52 to 54 patients                                                                                        got 73-77/52-54            paper 73-77/52-54
+ok        diagnostic (T): per-model median disagreement 7.8, 9.5, 11.4                                                                             got 7.8/9.5/11.4           paper 7.8/9.5/11.4
+ok        S6: per-model medians 7.80, 9.47, 11.40                                                                                                  got 7.80/9.47/11.40        paper 7.80/9.47/11.40
+ok        robustness (second run): stored responses reproduce the band                                                                             got 0                      paper 0
+ok        robustness: ERM and Inv at the highest contrast dose hold for 20 of 20 seeds and all 32 subsets                                          got 20-32/32/20-32/32/20-32/32 paper 20-32/32/20-32/32/20-32/32
+ok        robustness: smallest lower bounds 0.78, 1.60 and 0.73 (rounded down)                                                                     got 0.78/1.60/0.73         paper 0.78/1.60/0.73
+ok        robustness: Inv direction pair smallest bound 0.73 (rounded down)                                                                        got 0.73                   paper 0.73
+ok        robustness: Slim highest variegation lower bound 0.62                                                                                    got 0.623514               paper 0.62
+ok        robustness: Slim highest variegation in 17 of 32 subsets and 20 of 20 seeds                                                              got 17/32 20               paper 17/32 20
+ok        robustness: its seed lower bounds 0.55 to 0.70                                                                                           got 0.5508 to 0.7024       paper 0.55 to 0.7
+ok        robustness: its smallest subset bound 0.06                                                                                               got 0.06                   paper 0.06
+ok        robustness: critical value across seeds 3.35 to 3.39                                                                                     got 3.347 to 3.389         paper 3.35 to 3.39
+ok        Table 5 cell erm|contrast@0                                                                                                              got 1                      paper 1
+ok        Table 5 cell slim|contrast@0                                                                                                             got 1                      paper 1
+ok        Table 5 cell causal|contrast@0                                                                                                           got 1                      paper 1
+ok        Table 5 cell erm|contrast@2                                                                                                              got 1                      paper 1
+ok        Table 5 cell slim|contrast@2                                                                                                             got 1                      paper 1
+ok        Table 5 cell causal|contrast@2                                                                                                           got 1                      paper 1
+ok        Table 5 cell erm|color_var@0                                                                                                             got 1                      paper 1
+ok        Table 5 cell slim|color_var@0                                                                                                            got 1                      paper 1
+ok        Table 5 cell causal|color_var@0                                                                                                          got 1                      paper 1
+ok        Table 5 cell erm|color_var@2                                                                                                             got 1                      paper 1
+ok        Table 5 cell slim|color_var@2                                                                                                            got 1                      paper 1
+ok        Table 5 cell causal|color_var@2                                                                                                          got 1                      paper 1
+ok        cross pairs: 4, 5 and 2 outside, none inside                                                                                             got 4/5/2 0                paper 4/5/2 0
+ok        first run: borderline lower bound 0.510                                                                                                  got 0.50979                paper 0.51
+ok        first run: borderline under 10 of 20 seeds                                                                                               got 10                     paper 10
+ok        first run: borderline in 31 of the 53 subsets                                                                                            got 31 to 53               paper 31 to 53
+ok        first run: the two highest-dose disagreements hold for 20 of 20 seeds and every in-cell subset                                           got 20-52/52/20-54/54      paper 20-52/52/20-54/54
+ok        screens: no constructed control passes all three                                                                                         got 0                      paper 0
+ok        screens: optimised radial footprint-link scores 0.56 and 0.06                                                                            got 0.563 to 0.06418       paper 0.56 to 0.06
+ok        screens: two controls pass under a target-only (A2)                                                                                      got frontier|color_var@2|rad/registered|color_var@2|rad16 paper frontier|color_var@2|rad/registered|color_var@2|rad16
+ok        screens: they move the contrast proxy by 47 and 58%                                                                                      got 46.7 to 58.16          paper 47 to 58
+ok        screens: target proxy of every constructed control moves < 0.15%                                                                         got 1                      paper 1
+ok        C3b proxies: edit off-target CIELAB 25 and 78% (contrast)                                                                                got 25.19 to 78.39         paper 25 to 78
+ok        C3b proxies: edit off-target CIELAB 16 and 51% (variegation)                                                                             got 16.07 to 50.67         paper 16 to 51
+ok        off-target: CIELAB 20.0 and 26.4% at the highest contrast dose                                                                           got 19.95 to 26.42         paper 20 to 26.4
+ok        off-target: contrast proxy 18 and 47% at the highest variegation dose                                                                    got 18.17 to 46.7          paper 18 to 47
+ok        screens: proxy shift 20 and 29%                                                                                                          got 20.31 to 29.1          paper 20 to 29
+ok        screens: 30 and 71% of the edit's shift                                                                                                  got 30 to 71.17            paper 30 to 71
+ok        screens: every low-dose hue control passes (A2)                                                                                          got 1                      paper 1
+ok        screens: hue misses balance by 9.2 to 9.4 at the lowest contrast dose                                                                    got 9.234 to 9.435         paper 9.2 to 9.4
+ok        screens: and by 10.8 to 10.9 at the lowest variegation dose                                                                              got 10.83 to 10.86         paper 10.8 to 10.9
+ok        screens: concept edit moves the contrast proxy by 16% on the images of the two candidates                                                got 15.6 to 15.6           paper 16 to 16
+ok        screens: off-target 4.9 and 5.3% at the lowest contrast dose                                                                             got 4.868 to 5.278         paper 4.9 to 5.3
+ok        route-test manifest: every listed file matches its SHA-256                                                                               got 0                      paper 0
+ok        exploratory (second run): nine differences analyzed, none decided                                                                        got 9 9                    paper 9 9
+ok        exploratory (second run): main text says no pair is decided                                                                              got 0                      paper 0
+ok        exploratory (second run): critical value 2.86                                                                                            got 2.85863                paper 2.86
+ok        first run exploratory: Slim persists at 2.32 on 49 images                                                                                got 2.323 to 49            paper 2.32 to 49
+ok        first run exploratory: decision exceeds                                                                                                  got exceeds                paper exceeds
+ok        frontier: radial within 0.1% on 13 and 15 images at the high doses, none at the low doses                                                got 0/13/0/15              paper 0/13/0/15
+ok        frontier: hue never within 10%                                                                                                           got 0                      paper 0
+ok        frontier: two inexact hue solutions, 0.007 and 0.22%                                                                                     got 2: 0.007/0.22          paper 2: 0.007/0.22
+ok        frontier: pre-specified radial controls never within 0.1%                                                                                got 0                      paper 0
+ok        high doses: seven of eight controls fail G2 on most images                                                                               got 7                      paper 7
+ok        36-component critical value 3.12 (headline band)                                                                                         got 3.11823                paper 3.12
+ok        every cell exceeds every tolerance below 0.042 (36 components)                                                                           got 0.0422275              paper >= 0.042
+ok        36-component frontier 0.0422 (supp)                                                                                                      got 0.0422275              paper 0.0422
+ok        36 band: 17 of 18 cells exceed jointly at 0.05                                                                                           got 17                     paper 17
+ok        36 band signed: 11 exceed / 1 within / 6 indet                                                                                           got 11/1/6                 paper 11/1/6
+ok        R50 Inv malignant signed sim36 [-0.040, +0.029]                                                                                          got -0.0402 to 0.02876     paper -0.04 to 0.029
+ok        36 band critical value agrees with c40 (2.96 for 18)                                                                                     got 2.95684                paper 2.96
+ok        marginal bound 0.0627                                                                                                                    got 0.0627059              paper 0.0627
+ok        0.063 is 1.25 times the tolerance                                                                                                        got 1.25412                paper 1.25
+ok        cached run: Inv benign 0.091 [0.063, 0.124]                                                                                              got 0.09059 to 0.06296     paper 0.091 to 0.063
+ok        cached run: Slim malignant 0.762 [0.707, 0.808]                                                                                          got 0.7615 to 0.8082       paper 0.762 to 0.808
+ok        seven realizations move magnitudes 3.2 to 24.9%                                                                                          got 3.17 to 24.91          paper 3.2 to 24.9
+ok        no verdict changes across realizations                                                                                                   got 1                      paper 1
+ok        smallest lower bound across realizations 0.058                                                                                           got 0.0584655              paper >= 0.058
+ok        seven realizations                                                                                                                       got 7                      paper 7
+ok        altered-pixel fractions vary by at most 0.06 percentage points                                                                           got 0.0619568              paper <= 0.065
+ok        ResNet-50 Inv within tolerance under the ruler alone                                                                                     got equivalence/equivalence/equivalence paper equivalence/equivalence/equivalence
+ok        dose grid: 144 cells                                                                                                                     got 144                    paper 144
+ok        dose grid: 55 within tolerance                                                                                                           got 55                     paper 55
+ok        dose grid: 19 indeterminate                                                                                                              got 19                     paper 19
+ok        first exceedance 0.34 to 2.37%                                                                                                           got 0.3364 to 2.368        paper 0.34 to 2.37
+ok        identity edit within tolerance in all eighteen cells                                                                                     got 18                     paper 18
+ok        non-identity: 37 of 126 within tolerance                                                                                                 got 37 to 126              paper 37 to 126
+ok        dose grid spans 0.16 to 4.06%                                                                                                            got 0.1602 to 4.06         paper 0.16 to 4.06
+ok        second cohort: six cells exceed                                                                                                          got 6                      paper 6
+ok        second cohort: 0.069 to 0.096                                                                                                            got 0.06859 to 0.09643     paper 0.069 to 0.096
+ok        second cohort: both first exceed at 1.02%                                                                                                got ['hair_light']         paper ['hair_light']
+ok        photometric edits move the malignant score by at most 0.09                                                                               got 0.0894164              paper <= 0.095
+ok        photometric edits move the malignant logit by at most 1.7 (mean |change|, 183 images)                                                    got 1.66002                paper <= 1.7
+ok        main hair edit moves it by up to 13.8 (mean |change|, 183 images)                                                                        got 13.7638                paper 13.8
+ok        largest concept response 1.06 logits                                                                                                     got 1.06461                paper 1.06
+ok        component-range width 26.57 logits                                                                                                       got 26.5664                paper 26.57
+ok        width is 96.1% of the 27.63-logit range                                                                                                  got 96.147                 paper 96.1
+ok        concept responses run −0.06 to +1.06                                                                                                     got -0.06222 to 1.065      paper -0.06 to 1.06
+ok        clipped logit bound B = 13.8155                                                                                                          got 13.8155                paper 13.8155
+ok        87.1% of hair-edit predictions at the bound                                                                                              got 87.0674                paper 87.1
+ok        16.3% of edited predictions at the bound                                                                                                 got 16.2922                paper 16.3
+ok        minimum detectable effect 0.48 to 1.79 logits                                                                                            got 0.4761 to 1.787        paper 0.48 to 1.79
+ok        numerical check on the 183-image cohort                                                                                                  got 183                    paper 183
+ok        pipeline noise floor 0.303 logits                                                                                                        got 0.30314                paper 0.303
+ok        fp32 changes the aggregate by −2.8 to +2.8%                                                                                              got -2.838 to 2.775        paper -2.8 to 2.8
+ok        batching changes it by −0.3 to +0.3%                                                                                                     got -0.2765 to 0.2613      paper -0.3 to 0.3
+ok        patient-clustering comparison on the 183-image cohort                                                                                    got 183                    paper 183
+ok        42 quantities, 39 agree                                                                                                                  got 39/42                  paper 39/42
+ok        width ratio 0.86 to 1.41                                                                                                                 got 0.8646 to 1.41         paper 0.86 to 1.41
+ok        ERM first dose step −0.395                                                                                                               got -0.394551              paper -0.395
+ok        Spearman −0.51 to −0.82                                                                                                                  got -0.5053 to -0.8228     paper -0.51 to -0.82
+ok        weakest Spearman interval [−0.79, −0.04]                                                                                                 got -0.7916 to -0.03693    paper -0.79 to -0.04
+ok        four threshold schemes                                                                                                                   got 4                      paper 4
+ok        no valid control under any scheme                                                                                                        got 0                      paper 0
+ok        balance tolerances span 0.05 to 0.30                                                                                                     got 0.05 to 0.3            paper 0.05 to 0.3
+ok        19 candidate controls per target                                                                                                         got [19]                   paper [19]
+ok        best-balanced control: SMD 0.05, proxy 99%                                                                                               got 0.04598 to 99.22       paper 0.05 to 99
+ok        most neutral control: SMD 1.40                                                                                                           got 1.39652                paper 1.4
+ok        neutral controls miss balance by at least 11 times                                                                                       got 11.1649                paper >= 11
+ok        balanced and neutral sets are disjoint                                                                                                   got 1                      paper 1
+ok        88 performed edits                                                                                                                       got 88                     paper 88
+ok        four exactly matched pairs                                                                                                               got 4                      paper 4
+ok        eight distinct edits in those pairs                                                                                                      got 8                      paper 8
+ok        length-two route rho 9.7 to 13.3                                                                                                         got 9.655 to 13.27         paper 9.7 to 13.3
+ok        best route rho 1.17 to 2.13                                                                                                              got 1.166 to 2.131         paper 1.17 to 2.13
+ok        three targets: bottleneck above one in 98.5 to 100% of resamples                                                                         got 98.48 to 100           paper 98.5 to 100
+ok        color variegation at top dose: above one in 89.9%                                                                                        got 89.86                  paper 89.9
+ok        its bottleneck interval [0.90, 1.95]                                                                                                     got 0.8966 to 1.95         paper 0.9 to 1.95
+ok        route bootstrap 5,000 resamples                                                                                                          got 5000                   paper 5000
+ok        route reselected in every resample                                                                                                       got 1                      paper 1
+ok        Table S26 intervals                                                                                                                      got 1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10 paper 1.10, 2.34; 0.90, 1.95; 1.09, 1.95; 1.24, 2.10
+ok        Table S26 shares                                                                                                                         got 1.5, 10.1, 0.4, 0.0    paper 1.5, 10.1, 0.4, 0.0
+ok        footprint parts 0.47 to 3.41                                                                                                             got 0.4657 to 3.41         paper 0.47 to 3.41
+ok        concept parts 2.66 to 6.52                                                                                                               got 2.657 to 6.516         paper 2.66 to 6.52
+ok        binding pair 10.24 logits                                                                                                                got 10.238                 paper 10.24
+ok        at 7.24 scored units                                                                                                                     got 7.23625                paper 7.24
+ok        L^g >= 1.41                                                                                                                              got 1.41482                paper 1.41
+ok        dropping the binding pair gives 1.33                                                                                                     got 1.32864                paper 1.33
+ok        conservative floor 0.96                                                                                                                  got 0.959903               paper 0.96
+ok        median implied constant 0.71                                                                                                             got 0.712245               paper 0.71
+ok        quartiles 0.34 and 0.91                                                                                                                  got 0.3386 to 0.9092       paper 0.34 to 0.91
+ok        twenty-one Lipschitz comparisons                                                                                                         got 21                     paper 21
+ok        half-widths 0.66, 1.00, 1.01, 4.82                                                                                                       got 0.66, 1.00, 1.01, 4.82 paper 0.66, 1.00, 1.01, 4.82
+ok        full-width break-even 0.117 to 0.154 at three targets, color_var@2 vacuous                                                               got 0.117, 0.138, 0.154, 0.000 paper 0.117, 0.138, 0.154, 0.000
+ok        break-even uses full width (hw <= range/2)                                                                                               got 0.154483               paper 0.154483
+ok        break-even is 9.2 to 12.1 times below the floor                                                                                          got 9.158 to 12.1          paper 9.2 to 12.1
+ok        only the color_var@2 full width, 9.65, exceeds the 3.33 span                                                                             got 2.00, 2.03, 9.65 ['color_var@2'] paper 2.00, 2.03, 9.65 ['color_var@2']
+ok        span recomputed from c12 equals c55's                                                                                                    got 3.33119                paper 3.33119
+ok        corrected scores span 3.33 logits, 0.96 to 4.29                                                                                          got 3.33/0.96/4.29         paper 3.33/0.96/4.29
+ok        no interaction price is claimed from neutral pairs                                                                                       got 0                      paper 0
+ok        twenty-one control comparisons                                                                                                           got 21                     paper 21
+ok        all twenty-one exclude zero (patient)                                                                                                    got 21                     paper 21
+ok        all twenty-one exclude zero (image)                                                                                                      got 21                     paper 21
+ok        median disagreement 9.47 logits                                                                                                          got 9.47195                paper 9.47
+ok        disagreement 2.26 to 14.43                                                                                                               got 2.257 to 14.43         paper 2.26 to 14.43
+ok        every comparison follows globrot_m > noise_m > pixperm_m                                                                                 got 1                      paper 1
+ok        the order as printed in S6                                                                                                               got 1                      paper 1
+ok        pairs per target 0/1/3/3                                                                                                                 got {'contrast@2': 0, 'color_var@2': 1, 'contrast@0': 3, 'color_var@0': 3} paper {'contrast@2': 0, 'color_var@2': 1, 'contrast@0': 3, 'color_var@0': 3}
+ok        leave-one-family-out R^2 negative everywhere                                                                                             got -1.35902               paper <= 0
+ok        below −100 for one family in two of three models                                                                                         got 2                      paper 2
+ok        globrot R^2 −1,631.9 / −66.1 / −204.4                                                                                                    got -1631.9/-66.1/-204.4   paper -1631.9/-66.1/-204.4
+ok        LOFO fit on 58 common images                                                                                                             got 58                     paper 58
+ok        balance+overlap controls bracket no cell                                                                                                 got 0                      paper 0
+ok        whole library brackets 7 of 12                                                                                                           got 7                      paper 7
+ok        the whole library is the 15 constructed controls                                                                                         got [15, 15]               paper [15, 15]
+ok        balanced controls bracket the slope in 2 cells, the intercept in none                                                                    got 2/0                    paper 2/0
+ok        bracketing controls 4.4 to 21 times outside tolerance                                                                                    got 4.356 to 20.95         paper 4.4 to 21
+ok        slope interval widths 0.04 to 0.40                                                                                                       got 0.0416 to 0.3968       paper 0.04 to 0.4
+ok        linear beats constant in ten of twelve                                                                                                   got 10                     paper 10
+ok        largest half-split disagreement 0.32                                                                                                     got 0.318347               paper 0.32
+ok        simulated target 1.117                                                                                                                   got 1.11702                paper 1.117
+ok        valid regime within 0.8%                                                                                                                 got 0.762019               paper 0.8
+ok        model-state regime biased 6.7%                                                                                                           got 6.73874                paper 6.7
+ok        proxy-blind regime biased 42.5%                                                                                                          got 42.4932                paper 42.5
+ok        screens admit R1, R4, R5 and reject R2, R3                                                                                               got ARRAA                  paper ARRAA
+ok        designed length-four route +1.111                                                                                                        got 1.1108                 paper 1.111
+ok        its interval [1.085, 1.151]                                                                                                              got 1.085 to 1.151         paper 1.085 to 1.151
+ok        recovery within 0.6%                                                                                                                     got 0.556658               paper <= 0.6
+ok        nearest neutral control 1.65 SMD away                                                                                                    got 1.64901                paper 1.65
+ok        no length-two route there                                                                                                                got false                  paper false
+ok        CAV accuracy 0.84 to 0.94 on all activations (S12)                                                                                       got 0.8417 to 0.9366       paper 0.84 to 0.94
+ok        CAV accuracy 0.68 to 0.87 on held-out activations                                                                                        got 0.6839 to 0.8732       paper 0.68 to 0.87
+ok        significant in 7 of 12 cells                                                                                                             got 7 of 12                paper 7 of 12
+ok        multi-placebo sample: 57 of 83 malignant audit images                                                                                    got 57                     paper 57
+ok        multi-placebo intervals are patient-clustered                                                                                            got patient                paper patient
+ok        multi-placebo: 29 patients                                                                                                               got 29                     paper 29
+ok        Slim −0.34 under flip                                                                                                                    got -0.341671              paper -0.34
+ok        Slim +5.14 under noise                                                                                                                   got 5.13772                paper 5.14
+ok        sign changes for one of three models                                                                                                     got 1                      paper 1
+ok        Table S29: all 12 rows match c10                                                                                                         got 12                     paper 12
+ok        marginal endpoints of the two runs differ by at most 0.0043                                                                              got 0.00433314             paper <= 0.00435
+ok        reported checkpoint gives 0.123 on both cohorts                                                                                          got 0.123/0.123            paper 0.123/0.123
+ok        between-lesion scale keeps 1,991 of 2,000 draws                                                                                          got 2000/1991              paper 2000/1991
+ok        S6: noise_m fails neutrality at both top doses, 20 and 18%                                                                               got 20/18                  paper 20/18
+ok        S6: pixperm_m overlap 92% at the contrast top dose                                                                                       got 92                     paper 92
+ok        S6: hue_m passes neutrality only at the contrast top dose                                                                                got ['contrast@2']         paper ['contrast@2']
+ok        at most 8 of 183 bounded observations in any one shrinkage fit                                                                           got 8                      paper 8
+ok        ResNet-50 Inv alone has the highest first-exceeding hair dose, 2.37%                                                                     got r50-Inv 2.37           paper r50-Inv 2.37
+ok        cycle test uses 20,000 resamples                                                                                                         got 20000                  paper 20000
+ok        optimized radial controls: target proxy moves < 0.1%, off-target share of the mean shift > 99%                                           got True True              paper True True
+ok        occlusion: full overlays reproduce Table 4                                                                                               got 0                      paper 0
+ok        occlusion: lesion region covers a median 36% of the frame                                                                                got 36                     paper 36
+ok        occlusion: region share 2 to 100%                                                                                                        got 2 to 100               paper 2 to 100
+ok        occlusion: 40% of the main hair edit's altered pixels inside (main text)                                                                 got 40                     paper 40
+ok        occlusion: on average 34% of the ruler's altered pixels lie in the lesion region (main text and S8)                                      got 34                     paper 34
+ok        occlusion: light/main/heavy alter 1.1, 2.4 and 4.2% of the region                                                                        got 1.1/2.4/4.2            paper 1.1/2.4/4.2
+ok        occlusion: 40 to 41% of hair-altered pixels inside                                                                                       got 40 to 41               paper 40 to 41
+ok        occlusion: ruler alters 0.8% of the region, 34% inside                                                                                   got 0.8 34                 paper 0.8 34
+ok        occlusion: main hair alters 1.43 and 0.93% of the frame when split                                                                       got 1.43 0.93              paper 1.43 0.93
+ok        occlusion: skin-only overlays exceed in 16 of 18 cells                                                                                   got 16                     paper 16
+ok        occlusion: skin-only at 52 to 101% of the full response                                                                                  got 52 to 101              paper 52 to 101
+ok        occlusion: the two exceptions are B3 Inv benign and R50 Inv malignant, indeterminate                                                     got b3-Inv/benign,r50-Inv/malignant indeterminate,indeterminate paper b3-Inv/benign,r50-Inv/malignant indeterminate,indeterminate
+ok        occlusion: b3-Inv/benign skin-only interval                                                                                              got 0.073 [0.047, 0.102]   paper 0.073 [0.047, 0.102]
+ok        occlusion: r50-Inv/malignant skin-only interval                                                                                          got 0.047 [0.041, 0.055]   paper 0.047 [0.041, 0.055]
+ok        occlusion: skin-only frontier 0.026 (rounded down) and 12 of 18 jointly                                                                  got 0.026 12               paper 0.026 12
+ok        occlusion: 12 skin-only cells exceed 0.05 on the joint band (cell rule)                                                                  got 12                     paper 12
+ok        occlusion: skin-only response is more than half of the full response in every cell                                                       got 1                      paper 1
+ok        occlusion: lesion-only 17 cells, frontier 0.025                                                                                          got 17 0.025               paper 17 0.025
+ok        occlusion: every B3 ERM and Slim cell at least 0.191                                                                                     got 0.191                  paper 0.191
+ok        floor: second run reproduced exactly                                                                                                     got 0                      paper 0
+ok        floor: per-model floor and first-run images give the same three cells                                                                    got causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|color_var@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|color_var@2
+ok        floor: per-model floor keeps 45 to 78 images per cell                                                                                    got 45 to 78               paper 45 to 78
+ok        floor: on the common images the first run's borderline cell is indeterminate, the other two remain                                       got indeterminate erm|contrast@2,slim|color_var@2 44-47 paper indeterminate erm|contrast@2,slim|color_var@2 44-47
+ok        numerics: stored second-run responses reproduced exactly                                                                                 got 0                      paper 0
+ok        numerics: stored first-run responses reproduced exactly                                                                                  got 0                      paper 0
+ok        numerics: full precision adds three Slim disagreements                                                                                   got slim|color_var@0,slim|contrast@0,slim|contrast@2 routes disagree,routes disagree,routes disagree paper slim|color_var@0,slim|contrast@0,slim|contrast@2 routes disagree,routes disagree,routes disagree
+ok        numerics: differences move by up to 2.19 and 1.86 logits                                                                                 got 2.19 to 1.857          paper 2.19 to 1.86
+ok        numerics: mixed batches swap the Slim cells                                                                                              got indeterminate routes disagree paper indeterminate routes disagree
+ok        numerics: no ERM or Inv cell changes in either run                                                                                       got 0                      paper 0
+ok        numerics: 89% of Slim rad4 predictions at the bound at the highest contrast dose                                                         got 89                     paper 89
+ok        numerics: 32% (ERM) and 34% (Inv) of rad4 predictions at the bound in the robust cells                                                   got 32/34                  paper 32/34
+ok        numerics: about a third in the robust cells (main text)                                                                                  got 1                      paper 1
+ok        numerics: 22% of Slim edit and control predictions beyond the bound, 5% ERM, 3% Inv                                                      got 22/5/3                 paper 22/5/3
+ok        numerics: unclipped log-odds reach 25,984, 41,344 and 2,488                                                                              got 25984/41344/2488       paper 25984/41344/2488
+ok        numerics: no cell decided on the unclipped log-odds                                                                                      got 12                     paper 12
+ok        robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check                                   got True True              paper True True
+ok        robust cells: claims are restricted to the clipped scale (main text and S19)                                                             got 1                      paper 1
+ok        variants: two to six cells disagree                                                                                                      got 2 to 6                 paper 2 to 6
+ok        floor sets: one image, ISIC_3039686, at 0.099 to 0.102 in bf16 and 0.096 in fp32                                                         got ISIC_3039686 0.099-0.102 0.096 paper ISIC_3039686 0.099-0.102 0.096
+ok        floor sets: full precision keeps 57, the cache 58                                                                                        got 57 58                  paper 57 58
+ok        floor sets: the c10 batch reproduces its 57                                                                                              got 1                      paper 1
+ok        prediction cache built from the current checkpoints                                                                                      got 1                      paper 1
+ok        clip: z-based reading at 1e-6 reproduces the plan, estimates within 0.001                                                                got True True True         paper True True True
+ok        clip: bound 9.2 to 18.4 logits                                                                                                           got 9.2 to 18.4            paper 9.2 to 18.4
+ok        clip: second run, same three cells from 1e-5 to 1e-8 in bf16, Slim lowest contrast joins at 1e-4                                         got 1                      paper 1
+ok        clip: full precision 5 or 6 cells; Slim highest variegation drops at 1e-7 and below                                                      got 5-6 1e-07,1e-08        paper 5-6 1e-07,1e-08
+ok        clip: ERM and Inv highest contrast disagree at every level in both precisions                                                            got 1                      paper 1
+ok        clip: first run, ERM highest contrast and Slim highest variegation at every level; Slim lowest contrast drops at 1e-7 and below in bf16  got True 1e-07,1e-08       paper True 1e-07,1e-08
+ok        clip: floor read in fp32 changes one image of the second run, none of the first, and no decision                                         got 1 0 True True          paper 1 0 True True
+ok        saturation: 93% of Slim highest-contrast images have a scale-pair prediction at the bound; 34% in the robust cells                       got 93 34 34               paper 93 34 34
+ok        extreme: full-precision maxima 8,901, 71,120 and 4,215                                                                                   got 8901/71120/4215        paper 8901/71120/4215
+ok        extreme: feature norm about 420 to 44,000 times its unedited median                                                                      got 420 to 4.4e+04         paper 420 to 4.4e+04
+ok        extreme: correlation 0.88 to 0.99                                                                                                        got 0.88 to 0.99           paper 0.88 to 0.99
+ok        extreme: one sign flip among the ten largest per model                                                                                   got 1                      paper 1
+ok        probability scale: 12 of 48 exclude zero incl. every decisive difference; 18 in the first run                                            got 12 True 18             paper 12 True 18
+ok        G2 of the disagreeing scale pairs: 13 and 23% (contrast), 35 and 38% (variegation)                                                       got 13/23/35/38            paper 13/23/35/38
+ok        robust: ERM and Inv highest contrast disagree under every variant of the second run                                                      got causal|contrast@2,erm|contrast@2 paper causal|contrast@2,erm|contrast@2
+ok        robust: smallest lower bounds 0.72, 1.40 and 0.51 (rounded down)                                                                         got 0.72/1.40/0.51         paper 0.72/1.40/0.51
+ok        robust: second-run variants give 3 to 6 disagreeing cells                                                                                got 3 to 6                 paper 3 to 6
+ok        robust: c73 robust lists agree with an independent computation, and only ERM highest contrast is robust in both runs                     got True erm|contrast@2    paper True erm|contrast@2
+ok        robust: first run, ERM highest contrast and Slim highest variegation under every variant, bounds 1.21 and 0.63                           got erm|contrast@2,slim|color_var@2 1.21 0.63 paper erm|contrast@2,slim|color_var@2 1.21 0.63
+ok        robust: both first-run minima come from the floor passed under both Inv checkpoints                                                      got floor passed under both Inv checkpoints | floor passed under both Inv checkpoints paper floor passed under both Inv checkpoints | floor passed under both Inv checkpoints
+ok        robust: first-run Slim lowest contrast fails under 10 of 20 seeds                                                                        got 10                     paper 10
+ok        Table 5: first-run robustness labels                                                                                                     got                        paper 
+ok        bounded deviation: robust cells need eps_R above 0.60 and 0.99                                                                           got 0.6 to 0.99            paper 0.6 to 0.99
+ok        no cell agrees: smallest agreement margin 2.09 (rounded up, as in Table 5)                                                               got 2.09                   paper 2.09
+ok        region: the reference region reproduces c66                                                                                              got True True              paper True True
+ok        dose-matched: 2.46 vs 2.36% altered; ratio 0.77 to 1.41, median 0.99; 18 cells                                                           got 2.46 2.36 0.77 1.41 0.99 18 paper 2.46 2.36 0.77 1.41 0.99 18
+ok        dose: skin-only main hair 1.43% vs full 2.36% (main text)                                                                                got 1.43 2.36              paper 1.43 2.36
+ok        region: no widening 13%, 18 cells, frontier 0.043                                                                                        got 13 18 0.043            paper 13 18 0.043
+ok        region: w >= 0.7 15%, 17 cells                                                                                                           got 15 17                  paper 15 17
+ok        region: 7 px 62% 13 cells; w >= 0.3 76% 12 cells                                                                                         got 62 13 76 12            paper 62 13 76 12
+ok        region: 15 px 91%, 10 cells, frontier 0.003                                                                                              got 91 10 0.003            paper 91 10 0.003
+ok        region: at 91% the skin-only main hair alters 0.44%                                                                                      got 0.44                   paper 0.44
+ok        region: two images covered entirely                                                                                                      got 2                      paper 2
+ok        SMD: no zero denominator in the library or the route controls                                                                            got 0                      paper 0
+ok        SMD: smallest pooled SD 7.8e-5                                                                                                           got 7.8                    paper 7.8
+ok        SMD: unit test of the corrected rule                                                                                                     got 1                      paper 1
+ok        floor 57: MDE changes by less than 0.03                                                                                                  got 1                      paper 1
+ok        floor 57: every LOFO R2 negative; ERM globrot -1,659.3 vs -1,631.9                                                                       got True True -1659.3 -1631.9 paper True True -1659.3 -1631.9
+ok        LOFO: RMSE 8.1 to 35.1, MAE 6.1 to 23.3                                                                                                  got 1                      paper 1
+ok        TCAV: 7 nominal, 3 Holm, 6 Benjamini-Hochberg                                                                                            got 7 3 6                  paper 7 3 6
+ok        A2 split: average 6,6,4,3 and max 5,3,3,3; none passes A1 and the stricter A2; averages reproduce c25                                    got 6,6,4,3 5,3,3,3 0 True paper 6,6,4,3 5,3,3,3 0 True
+ok        S13: leaky epochs 2, 3, 5 and blind epoch 15                                                                                             got 2 3 5 15               paper 2 3 5 15
+ok        Fig. 2 images are CC0, attribution ACEMID MIA                                                                                            got CC-0|ACEMID MIA        paper CC-0|ACEMID MIA
+ok        ISIC-2024 per-image licenses are CC0, CC BY or CC BY-NC                                                                                  got CC-0,CC-BY,CC-BY-NC    paper CC-0,CC-BY,CC-BY-NC
+ok        Fig. 2 file present                                                                                                                      got 1                      paper 1
+ok        artifact: the cell decision equals the magnitude decision in all 18 cells                                                                got 18 18                  paper 18 18
+ok        artifact: in every stored band the magnitude ends bound the signed ends in all 18 cells                                                  got 18/18 18/18 18/18 18/18 paper 18/18 18/18 18/18 18/18
+ok        marginal bound 0.0627 (plain) and 0.063 (stratified), rounded down                                                                       got 0.0627 0.063           paper 0.0627 0.063
+ok        exact match: residual mismatch at most 6.3e-7 relative and one pixel on one image                                                        got 6.3e-07 1 1            paper 6.3e-07 1 1
+ok        exact match: radial 50 to 67 images, hue 17 to 38                                                                                        got 50-67 17-38            paper 50-67 17-38
+ok        exact match: second-run decisive differences +4.83, +6.46, +6.24 on 35, 35, 41 images                                                    got +4.83/35 +6.46/35 +6.24/41 paper +4.83/35 +6.46/35 +6.24/41
+ok        exact match: lower bounds 1.46, 2.41, 1.20 under the 30-image rule (rounded down)                                                        got 1.46 2.41 1.20         paper 1.46 2.41 1.20
+ok        exact match: critical values 2.82 and 3.11 (30-image rule), 3.82 and 3.52 (all 48), plan 3.37 and 3.30                                   got 2.82 3.11 3.82 3.52 3.37 3.30 paper 2.82 3.11 3.82 3.52 3.37 3.30
+ok        exact match, all 48: second-run ERM indeterminate at 0.26; Inv direction pair 18 images, [-2.40, +12.60]; first-run Inv cv@0 agrees      got indeterminate 0.26 18 [-2.40, +12.60] indeterminate routes agree paper indeterminate 0.26 18 [-2.40, +12.60] indeterminate routes agree
+ok        exact match, all 48: one cell disagrees in the second run, two in the first                                                              got 1 2                    paper 1 2
+ok        exact match: decisions under the 30-image rule and with all 48 differences                                                               got causal|contrast@2,erm|contrast@2,slim|color_var@2,slim|contrast@2 | erm|contrast@2,slim|color_var@2,slim|contrast@2 | causal|contrast@2 | erm|contrast@2,slim|color_var@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2,slim|contrast@2 | erm|contrast@2,slim|color_var@2,slim|contrast@2 | causal|contrast@2 | erm|contrast@2,slim|color_var@2
+ok        exact match: 9 and 21 differences analysed; smallest n 6                                                                                 got 9 21 6                 paper 9 21 6
+ok        route manifest lists the scripts c62 to c65 only                                                                                         got c62,c63,c64,c65        paper c62,c63,c64,c65
+ok        exact match: first-run +4.38 and +5.58                                                                                                   got +4.38 +5.58            paper +4.38 +5.58
+ok        route test: SHA-256 of the two Inv files                                                                                                 got 39de9dbc ebfbb47c      paper 39de9dbc ebfbb47c
+ok        deterministic full precision: +4.61 [0.73] and +6.48 [1.85]                                                                              got +4.61 0.73 +6.48 1.85  paper +4.61 0.73 +6.48 1.85
+ok        skin tone: the CIELAB fields exist in the metadata                                                                                       got 1                      paper 1
+ok        second fresh-directory run: 14 files equal, every script rc=0, c74 included                                                              got 14 0 True True         paper 14 0 True True
+=========================================================================================================================================================================================
+415 checks, 415 ok, 0 not ok
