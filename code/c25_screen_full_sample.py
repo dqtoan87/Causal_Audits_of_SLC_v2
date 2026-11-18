@@ -157,7 +157,7 @@ def build_design(imgs01, order):
         design[t]["_concept_proxy_shift"] = prx_concept
     # stash the per-image footprint and proxy arrays so that a later script can form
     # all-pairs comparisons without repeating the loop's own conventions
-    build_design.FP, build_design.PRX = FP, PRX
+    build_design.FP, build_design.PRX, build_design.STR = FP, PRX, STR
     return design, len(order)
 
 

@@ -826,41 +826,11 @@ if d:
     fr = {t: 100 * pt[t]["boot_frac_at_or_below_one"] for t in pt}
     check("Table S26 shares", "%.1f, %.1f, %.1f, %.1f" % (fr["contrast@2"], fr["color_var@2"], fr["contrast@0"], fr["color_var@0"]),
           "1.5, 10.1, 0.4, 0.0", text="[1.24, 2.10] | 0.0%", where="supp")
-    check("footprint parts 0.47 to 3.41", rng([v["total_footprint_part"] for v in pt.values()]),
-          (0.47, 3.41), 5e-3, text="0.47, 0.71, 0.72 and 3.41", where="supp")
-    check("concept parts 2.66 to 6.52", rng([v["total_concept_part"] for v in pt.values()]),
-          (2.66, 6.52), 5e-3, text="6.52, 5.69, 4.72 and 2.66", where="supp")
     L = d["lipschitz"]
     wp = L["worst_pair"]
-    check("binding pair 10.24 logits", wp["abs_diff_logits"], 10.24, 5e-3, text="10.24 logits")
-    check("at 7.24 scored units", wp["distance_tolerance_units"], 7.24, 5e-3, text="7.24 scored units")
-    check("L^g >= 1.41", L["implied_L_binding"], 1.41, 5e-3, text="@supp:10.24/7.24 = 1.41")
-    check("dropping the binding pair gives 1.33", L["implied_L_second_largest"], 1.33, 5e-3,
-          text="leaves *L*ᵍ ≥ 1.33", where="supp")
-    check("conservative floor 0.96", L["implied_L_conservative_interval_ends"], 0.96, 5e-3, text="gives *L*ᵍ ≥ 0.96", where="supp")
-    check("median implied constant 0.71", L["implied_L_median"], 0.71, 5e-3, text="over the twenty-one pairs is 0.71", where="supp")
-    check("quartiles 0.34 and 0.91", tuple(L["implied_L_quartiles"]), (0.34, 0.91), 5e-3,
-          text="quartiles 0.34 and 0.91", where="supp")
-    check("twenty-one Lipschitz comparisons", L["n_pairs"], 21)
-    hw = L["footprint_only_half_width_at_binding_L"]
-    check("half-widths 0.66, 1.00, 1.01, 4.82",
-          "%.2f, %.2f, %.2f, %.2f" % (hw["color_var@0"], hw["contrast@2"], hw["contrast@0"], hw["color_var@2"]),
-          "0.66, 1.00, 1.01, 4.82", text="0.66, 1.00, 1.01 and 4.82", where="supp")
-    be = L["breakeven_kappa_Lh"]
-    check("full-width break-even 0.117 to 0.154 at three targets, color_var@2 vacuous",
-          "%.3f, %.3f, %.3f, %.3f" % (be["contrast@2"], be["contrast@0"], be["color_var@0"], be["color_var@2"]),
-          "0.117, 0.138, 0.154, 0.000", text=["at most 0.117 to 0.154 logits per scored unit", "below 0.117 to 0.154 logits per scored unit"], where=["paper", "supp"])
-    check("break-even uses full width (hw <= range/2)",
-          be["color_var@0"], (L["score_range_logits"] / 2 - hw["color_var@0"]) / pt["color_var@0"]["total_concept_part"], 1e-9)
-    check("break-even is 9.2 to 12.1 times below the floor",
-          (L["implied_L_binding"] / max(be[t] for t in ("contrast@2", "contrast@0", "color_var@0")),
-           L["implied_L_binding"] / min(be[t] for t in ("contrast@2", "contrast@0", "color_var@0"))), (9.2, 12.1), 0.05,
-          text="9.2 to 12.1 times smaller", where="supp")
-    check("only the color_var@2 full width, 9.65, exceeds the 3.33 span",
-          "%.2f, %.2f, %.2f %s" % (2 * hw["contrast@2"], 2 * hw["contrast@0"], 2 * hw["color_var@2"],
-                                   [t for t in hw if 2 * hw[t] > L["score_range_logits"]]), "2.00, 2.03, 9.65 ['color_var@2']",
-          text=["a full width of 9.65 logits", "full widths of 2.00 and 2.03 logits, below the range"],
-          where=["paper", "supp"])
+    check("cross-set combination (183-image routes, c34 responses) gives 1.41 and a vacuous color_var@2 bound",
+          "%.2f %s" % (L["implied_L_binding"], [t for t, v in L["breakeven_kappa_Lh"].items() if v == 0.0]), "1.41 ['color_var@2']",
+          text="@supp:would give *L*ᵍ ≥ 1.41 and a vacuous bound at variegation at the highest dose")
     _c12 = load("c12_matched_control")
     if _c12:
         _sc = [_c12["models"][m]["dcace"][t]["u:hue"]["mean"] for m in _c12["models"]
@@ -946,7 +916,7 @@ if d:
     check("structural biases 135.8, 48.6, 6.9 and 42.9%; valid regime exact on R0",
           " ".join("%.1f" % (100 * rg[k]["abs_error_frac_of_target_noise_free"]) for k in ("R1_valid", "R2_footprint_mismatch", "R3_concept_contamination",
                    "R4_model_state", "R5_proxy_blind")), "0.0 135.7 48.6 6.9 42.9",
-          text=["by 6.9 and 42.9% on the structural response", "off by 135.7, 48.6, 6.9 and 42.9% in the four flawed ones",
+          text=["by 6.9 and 42.9% on the structural response", "one breaks C1a and the other N, which no screen sees",
                 "@supp:| +1.117 | 0.0% |", "@supp:| −0.399 | 135.7% |", "@supp:| +0.574 | 48.6% |", "@supp:| +1.194 | 6.9% |", "@supp:| +0.637 | 42.9% |"])
     check("R4 structural error equals the bias formula +0.077", "%+.3f %+.3f" % (rg["R4_model_state"]["error_noise_free"], rg["R4_model_state"]["predicted_bias_from_formula"]),
           "+0.077 +0.077", text="@supp:at +0.077, which is its error on $R^0$")
@@ -986,7 +956,7 @@ if d:
     _ho = [e["cav_accuracy_heldout_mean"] for v in d["models"].values() for e in v["concepts"].values()]
     check("CAV accuracy 0.68 to 0.87 on held-out activations", rng(_ho), (0.68, 0.87), 5e-3,
           text=["with accuracy 0.68 to 0.87", "or 0.68 to 0.87 on the activations not used to fit them"], where=["paper", "supp"])
-    check("significant in 7 of 12 cells", "%d of %d" % (sum(flags), len(flags)), "7 of 12", text="7 of 12")
+    check("significant in 7 of 12 cells", "%d of %d" % (sum(flags), len(flags)), "7 of 12", text="7 of the 12 model-by-concept cells nominally significant")
 
 d = load("c10_multiplacebo")
 if d:
@@ -1208,7 +1178,7 @@ if _rs and _e1 and _e2:
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
           text=["@supp:the rejections for ERM and Inv at the highest contrast dose survive every check of Table S37", "The first two hold under every post hoc variant listed under Table 5"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
-          text=["Its statements hold on the clipped scale, for a fixed inference protocol and at an operating margin", "in the plan-locked run, the cycle test rejected in three cells",
+          text=["Its statements hold on the clipped scale, for a fixed inference protocol and at an operating margin", "in the plan-locked run, the cycle test rejected on its nominal band, in three cells",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
     counts = [sum(v == "routes disagree" for v in x["cells"].values()) for x in allv1 + allv2]
     counts += [_e1["secondary_all_g1"]["summary"]["routes disagree"], _e2["secondary_all_g1"]["summary"]["routes disagree"]]
@@ -1400,8 +1370,8 @@ if _rc:
           text="root-mean-square prediction error is 8.1 to 35.1 logits and the mean absolute error 6.1 to 23.3", where="supp")
     T = _rc["tcav_multiplicity"]
     check("TCAV: 7 nominal, 3 Holm, 6 Benjamini-Hochberg", "%d %d %d" % (T["nominal"], T["holm"], T["benjamini_hochberg"]), "7 3 6",
-          text=["3 cells remain after Holm correction and 6 after Benjamini-Hochberg correction", "Holm correction over the twelve cells leaves 3 of the 7",
-                "nominally significant, 3 after Holm correction"], where=["paper", "supp"])
+          text=["Holm [52] or Benjamini-Hochberg [53] adjustment assumes valid per-cell p-values and cannot repair this",
+                "@supp:corrections over the twelve cells would leave 3 and 6 of the 7"], where=["paper", "supp"])
 _ps = load("c72_library_proxy_split")
 if _ps:
     order = ["contrast@2", "color_var@2", "contrast@0", "color_var@0"]
@@ -1501,7 +1471,7 @@ if _em:
           text="with all 48 differences, two cells disagree in the first run and one in the second; under the plan's 30-image rule, three and four")
     check("exact match, all 48: one cell disagrees in the second run, two in the first",
           "%d %d" % (S2_["all"]["summary"]["routes disagree"], S1_["all"]["summary"]["routes disagree"]), "1 2",
-          text="@supp:and one and two with all 48 differences")
+          text="@supp:with all 48 differences, one in the second and two in the first")
     dis = lambda r: ",".join(sorted(c for c, v in r["cells"].items() if v == "routes disagree"))
     check("exact match: decisions under the 30-image rule and with all 48 differences",
           " | ".join([dis(S2_["min30"]), dis(S1_["min30"]), dis(S2_["all"]), dis(S1_["all"])]),
@@ -1644,13 +1614,11 @@ if _bc:
     check("batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max dD 1.95",
           "%.3f %.1f %.3f %.1f %.2f" % (sf["score_change_median"], 100 * sf["share_above_0.5"], fl["score_change_median"], 100 * fl["share_above_0.5"],
                                         max(v["max_abs_change_D"] for v in pp.values())), "0.081 5.2 0.002 0.8 1.95",
-          text=["@supp:moves scores by a median of 0.081 logit, with 5.2% above 0.5", "@supp:move scores by a median of 0.002 logit, with 0.8% above 0.5",
-                "@supp:the decisive differences move by up to 1.95 logits"])
+          text=["@supp:move scores by a median of 0.002 logit, with 0.8% above 0.5"])
     check("batch context: ERM and Inv highest contrast disagree under every protocol; Slim cells move",
           " | ".join(",".join(v["disagreeing_cells"]) for v in pp.values()),
           "causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2",
-          text=["ERM and Inv at the highest contrast dose still disagree, while the Slim disagreement moves to another cell", "@supp:and Slim at the lowest contrast dose instead of the highest variegation dose",
-                "@supp:ERM and Inv at the highest contrast dose disagree under every protocol; the Slim decisions do not"])
+          text=["@supp:ERM and Inv at the highest contrast dose disagree under every one; the Slim decisions do not"])
 _nn = load("c79_route_near_natural")
 if _nn:
     c2 = _nn["runs"]["second_run"]["all"]["components"]
@@ -1674,7 +1642,7 @@ if os.path.exists(_mf):
     _bad = [ln.split()[1] for ln in open(_mf) if ln.strip() and
             _hl3.sha256(open(os.path.join(BASE, ln.split()[1]), "rb").read()).hexdigest() != ln.split()[0]]
     _scr = sorted(set(re.findall(r"code/(c\d+)_", open(_mf).read())))
-    check("post hoc manifest: every listed hash matches; scripts c63 to c81", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c81 19",
+    check("post hoc manifest: every listed hash matches; scripts c63 to c83", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c83 21",
           text="@supp:`code/make_posthoc_manifest.py` writes `results/posthoc_manifest.sha256`")
 _e3 = os.path.join(BASE, "log", "e2e_posthoc3_fresh_copy_run.txt")
 if os.path.exists(_e3):
@@ -1697,6 +1665,14 @@ if os.path.exists(_e5):
           text=["@supp:Their five result files matched the committed ones", "each result file they wrote matched the committed one to a relative tolerance"])
 else:
     check("fifth fresh-directory run record present", None, "present")
+_e6 = os.path.join(BASE, "log", "e2e_posthoc6_fresh_copy_run.txt")
+if os.path.exists(_e6):
+    _t6 = open(_e6).read()
+    _m6 = re.search(r"files written: (\d+), differing: (\d+)", _t6)
+    check("sixth fresh-directory run: c82 and c83, 4 files equal", "%s %s %d" % (_m6.group(1), _m6.group(2), len(re.findall(r"rc=0", _t6))), "4 0 2",
+          text=["@supp:Their four result files matched the committed ones; the record is `log/e2e_posthoc6_fresh_copy_run.txt`"])
+else:
+    check("sixth fresh-directory run record present", None, "present")
 # ================================================================ size and power of the cycle-test band (c80)
 _nc = load("c80_route_null_calibration")
 if _nc:
@@ -1734,6 +1710,101 @@ if _nc:
                            sorted(set(f1["v80_by_model"]["causal"]))), "2 4 4.0 [1.0]",
           text=["reaches a median of 2 logits in the first run and 4 in the second", "@supp:for the decisive ERM difference of the first run it takes 4 logits"])
     check("c80: outer critical values median 3.29 and 3.31", "%.2f %.2f" % (f1["crit_outer_median"], f2["crit_outer_median"]), "3.29 3.31", text="@supp:median of 3.29 and 3.31")
+# ================================================================ image sets and protocols (c82), batch extremes (c83)
+_is = load("c82_image_set_checks")
+if _is:
+    A = _is["G0_shared_pairs"]; LC = _is["library_construction_83"]
+    check("G0: 4 shared footprint pairs on 183 images, 7 on the 83 malignant images as scored",
+          "%d %d %d" % (A["all_183"]["n_shared_footprint_pairs"], LC["malignant_83"]["n_shared_footprint_pairs"], LC["library_floor_58"]["n_shared_footprint_pairs"]),
+          "4 7 7", text=["coincide for exactly four pairs", "Rebuilt there exactly as scored, the library has three more coinciding pairs",
+                         "@supp:seven pairs coincide instead of four"])
+    newp = [pq for pq in LC["malignant_83"]["pairs"] if pq not in A["all_183"]["pairs"]]
+    fams = sorted({x.split("|")[1] for pq in newp for x in pq})
+    targ = all(not ("|" not in x) for pq in LC["malignant_83"]["pairs"] for x in pq if not x.startswith("L:"))
+    check("G0: new pairs are one control family at the same strength on every image; no concept edit shares a vertex",
+          "%s %s %s" % (fams, all(LC["malignant_83"]["same_family_same_strength_on_every_image"].values()), targ),
+          "['hue_m', 'texswap_m'] True True", text=["`hue_m` or `texswap_m`", "@supp:On every one of these images their calibration stops at the same strength"])
+    diffs = LC["edits_images_differing_from_183_order_build"]
+    check("rebuild differs from the 183-image build on one image, texture-swap and hybrid only",
+          "%d %s" % (len({x.split(' @ ')[1] for x in diffs}), sorted({x.split(' @ ')[0].split('|')[1] for x in diffs})), "1 ['hybrid_m', 'texswap_m']",
+          text="@supp:equals the 183-image build of Table S26 on every malignant image but one")
+    cr = _is["component_range_library_83"]
+    check("component range on 83 images: responses -0.32 to +1.45, at least 94.7%",
+          "%.2f %.2f %.1f" % (cr["responses_min_max"][0], cr["responses_min_max"][1], math.floor(1000 * cr["min_share_of_cap_range"]) / 10), "-0.32 1.45 94.7",
+          text=["and 94.7% with the library responses on the 83 malignant images", "@supp:which run from −0.32 to +1.45 logits"])
+    g = _is["G_a_library_floor_58"]
+    T4 = ("contrast@2", "color_var@2", "contrast@0", "color_var@0")
+    check("58 images: length-two 12.2 to 13.3, any length 1.67 to 2.44",
+          "%.1f %.1f %.2f %.2f" % (math.floor(10 * min(g[t]["bottleneck_length_two"] for t in T4)) / 10, max(g[t]["bottleneck_length_two"] for t in T4),
+                                   min(g[t]["bottleneck_any_length"] for t in T4), max(g[t]["bottleneck_any_length"] for t in T4)), "12.2 13.3 1.67 2.44",
+          text=["On the 58 images used below, they are 12.2 to 13.3 and 1.67 to 2.44", "@supp:a bottleneck of 12.2 to 13.3 and the best route of any length 1.67 to 2.44"])
+    check("58 images: minimum-total routes 5.65 to 6.69", "%.2f %.2f" % (min(g[t]["total"] for t in T4), max(g[t]["total"] for t in T4)), "5.65 6.69",
+          text="@supp:The minimum-total routes run from 5.65 to 6.69 scored units")
+    check("58 images: footprint parts 0.72, 0.68, 0.81, 0.46; concept parts 5.80, 5.70, 4.84, 6.22",
+          "%s; %s" % (", ".join("%.2f" % g[t]["footprint_part"] for t in T4), ", ".join("%.2f" % g[t]["concept_part"] for t in T4)),
+          "0.72, 0.68, 0.81, 0.46; 5.80, 5.70, 4.84, 6.22", text=["@supp:Their footprint parts are 0.72, 0.68, 0.81 and 0.46 scored units", "@supp:concept parts of 5.80, 5.70, 4.84 and 6.22",
+                                                                   "@supp:| contrast, top dose | 0.72 | 5.80 | 0.79 | 0.152 |", "@supp:| color variegation, low dose | 0.46 | 6.22 | 0.51 | 0.186 |"])
+    LL = _is["lipschitz_library_floor_58"]; b = LL["binding"]
+    check("library protocol, 58 images: binding pair 11.03 logits at 10.10 units, L^g >= 1.09",
+          "%.2f %.2f %.2f %s %s %s-%s" % (b["abs_diff_library_58"], b["distance_58"], LL["L_floor"], b["model"], b["target"], b["a"], b["b"]),
+          "11.03 10.10 1.09 Inv color_var@0 pixperm_m-noise_m",
+          text=["disagrees by 11.03 logits at 10.10 scored units, so $L^g \\ge 1.09$", "@supp:giving *L*ᵍ ≥ 11.03/10.10 = 1.09"])
+    check("library protocol, 58 images: 21 pairs, 2.26 to 14.38, median 9.36, all exclude zero, distances 10.1 to 22.5",
+          "%d %.2f %.2f %.2f %d %.1f %.1f" % (LL["n_pairs"], LL["diff_range"][0], LL["diff_range"][1], LL["diff_median"], LL["n_excluding_zero"],
+                                               min(p_["distance_58"] for p_ in LL["pairs"]), max(p_["distance_58"] for p_ in LL["pairs"])),
+          "21 2.26 14.38 9.36 21 10.1 22.5", text="@supp:differ by 2.26 to 14.38 logits, with a median of 9.36, and every patient-clustered interval excludes zero. Their footprints lie 10.1 to 22.5 scored units apart")
+    check("library protocol: second-largest 0.98, conservative 0.72, median 0.63, quartiles 0.25 and 0.74",
+          "%.2f %.2f %.2f %.2f %.2f" % (LL["second_largest_L"], math.floor(100 * LL["conservative_L"]) / 100, LL["median_implied_L"], *LL["quartiles_implied_L"]),
+          "0.98 0.72 0.63 0.25 0.74", text=["@supp:Dropping the binding pair leaves *L*ᵍ ≥ 0.98", "@supp:still gives *L*ᵍ ≥ 0.72", "@supp:The median implied constant is 0.63, with quartiles 0.25 and 0.74"])
+    BE = _is["break_even_library_floor_58"]
+    check("break-even 0.152, 0.161, 0.161, 0.186; half-widths 0.79, 0.75, 0.89, 0.51; none vacuous; span 3.33",
+          "%s; %s; %s; %.2f" % (", ".join("%.3f" % BE["targets"][t]["break_even_kappaLh"] for t in T4), ", ".join("%.2f" % BE["targets"][t]["half_width_footprint"] for t in T4),
+                                any(BE["targets"][t]["vacuous"] for t in T4), BE["score_span"]),
+          "0.152, 0.161, 0.161, 0.186; 0.79, 0.75, 0.89, 0.51; False; 3.33",
+          text=["$\\kappa L^h$ is at most 0.152 to 0.186 logits per scored unit", "@supp:half-widths of 0.79, 0.75, 0.89 and 0.51 logits",
+                "@supp:stays below 0.152 to 0.186 logits per scored unit", "Against the 3.33-logit spread of the corrected scores on these images"])
+    be = [BE["targets"][t]["break_even_kappaLh"] for t in T4]
+    check("break-even is 5.8 to 7.2 times below the floor", "%.1f %.1f" % (LL["L_floor"] / max(be), LL["L_floor"] / min(be)), "5.9 7.2",
+          text="@supp:5.8 to 7.2 times smaller")
+    c34p = _is["lipschitz_c34_on_its_57"]["pairs"]
+    check("diagnostic (T) distances on its 57 images: 10.3 to 23.0",
+          "%.1f %.1f" % (min(p_["distance_57"] for p_ in c34p), max(p_["distance_57"] for p_ in c34p)), "10.3 23.0",
+          text=["On these images the pairs' footprints still lie 10.3 to 23.0 scored units apart", "@supp:on these 57 images their six-descriptor footprints still lie 10.3 to 23.0 scored units apart"])
+_bx = load("c83_batch_extremes")
+if _bx:
+    P_ = _bx["pairs"]; bc = P_["stack_bf16_vs_single_bf16"]; bf = P_["stack_fp32_vs_single_fp32"]; pr = P_["stack_bf16_vs_stack_fp32"]
+    check("batch extremes: eval mode, no batch-statistics layers; plan protocol reproduces stored scores",
+          "%s %.1e" % (all(len(v) == 0 for v in _bx["eval_mode_or_batch_statistics_issues"].values()), max(_bx["check_stack_bf16_vs_stored_max_abs_prob"].values())),
+          "True 0.0e+00", text=["Every network runs in evaluation mode, none has a layer that uses batch statistics there"])
+    check("batch extremes: 57 moves > 0.5, 86% on features > 10x (median 524x); 9.7% of scores; others 0.3%, max 4.9",
+          "%d %.0f %.0f %.1f %.1f %.1f" % (bc["n_above_0.5"], 100 * bc["share_large_moves_feature_norm_over_10x"], bc["median_feature_norm_ratio_large_moves"],
+                                           100 * bc["share_all_scores_feature_norm_over_10x"], 100 * bc["share_above_0.5_among_feature_norm_at_most_10x"],
+                                           bc["max_change_among_feature_norm_at_most_10x"]), "57 86 524 9.7 0.3 4.9",
+          text=["Of the moves above 0.5, 86% are on inputs whose pooled feature is more than ten times its median norm on unedited images, a median of 524 times",
+                "@supp:Such inputs make up 9.7% of all scores. Among the other scores, 0.3% move by more than 0.5, by at most 4.9 logits"])
+    check("batch extremes: fp32 batch context 1.4%, 90% on large features; precision 5.2% overall, 3.4% within 10x",
+          "%.1f %.0f %.1f %.1f" % (100 * bf["share_above_0.5"], 100 * bf["share_large_moves_feature_norm_over_10x"], 100 * pr["share_above_0.5"],
+                                   100 * pr["share_above_0.5_among_feature_norm_at_most_10x"]), "1.4 90 5.2 3.4",
+          text=["Full precision instead of bf16 moves 3.4% of these scores by more than 0.5", "@supp:batch context moves 1.4% of scores by more than 0.5, 90% of them",
+                "@supp:moves 5.2% of all scores by more than 0.5, and 3.4% of those whose features stay within ten times the median"])
+    lc = _bx["largest_change"]
+    check("batch extremes: largest move 27.6, Slim hue4 contrast@0 on ISIC_0467830, log-odds +21.1 / -1,368 / -4,248 / -905, features 524 to 2,729x",
+          "%.1f %s %s %s %+.1f %.0f %.0f %.0f %.0f %.0f" % (lc["change"], lc["model"], lc["column"], lc["image"], lc["logodds"]["stack_bf16"], lc["logodds"]["stack_fp32"],
+                                                       lc["logodds"]["single_bf16"], lc["logodds"]["single_fp32"], min(lc["feature_norm_over_median_unedited"].values()),
+                                                       max(lc["feature_norm_over_median_unedited"].values())),
+          "27.6 slim contrast@0|hue4 ISIC_0467830 +21.1 -1368 -4248 -905 524 2729",
+          text=["@supp:Its unclipped log-odds are +21.1 in the plan's batch in bf16, but −1,368 in the same batch in full precision, −4,248 alone in bf16 and −905 alone in full precision",
+                "@supp:524 to 2,729 times the median norm"])
+    cy = _bx["cycle"]
+    check("batch extremes: Table S40 cells (3/6/3/4); ERM and Inv highest contrast under all four",
+          " | ".join("%d %s" % (len(cy[v]["disagreeing_cells"]), all(c in cy[v]["disagreeing_cells"] for c in ("erm|contrast@2", "causal|contrast@2")))
+                     for v in ("stack_bf16", "stack_fp32", "single_bf16", "single_fp32")), "3 True | 6 True | 3 True | 4 True",
+          text=["ERM and Inv at the highest contrast dose disagree under all four combinations of batch context and precision",
+                "@supp:| plan's batch | fp32 | 6 | disagree | disagree | all four targets |", "@supp:| one image | fp32 | 4 | disagree | disagree | lowest variegation, highest contrast |"])
+    slim = {v: sorted(c.split("|")[1] for c in cy[v]["disagreeing_cells"] if c.startswith("slim")) for v in cy}
+    check("batch extremes: Slim cells per protocol", str(slim),
+          "{'stack_bf16': ['color_var@2'], 'stack_fp32': ['color_var@0', 'color_var@2', 'contrast@0', 'contrast@2'], 'single_bf16': ['contrast@0'], 'single_fp32': ['color_var@0', 'contrast@2']}")
+
 # ================================================================ protocol checks (c81), plan commit, abstract length
 _pc = load("c81_protocol_checks")
 if _pc:

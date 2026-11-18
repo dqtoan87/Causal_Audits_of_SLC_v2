@@ -291,10 +291,10 @@ def p3_fig1_dag():
     a2.text(0.62, 0.31, r"$\tau(M^{\ast})$", ha="center", va="center", fontsize=MD, bbox=box)
     _rung(a2, 0.52, 0.12, 0.24, "C1a\ngranted", "assumed", ASSC)
     _rung(a2, 0.52, 0.43, 0.55, "C1b\ngranted", "assumed", ASSC)
-    _rung(a2, 0.52, 0.69, 0.85, "C2  route in $G_0$\nnot satisfied\n(C0 gates it)", "tested", BADC)
+    _rung(a2, 0.52, 0.69, 0.85, "C2  footprint route\nnot satisfied (C0 gates it)\nN  neutrality: untested", "tested", BADC)
     a2.annotate("", xy=(0.545, 0.31), xytext=(0.36, 0.475),
-                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=BADC, mutation_scale=12))
-    a2.text(0.30, 0.355, "exact control\nnone certified", ha="center", va="center", fontsize=SM, color=BADC)
+                arrowprops=dict(arrowstyle="-|>", lw=1.5, color=ASSC, ls=(0, (4, 2)), mutation_scale=12))
+    a2.text(0.30, 0.355, "exact control\n(needs N)\nnone certified", ha="center", va="center", fontsize=SM, color=ASSC)
     a2.annotate("", xy=(0.885, 0.475), xytext=(0.70, 0.31),
                 arrowprops=dict(arrowstyle="-|>", lw=1.5, color=ASSC, ls=(0, (4, 2)), mutation_scale=12))
     a2.text(0.80, 0.355, "C1b", ha="left", va="center", fontsize=SM, color=ASSC)
