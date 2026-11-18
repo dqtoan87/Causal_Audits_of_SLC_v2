@@ -350,7 +350,7 @@ if d:
     _a1 = sorted(c for c, v in _d1["primary"]["cells"].items() if v["class"] == "routes agree")
     check("both runs: ERM highest contrast and Slim highest variegation disagree in both",
           ",".join(sorted(set(_f1) & set(dis))), "erm|contrast@2,slim|color_var@2",
-          text="the first run's two highest-dose disagreements remain")
+          text="the first run's two highest-dose flags remain")
     check("first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed", ",".join(_f1) + " | " + ",".join(_a1),
           "erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0".replace(
               "erm|contrast@2,slim|color_var@2,slim|contrast@0", ",".join(sorted(["erm|contrast@2", "slim|color_var@2", "slim|contrast@0"]))),
@@ -597,7 +597,7 @@ if d:
         _g2 = [sum(r["targets"][t]["controls"][c]["g2"] for r in _con["images"]) / len(_con["images"])
                for t in ("contrast@2", "color_var@2") for c in ("rad4", "rad16", "hue4", "hue16")]
         check("high doses: seven of eight controls fail G2 on most images", sum(x < 0.5 for x in _g2), 7,
-              text="seven of the eight controls fail G2 on most images")
+              text="seven of the eight controls fail the independent CIELAB check G2 on most images")
 d = load("c56_simultaneous36")
 if d:
     check("36-component critical value 3.12 (headline band)", d["crit_36"], 3.12, 5e-3, text="1.96 to 3.12")
@@ -916,12 +916,12 @@ if d:
     check("structural biases 135.8, 48.6, 6.9 and 42.9%; valid regime exact on R0",
           " ".join("%.1f" % (100 * rg[k]["abs_error_frac_of_target_noise_free"]) for k in ("R1_valid", "R2_footprint_mismatch", "R3_concept_contamination",
                    "R4_model_state", "R5_proxy_blind")), "0.0 135.7 48.6 6.9 42.9",
-          text=["by 6.9 and 42.9% on the structural response", "one breaks C1a and the other N, which no screen sees",
+          text=["by 6.9 and 42.9% on the structural response", "One moves the latent concept, so N fails, which no screen sees",
                 "@supp:| +1.117 | 0.0% |", "@supp:| −0.399 | 135.7% |", "@supp:| +0.574 | 48.6% |", "@supp:| +1.194 | 6.9% |", "@supp:| +0.637 | 42.9% |"])
     check("R4 structural error equals the bias formula +0.077", "%+.3f %+.3f" % (rg["R4_model_state"]["error_noise_free"], rg["R4_model_state"]["predicted_bias_from_formula"]),
           "+0.077 +0.077", text="@supp:at +0.077, which is its error on $R^0$")
     check("designed route exact on R0", d["constructive_repair"]["chained_route_noise_free_abs_error"], 0.0, 1e-12,
-          text=["and so does a designed length-four route where no length-two route exists", "@supp:On $R^0$ it returns the target exactly, to floating-point rounding"])
+          text=["There the valid regime and a designed length-four route, where no length-two route exists, return the target exactly", "@supp:On $R^0$ it returns the target exactly, to floating-point rounding"])
     check("proxy-blind regime biased 42.5%", 100 * rg["R5_proxy_blind"]["abs_error_frac_of_target"], 42.5, 0.05,
           text="@supp:42.5%")
     check("screens admit R1, R4, R5 and reject R2, R3",
@@ -1176,13 +1176,13 @@ if _rs and _e1 and _e2:
     ok2 = ok2 and all(q2[k]["seed_exceeds"] == 20 and q2[k]["lopo_in_cell_exceeds"] == q2[k]["lopo_in_cell_n"]
                       for k in ("erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16"))
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
-          text=["@supp:the rejections for ERM and Inv at the highest contrast dose survive every check of Table S37", "The first two hold under every post hoc variant listed under Table 5"])
+          text=["@supp:the flags for ERM and Inv at the highest contrast dose survive every check of Table S37", "The first two hold under every post hoc variant listed under Table 5"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
-          text=["Its statements hold on the clipped scale, for a fixed inference protocol and at an operating margin", "in the plan-locked run, the cycle test rejected on its nominal band, in three cells",
+          text=["They hold on the clipped scale for a fixed inference protocol", "the plan's nominal band flagged route sums as differing beyond a 0.5-logit margin in three cells",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
     counts = [sum(v == "routes disagree" for v in x["cells"].values()) for x in allv1 + allv2]
     counts += [_e1["secondary_all_g1"]["summary"]["routes disagree"], _e2["secondary_all_g1"]["summary"]["routes disagree"]]
-    check("variants: two to six cells disagree", (min(counts), max(counts)), (2, 6), 0, text="two to six cells disagree")
+    check("variants: two to six cells disagree", (min(counts), max(counts)), (2, 6), 0, text="two to six cells are flagged")
 
 # ================================================================ floor sets (c68) and the cache manifest
 _fs = load("c68_floor_sets")
@@ -1264,7 +1264,7 @@ if _cl:
     _cons = load("c62_construction")
     _g2 = ["%d" % round(100 * _cons["summary"][t][c]["share_g2_independent"]) for t in ("contrast@2", "color_var@2") for c in ("rad4", "rad16")]
     check("G2 of the disagreeing scale pairs: 13 and 23% (contrast), 35 and 38% (variegation)", "/".join(_g2), "13/23/35/38",
-          text="rad4 and rad16 pass on only 13 and 23% of the images at the highest contrast dose, and on 35 and 38% at the highest variegation dose")
+          text="rad4 and rad16 pass it on only 13 and 23% of the images at the highest contrast dose, and on 35 and 38% at the highest variegation dose")
 
 # ================================================================ every variant in one table (c73) and the bounded-deviation reading
 _rt = load("c73_route_robustness_table")
@@ -1331,7 +1331,7 @@ if _om:
           text=["alters 2.46% of the frame", "0.77 to 1.41 times the full main response", "with a median of 0.99"], where=["paper", "supp"])
     check("dose: skin-only main hair 1.43% vs full 2.36% (main text)",
           "%.2f %.2f" % (100 * _om["regions"]["0.5/3"]["altered_frac_skin_only_mean"]["hair"], 100 * _om["altered_frac_full_mean"]["hair"]), "1.43 2.36",
-          text="lowers the altered pixels of the main hair edit from 2.36 to 1.43%")
+          text="Restricted to skin, the main hair edit alters 1.43% of pixels instead of 2.36%")
     def _r(cfg):
         r, k = _om["regions"][cfg], _om["skin_only"][cfg]
         return "%d %d %.3f" % (round(100 * r["frame_share_median"]), k["marginal_joint_counts"]["exceedance"], math.floor(1000 * k["frontier_36"]) / 1000)
@@ -1342,7 +1342,7 @@ if _om:
           text="makes it 62 or 76% of the frame, and 13 or 12 cells exceed", where="supp")
     check("region: 15 px 91%, 10 cells, frontier 0.003", _r("0.5/15"), "91 10 0.003",
           text=["Widening by 15 pixels makes it 91% of the frame, and 10 cells exceed, with a joint frontier of 0.003",
-                "18 cells with no widening, and 10 when a 15-pixel widening covers a median 91% of the frame"], where=["paper", "supp"])
+                "@supp:Widening by 15 pixels makes it 91% of the frame, and 10 cells exceed"], where=["paper", "supp"])
     check("region: at 91% the skin-only main hair alters 0.44%", round(100 * _om["regions"]["0.5/15"]["altered_frac_skin_only_mean"]["hair"], 2), 0.44, 1e-9,
           text="the skin-only main hair edit alters only 0.44% of the frame", where="supp")
     check("region: two images covered entirely", _om["regions"]["0.5/3"]["n_full_frame"], 2, text="it covers two images entirely", where="supp")
@@ -1468,7 +1468,7 @@ if _em:
     check("exact match (main text): two and one cells with all 48, three and four under the 30-image rule",
           "%d %d %d %d" % (S1_["all"]["summary"]["routes disagree"], S2_["all"]["summary"]["routes disagree"], S1_["min30"]["summary"]["routes disagree"],
                            S2_["min30"]["summary"]["routes disagree"]), "2 1 3 4",
-          text="with all 48 differences, two cells disagree in the first run and one in the second; under the plan's 30-image rule, three and four")
+          text="two cells are flagged in the first run and one in the second with all 48 differences, and three and four under the plan's 30-image rule")
     check("exact match, all 48: one cell disagrees in the second run, two in the first",
           "%d %d" % (S2_["all"]["summary"]["routes disagree"], S1_["all"]["summary"]["routes disagree"]), "1 2",
           text="@supp:with all 48 differences, one in the second and two in the first")
@@ -1493,7 +1493,7 @@ import hashlib as _hl2
 _h1 = _hl2.sha256(open(os.path.join(BASE, "checkpoints", "archived_b3inv_ep1", "dj_causal_b3.pt"), "rb").read()).hexdigest()
 _h2 = _hl2.sha256(open(os.path.join(BASE, "checkpoints", "dj_causal_b3.pt"), "rb").read()).hexdigest()
 check("route test: SHA-256 of the two Inv files", "%s %s" % (_h1[:8], _h2[:8]), "39de9dbc ebfbb47c",
-      text=["which begin 39de9dbc and ebfbb47c", _h1, _h2], where=["paper", "supp"])
+      text=["@supp:SHA-256 begins 39de9dbc | Inv retrained under the restricted rule after the first run's results, SHA-256 begins ebfbb47c", _h1, _h2], where=["paper", "supp"])
 _rt2 = load("c73_route_robustness_table")
 if _rt2:
     _row = [r for r in _rt2["second_run"]["rows"] if r["variant"] == "clip eta = 1e-06, fp32"][0]["entries"]
@@ -1537,7 +1537,7 @@ if _sb:
 _b56b = load("c56_simultaneous36")
 if _b56b:
     check("abstract: 17 of 18 cells exceed jointly at 0.05", _b56b["magnitude_exceed_36"], 17,
-          text="At the 0.05 operating point, 17 of 18 model-by-subgroup cells exceeded tolerance jointly")
+          text="At 0.05, 17 of 18 model-subgroup cells exceeded tolerance jointly")
 
 # ================================================================ exact identity, three analyses, LOPO on bit-exact images (c76)
 _xd = load("c76_route_exact_detail")
@@ -1609,7 +1609,7 @@ if _bc:
     sb, sf, fl = pp["single_bf16"], pp["single_fp32"], pp["flat32_bf16"]
     check("batch context: one image per batch bf16, median 0.016, q95 0.066, 2.0% above 0.5",
           "%.3f %.3f %.1f" % (sb["score_change_median"], sb["score_change_q95"], 100 * sb["share_above_0.5"]), "0.016 0.066 2.0",
-          text=["each score of the second run moves by a median of 0.016 logit, and 2.0% of scores move by more than 0.5",
+          text=["@supp:a clipped-logit score moves by a median of 0.016 logit, with a 95th percentile of 0.066, and 2.0% of scores move by more than 0.5",
                 "@supp:moves by a median of 0.016 logit, with a 95th percentile of 0.066"])
     check("batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max dD 1.95",
           "%.3f %.1f %.3f %.1f %.2f" % (sf["score_change_median"], 100 * sf["share_above_0.5"], fl["score_change_median"], 100 * fl["share_above_0.5"],
@@ -1628,7 +1628,7 @@ if _nn:
           "%d %d %+.2f %+.2f %s %s | %s | %s" % (e["n_images"], e["n_patients"], e["est"], i_["est"], e["decision"], i_["decision"],
                                                  dis("second_run", "all"), dis("first_run", "all")),
           "16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2",
-          text=["leaves 16 images for the second run's ERM and Inv pairs, which are then undecided",
+          text=["@supp:the ERM and Inv scale pairs at the highest contrast dose keep 16 images from 13 patients",
                 "@supp:keep 16 images from 13 patients, at +4.06 [−1.16, +9.28] and +4.27 [−2.34, +10.88] logits"])
     check("near-natural: threshold equals c77 q95; 30-image rule: none (second), Slim both contrast doses (first)",
           "%.2f %s | %s" % (_nn["natural_nn_q95"], dis("second_run", "min30") or "none", dis("first_run", "min30")),
@@ -1642,7 +1642,7 @@ if os.path.exists(_mf):
     _bad = [ln.split()[1] for ln in open(_mf) if ln.strip() and
             _hl3.sha256(open(os.path.join(BASE, ln.split()[1]), "rb").read()).hexdigest() != ln.split()[0]]
     _scr = sorted(set(re.findall(r"code/(c\d+)_", open(_mf).read())))
-    check("post hoc manifest: every listed hash matches; scripts c63 to c83", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c83 21",
+    check("post hoc manifest: every listed hash matches; scripts c63 to c84", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c84 22",
           text="@supp:`code/make_posthoc_manifest.py` writes `results/posthoc_manifest.sha256`")
 _e3 = os.path.join(BASE, "log", "e2e_posthoc3_fresh_copy_run.txt")
 if os.path.exists(_e3):
@@ -1687,19 +1687,19 @@ if _nc:
                 "@supp:jointly in 77.7% of outer draws in the first run and 73.2% in the second"])
     check("c80: false disagreement 1.7/4.8 (zero), 3.5/3.0 (margin, estimate side)",
           "%s %s %s %s" % (pu(f1["fwer_all_zero"]), pu(f2["fwer_all_zero"]), pu(f1["fwer_margin_by_sign"]["sign_of_estimate"]), pu(f2["fwer_margin_by_sign"]["sign_of_estimate"])),
-          "1.7 4.8 3.5 3.0", text=["falsely disagreed in 1.7 and 4.8% of cohorts", "it did so in 3.5 and 3.0%", "@supp:the rate was 3.5 and 3.0%"])
+          "1.7 4.8 3.5 3.0", text=["some cell was falsely flagged in 1.7 and 4.8% of cohorts", "@supp:some cell disagreed falsely in 1.7 and 4.8% of draws", "@supp:the rate was 3.5 and 3.0%"])
     check("c80: least favorable 21.7/26.6, bound 22.3/26.8, opposite sides 20.3/25.2",
           "%s %s %s %s %s %s" % (pu(f1["fwer_margin_worst_found"]), pu(f2["fwer_margin_worst_found"]), pu(f1["fwer_margin_upper_bound"]), pu(f2["fwer_margin_upper_bound"]),
                                  pu(f1["fwer_margin_by_sign"]["against_estimate"]), pu(f2["fwer_margin_by_sign"]["against_estimate"])),
           "21.7 26.6 22.3 26.8 20.3 25.2", text=["@supp:reached 21.7 and 26.6%, against the upper bound of 22.3 and 26.8%", "@supp:On the opposite sides it was 20.3 and 25.2%",
-                                                  "in about 22 and 27%"])
+                                                  "at the least favorable points on the margin that were found, in about 22 and 27%"])
     check("c80: kappa 1.42 and 1.47; recalibrated: first run ERM c@2 only (LB 0.78), second run none",
           "%.2f %.2f %s %.2f %s %s" % (f1["kappa_95"], f2["kappa_95"], ",".join(c for c, v in f1["calibrated_cells"].items() if v == "routes disagree"),
                                       math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] * 100) / 100,
                                       sum(v == "routes disagree" for v in f2["calibrated_cells"].values()), "%d/%d/%d" % tuple(f1["calibrated_summary"][k] for k in ("routes disagree", "routes agree", "indeterminate"))),
           "1.42 1.47 erm|contrast@2 0.78 0 1/2/9", text=["by a factor of 1.42 and 1.47", "with a lower bound of 0.78 logit", "@supp:one disagreeing, two agreeing and nine indeterminate cells"])
     check("c80: recalibrated ERM bound gives eps_R above 0.39", math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] / 2 * 100) / 100, 0.39, 1e-9,
-          text="so $\\varepsilon_R$ would still have to exceed 0.39")
+          text="@supp:$\\varepsilon_R$ would still have to exceed 0.39")
     check("c80: first-run Slim lower bounds 0.39 and -0.12 (rounded down)",
           "%.2f %.2f" % tuple(math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"][k] * 100) / 100 for k in ("slim|color_var@2|D_rad4-rad16", "slim|contrast@0|D_rad4-rad16")),
           "0.39 -0.12", text="@supp:at lower bounds of 0.39 and −0.12")
@@ -1737,7 +1737,7 @@ if _is:
     check("58 images: length-two 12.2 to 13.3, any length 1.67 to 2.44",
           "%.1f %.1f %.2f %.2f" % (math.floor(10 * min(g[t]["bottleneck_length_two"] for t in T4)) / 10, max(g[t]["bottleneck_length_two"] for t in T4),
                                    min(g[t]["bottleneck_any_length"] for t in T4), max(g[t]["bottleneck_any_length"] for t in T4)), "12.2 13.3 1.67 2.44",
-          text=["On the 58 images used below, they are 12.2 to 13.3 and 1.67 to 2.44", "@supp:a bottleneck of 12.2 to 13.3 and the best route of any length 1.67 to 2.44"])
+          text=["On the 58 images used below, the two bottlenecks are 12.2 to 13.3 and 1.67 to 2.44, as point values", "@supp:a bottleneck of 12.2 to 13.3 and the best route of any length 1.67 to 2.44"])
     check("58 images: minimum-total routes 5.65 to 6.69", "%.2f %.2f" % (min(g[t]["total"] for t in T4), max(g[t]["total"] for t in T4)), "5.65 6.69",
           text="@supp:The minimum-total routes run from 5.65 to 6.69 scored units")
     check("58 images: footprint parts 0.72, 0.68, 0.81, 0.46; concept parts 5.80, 5.70, 4.84, 6.22",
@@ -1769,23 +1769,23 @@ if _is:
     c34p = _is["lipschitz_c34_on_its_57"]["pairs"]
     check("diagnostic (T) distances on its 57 images: 10.3 to 23.0",
           "%.1f %.1f" % (min(p_["distance_57"] for p_ in c34p), max(p_["distance_57"] for p_ in c34p)), "10.3 23.0",
-          text=["On these images the pairs' footprints still lie 10.3 to 23.0 scored units apart", "@supp:on these 57 images their six-descriptor footprints still lie 10.3 to 23.0 scored units apart"])
+          text=["On these images the pairs' footprints lie 10.3 to 23.0 scored units apart", "@supp:on these 57 images their six-descriptor footprints still lie 10.3 to 23.0 scored units apart"])
 _bx = load("c83_batch_extremes")
 if _bx:
     P_ = _bx["pairs"]; bc = P_["stack_bf16_vs_single_bf16"]; bf = P_["stack_fp32_vs_single_fp32"]; pr = P_["stack_bf16_vs_stack_fp32"]
     check("batch extremes: eval mode, no batch-statistics layers; plan protocol reproduces stored scores",
           "%s %.1e" % (all(len(v) == 0 for v in _bx["eval_mode_or_batch_statistics_issues"].values()), max(_bx["check_stack_bf16_vs_stored_max_abs_prob"].values())),
-          "True 0.0e+00", text=["Every network runs in evaluation mode, none has a layer that uses batch statistics there"])
+          "True 0.0e+00", text=["where the log-odds are a small difference of very large numbers (Supplementary Section S19)", "@supp:evaluation mode, and none has a layer that uses batch statistics there"])
     check("batch extremes: 57 moves > 0.5, 86% on features > 10x (median 524x); 9.7% of scores; others 0.3%, max 4.9",
           "%d %.0f %.0f %.1f %.1f %.1f" % (bc["n_above_0.5"], 100 * bc["share_large_moves_feature_norm_over_10x"], bc["median_feature_norm_ratio_large_moves"],
                                            100 * bc["share_all_scores_feature_norm_over_10x"], 100 * bc["share_above_0.5_among_feature_norm_at_most_10x"],
                                            bc["max_change_among_feature_norm_at_most_10x"]), "57 86 524 9.7 0.3 4.9",
-          text=["Of the moves above 0.5, 86% are on inputs whose pooled feature is more than ten times its median norm on unedited images, a median of 524 times",
+          text=["@supp:86% come from inputs whose pooled feature exceeds ten times the median unedited norm, with a median ratio of 524",
                 "@supp:Such inputs make up 9.7% of all scores. Among the other scores, 0.3% move by more than 0.5, by at most 4.9 logits"])
     check("batch extremes: fp32 batch context 1.4%, 90% on large features; precision 5.2% overall, 3.4% within 10x",
           "%.1f %.0f %.1f %.1f" % (100 * bf["share_above_0.5"], 100 * bf["share_large_moves_feature_norm_over_10x"], 100 * pr["share_above_0.5"],
                                    100 * pr["share_above_0.5_among_feature_norm_at_most_10x"]), "1.4 90 5.2 3.4",
-          text=["Full precision instead of bf16 moves 3.4% of these scores by more than 0.5", "@supp:batch context moves 1.4% of scores by more than 0.5, 90% of them",
+          text=["@supp:batch context moves 1.4% of scores by more than 0.5, 90% of them",
                 "@supp:moves 5.2% of all scores by more than 0.5, and 3.4% of those whose features stay within ten times the median"])
     lc = _bx["largest_change"]
     check("batch extremes: largest move 27.6, Slim hue4 contrast@0 on ISIC_0467830, log-odds +21.1 / -1,368 / -4,248 / -905, features 524 to 2,729x",
@@ -1799,7 +1799,7 @@ if _bx:
     check("batch extremes: Table S40 cells (3/6/3/4); ERM and Inv highest contrast under all four",
           " | ".join("%d %s" % (len(cy[v]["disagreeing_cells"]), all(c in cy[v]["disagreeing_cells"] for c in ("erm|contrast@2", "causal|contrast@2")))
                      for v in ("stack_bf16", "stack_fp32", "single_bf16", "single_fp32")), "3 True | 6 True | 3 True | 4 True",
-          text=["ERM and Inv at the highest contrast dose disagree under all four combinations of batch context and precision",
+          text=["In the second run, ERM and Inv at the highest contrast dose are flagged under all four combinations of batch context and precision",
                 "@supp:| plan's batch | fp32 | 6 | disagree | disagree | all four targets |", "@supp:| one image | fp32 | 4 | disagree | disagree | lowest variegation, highest contrast |"])
     slim = {v: sorted(c.split("|")[1] for c in cy[v]["disagreeing_cells"] if c.startswith("slim")) for v in cy}
     check("batch extremes: Slim cells per protocol", str(slim),
@@ -1819,6 +1819,120 @@ check("plan commit given by its full SHA", True, True, text=["@supp:40b6367b84fe
 _abs = TEXT["paper"].split("## Abstract")[1].split("**Index Terms")[0]
 check("abstract at most 250 words", len(_abs.split()), 250, ceil=True)
 check("no 'registered outcome' wording; T1 is Q-almost sure only", ("registered outcome" in TEXT["paper"] + TEXT["supp"]) or ("in particular every audited image" in TEXT["paper"]), False)
+
+# ---- review_v3_21_3: R4 read on its own library, Part D, label provenance, bound and wording ----
+d = load("c54_synthetic_scm")
+if d and "shared_footprint_controls" in d:
+    pdd = d["shared_footprint_controls"]
+    check("R4 alone: library component +1.194 on R0, generating term 1.117",
+          "%+.3f %.3f" % (pdd["library_component_R4_alone_noise_free"], pdd["generating_concept_term"]), "+1.194 1.117",
+          text=["Statement 1 identifies that library's component, which is not the generating term",
+                "@supp:Statement 1 identifies that library's component, +1.194 on $R^0$"])
+    ci = pdd["route_sum_R4_minus_R1_noisy_ci95"]
+    check("Part D: both controls pass the screens, route gap 0.077 on R0, 0.067 [0.039, 0.094] with noise (outward)",
+          "%s %.3f %.3f %.3f %.3f" % (pdd["both_pass_screens"], pdd["route_sum_R4_minus_R1_noise_free"], pdd["route_sum_R4_minus_R1_noisy"],
+                                      math.floor(ci[0] * 1000) / 1000, math.ceil(ci[1] * 1000) / 1000),
+          "True 0.077 0.067 0.039 0.094",
+          text=["differ by 0.077 logit on $R^0$ and by 0.067 [0.039, 0.094] with noise", "@supp:or +1.126 or +1.192 with noise",
+                "@supp:exceeds the route through the R1 control by 0.077 logit", "@supp:interval of [0.039, 0.094] from 20,000 resamples"])
+    check("Part D: excludes zero, agrees at the 0.5 margin, 20,000 resamples",
+          "%s %s %d" % (pdd["excludes_zero"], (abs(ci[0]) < 0.5 and abs(ci[1]) < 0.5), pdd["n_boot"]), "True True 20000",
+          text=["but at the 0.5-logit margin used below the two routes would agree, so agreement certifies nothing",
+                "@supp:the interval lies inside the margin and the two routes would agree"])
+    check("Part D leaves every earlier c54 field unchanged (R1 and R4 route sums)",
+          "%+.3f %+.3f" % (pdd["route_sum_R1_noise_free"], pdd["route_sum_R4_noise_free"]), "+1.117 +1.194",
+          text="| accept both; their placebo corrections are +1.117 and +1.194 on the structural response |")
+else:
+    rows.append(("MISSING", "c54 Part D (shared_footprint_controls)", "-", "-"))
+
+d = load("c84_label_provenance")
+if d:
+    co = d["cohort"]
+    check("cohort: 393 malignant, 114 indeterminate coded 0, 1,068 histopathology = 393 + 114 + 561",
+          "%d %d %s %d %d" % (co["n_target_1"], co["n_indeterminate"], d["indeterminate_coded_as_target_0"], co["n_histopathology"],
+                              co["iddx_1_counts"]["Benign"] - (co["n_images"] - co["n_histopathology"])),
+          "393 114 True 1068 561",
+          text=["codes the 114 tiles with an indeterminate diagnosis as not malignant",
+                "@supp:1,068 tiles carry such an entry: the 393 malignant, the 114 indeterminate and 561 benign"])
+    check("indeterminate tiles in the frames 2 / 3 / 1; none in the 183 audit or the 78 route-test images",
+          "%d %d %d %d %d" % (d["frame_train"]["n_indeterminate"], d["frame_select"]["n_indeterminate"], d["frame_audit"]["n_indeterminate"],
+                              d["audit_183"]["n_indeterminate"], d["route_test_78"]["n_indeterminate"]), "2 3 1 0 0",
+          text=["none is among the 183 audit images", "@supp:two indeterminate tiles in the training folds, three in the selection fold and one in the audit fold"])
+    check("histopathology: all 83 malignant audit images, none of the 100 benign; audit cohort inside the fold-0 frame",
+          "%d/%d %d/%d %s" % (d["audit_183_malignant"]["n_histopathology"], d["audit_183_malignant"]["n_images"],
+                              d["audit_183_benign"]["n_histopathology"], d["audit_183_benign"]["n_images"], d["audit_183"]["subset_of_audit_frame"]),
+          "83/83 0/100 True",
+          text=["among them all 83 malignant audit images and none of the 100 benign ones",
+                "1,068 tiles, among them the 83 malignant audit images, only carry a detailed diagnosis entry",
+                "@supp:all 83 malignant ones carry a detailed diagnosis entry and none of the 100 benign ones does"])
+else:
+    rows.append(("MISSING", "c84_label_provenance", "-", "-"))
+
+check("interaction bound (2k-1) eps_q in Consequence 3 and S14; old 2k bound and 'none of them cancels' gone",
+      "%s %s %s" % ("\\le (2k-1)\\,\\varepsilon_q" in TEXT["paper"], "(2*k* − 1)·$\\varepsilon_q$" in TEXT["supp"],
+                    ("2k\\,\\varepsilon_q" in TEXT["paper"]) or ("none of them cancels" in TEXT["supp"])), "True True False")
+check("Lipschitz conditions keep M (no 'coarsen $M$'); Statement 2 uses the first part of N only",
+      "%s %s" % ("coarsen $M$" in TEXT["paper"], "the first part of N" in TEXT["paper"] and "the first part of N" in TEXT["supp"]), "False True")
+check("S4 no longer cites Section III-B for 0.303; 89.9% tied to the 183 images",
+      "%s %s" % ("the protocol sensitivity stated in Section III-B" in TEXT["supp"],
+                 "Rerunning the route search on patient resamples of the 183 images" in TEXT["paper"]), "False True")
+check("theta^C next design is a new intervention class; N evidence supports without settling",
+      "%s %s" % ("a new intervention class: two edits that set each lesion's concept to the common levels" in TEXT["paper"],
+                 "this audit defines no standard that would settle N" in TEXT["paper"]), "True True")
+
+_t7p = os.path.join(BASE, "log", "e2e_posthoc7_fresh_copy_run.txt")
+if os.path.exists(_t7p):
+    _t7 = open(_t7p).read()
+    _m7 = re.search(r"files written: (\d+), differing: (\d+)", _t7)
+    check("seventh fresh-directory run: c54 and c84, 2 files equal", "%s %s %d" % (_m7.group(1), _m7.group(2), len(re.findall(r"rc=0", _t7))), "2 0 2",
+          text="@supp:the record is `log/e2e_posthoc7_fresh_copy_run.txt`")
+else:
+    rows.append(("MISSING", "seventh fresh-directory run record", "-", "-"))
+
+# ---- review_v3_22_3: nominal flags, footprint-relative h*, vertex 0, label proxy, scope of N ----
+_P, _S = TEXT["paper"], TEXT["supp"]
+_ab = _P.split("## Abstract")[1].split("**Index Terms")[0]
+_concl = _P.split("## VI. Conclusion")[1].split("## Acknowledgment")[0]
+check("abstract and conclusion call the 3 cells nominal flags, not 5%-level/controlled rejections",
+      "%s %s %s" % ("so the flags carry no controlled error rate" in _ab, "nominal flags, not rejections at a controlled level" in _concl,
+                    "rejecting factorization" in _ab or "rejected, in three cells" in _concl), "True True False")
+_bad_rej = [t for t in ("cycle test rejects factorization", "a joint rejection for the pair", "each disagreement rejects a joint package",
+                        "A disagreeing cell rejects C1a", "the plan-locked run rejects, on the nominal band", "kept one rejection",
+                        "the rejections for ERM", "A disagreement rejects the null") if t in _P + _S]
+check("no unqualified cycle-test rejection wording left", len(_bad_rej), 0)
+check("four readings of the route test kept apart; no controlled-level rejection shown",
+      "%s %s" % ("Four readings stay apart" in _P, "No rejection of the conjunction under $Q_R$ at a controlled level is shown" in _S), "True True")
+check("h* relative to M and the library (abstract, Table 1, III-C, conclusion, S1)",
+      "%s %s %s %s %s" % ("footprint-relative concept component" in _ab, "relative to the footprint $M$ and the library, net of the footprint term" in _P,
+                          "We therefore read $h^\\ast$ as the concept component relative to $M$ and the library" in _P,
+                          "the concept component relative to the measured footprint is identified exactly" in _concl,
+                          "relative to the footprint *M* and the library" in _S), "True True True True True")
+check("G0 concept vertices include 0, isolated when no edit is latently neutral",
+      "%s %s" % ("realized by the library together with $0$" in _P, "The vertex $0$ is isolated when no edit is latently neutral" in _P), "True True")
+check("histopathology is a diagnosis-field proxy (main, S8, Table S20, S16)",
+      "%s %s %s %s" % ("The metadata do not record how a label was confirmed" in _P, "does not show that a label was read from a specimen" in _S,
+                       "a diagnosis-specificity proxy (the confirmation method is not recorded)" in _S, "so the argument is conditional on how each label was confirmed" in _S),
+      "True True True True")
+check("N not settleable under this audit's rules; not an impossibility result",
+      "%s %s" % ("Under the rules of this audit, N cannot be settled on real images" in _P,
+                 "This is not an impossibility result for future edit designs" in _P), "True True")
+
+check("Assumption (i) no longer equates a designated concept-neutral edit with Delta C = 0; recalibrated flag defined",
+      "%s %s %s" % ("with $\\Delta C(e) = 0$ for a concept-neutral edit" in TEXT["paper"],
+                    "designating it concept-neutral does not make it so" in TEXT["paper"], "a *recalibrated flag*" in TEXT["paper"]), "False True True")
+
+# ---- review_v3_23_3: label proxy wording, reproduction scope, C1a vs diagnostic (T) ----
+check("label proxy never called histopathological; V-E states no verified count",
+      "%s %s %s" % ("read as histopathological" in TEXT["supp"] or "histopathological diagnosis by this proxy" in TEXT["supp"],
+                    "no verified count of such labels exists" in TEXT["paper"], "diagnosis-specificity proxy" in TEXT["paper"]), "False True True")
+check("reproduction scope: verifier needs paper/, cross-pipeline needs the unreleased reimplementation; no 'only external dependency'",
+      "%s %s %s %s" % ("covered every analysis script," in TEXT["paper"], "The verifier reads the manuscript and supplement, which the repository does not hold" in TEXT["paper"],
+                       "for this comparison only the stored results can be checked" in TEXT["paper"], "The only external dependency" in TEXT["supp"]),
+      "False True True False")
+check("C1a constrains only duplicate operators on this library; diagnostic (T) neither tests nor rejects C1a (Table 2, III-C, IV-B, S6)",
+      "%s %s %s %s" % ("C1a imposes no equality beyond duplicate operators" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["paper"],
+                       "On this library C1a constrains only duplicate operators" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["supp"]),
+      "True True True True")
 
 # ================================================================ report
 w = max(len(r[1]) for r in rows)

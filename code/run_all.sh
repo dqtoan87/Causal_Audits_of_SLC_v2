@@ -76,6 +76,7 @@ SCRIPTS=(
   c81_protocol_checks
   c82_image_set_checks
   c83_batch_extremes
+  c84_label_provenance
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage

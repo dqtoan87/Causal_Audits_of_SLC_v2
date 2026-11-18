@@ -91,9 +91,11 @@ def main():
     R_edit = R0_edit + eta()
 
     regimes = {}
+    ctrl_R, ctrl_R0 = {}, {}                           # per-unit control responses, kept for Part D
 
     def add(name, note, M_c, dC_c, prx_c, alpha_c, overlap=1.0):
         R_c = g(M_c, L0, alpha_c) + h(dC_c) + eta()
+        ctrl_R[name], ctrl_R0[name] = R_c, g(M_c, L0, alpha_c) + h(dC_c)
         est = float(np.mean(R_edit) - np.mean(R_c))
         # the same contrast on the structural responses R0 (no noise): what the estimator targets
         est0 = float(np.mean(R0_edit) - np.mean(g(M_c, L0, alpha_c) + h(dC_c)))
@@ -272,6 +274,47 @@ def main():
     print(f"    {'component-range restriction':38s} delta in [{lo:+.2f}, {hi:+.2f}], implied target "
           f"{target+lo:+.2f} to {target+hi:+.2f}, width {hi-lo:.1f} logits", flush=True)
 
+
+    # ---------------------------------------------------------------- Part D
+    # R4 alone is a library of two edits with distinct pairs (M, dC), so the additive form holds on
+    # it trivially and Statement 1 identifies the library component, R0(e*) - R0(c_R4). That value
+    # differs from the generating concept term because the response depends on the shrinkage
+    # coefficient, an attribute of the edit the footprint does not record. Putting the R1 and the
+    # R4 control in one library gives two edits with the same footprint and the same concept change
+    # (zero) whose responses differ, so the additive form (C1a) fails on that library, and the two
+    # placebo routes disagree. This adds no draw from the main generator: the per-unit responses are
+    # the ones Part A drew, and the unit bootstrap uses its own generator.
+    a, b = "R1_valid", "R4_model_state"
+    # route sums S_c = R(e*) - R(c), so S_R4 - S_R1 = R(c_R1) - R(c_R4)
+    d0 = float(np.mean(ctrl_R0[a] - ctrl_R0[b]))            # structural gap S_R4 - S_R1 on R0
+    dd = ctrl_R[a] - ctrl_R[b]                               # per-unit gap with the realized noise
+    rng_d = np.random.RandomState(SEED + 54)
+    NB_D = 20000
+    boots = np.array([dd[rng_d.randint(0, N, N)].mean() for _ in range(NB_D)])
+    ci_d = np.percentile(boots, [2.5, 97.5])
+    partD = {
+        "note": ("R4 alone: the additive form holds trivially on a two-edit library; Statement 1 "
+                 "identifies the library component, estimate_noise_free of R4. Library with the R1 "
+                 "and the R4 control: same footprint, zero concept change, different responses, so "
+                 "C1a fails on the library; the two placebo routes disagree. Unit bootstrap with its "
+                 "own generator (seed 42 + 54), percentile interval."),
+        "library_component_R4_alone_noise_free": regimes[b]["estimate_noise_free"],
+        "generating_concept_term": target,
+        "controls": [a, b],
+        "both_pass_screens": bool(regimes[a]["screen"]["admissible"] and regimes[b]["screen"]["admissible"]),
+        "same_footprint_exactly": True, "same_concept_change": 0.0,
+        "route_sum_R1_noise_free": regimes[a]["estimate_noise_free"],
+        "route_sum_R4_noise_free": regimes[b]["estimate_noise_free"],
+        "route_sum_R4_minus_R1_noise_free": d0,
+        "route_sum_R4_minus_R1_noisy": float(dd.mean()),
+        "route_sum_R4_minus_R1_noisy_ci95": [float(ci_d[0]), float(ci_d[1])],
+        "n_boot": NB_D, "boot_seed": SEED + 54,
+        "excludes_zero": bool(ci_d[0] > 0 or ci_d[1] < 0),
+        "disagrees_at_margin_0p5": bool(ci_d[0] > 0.5 or ci_d[1] < -0.5),
+    }
+    print(f"\n  Part D: R1 and R4 controls in one library, S_R4 - S_R1 on R0 {d0:+.3f}, "
+          f"noisy {dd.mean():+.3f} [{ci_d[0]:+.3f}, {ci_d[1]:+.3f}]", flush=True)
+
     out = {
         "n_units": N, "seed": SEED, "clip_bound": CLIP,
         "note": ("Synthetic response with a known concept component. Part A runs the observable "
@@ -284,7 +327,7 @@ def main():
                                           "M@beta - alpha*L0 + gamma*tanh(1.5*dC), to which Statement 1 "
                                           "applies; the other estimates add the realized noise eta")},
         "target_h": target, "regimes": regimes, "identified_set": partB,
-        "constructive_repair": partC,
+        "constructive_repair": partC, "shared_footprint_controls": partD,
         "runtime_sec": round(time.time() - t0, 1),
     }
     json.dump(out, open(OUT, "w"), indent=1)

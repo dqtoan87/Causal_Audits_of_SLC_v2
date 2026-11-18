@@ -407,5 +407,29 @@
   "covers_target": true,
   "boot": 2000
  },
- "runtime_sec": 0.7
+ "shared_footprint_controls": {
+  "note": "R4 alone: the additive form holds trivially on a two-edit library; Statement 1 identifies the library component, estimate_noise_free of R4. Library with the R1 and the R4 control: same footprint, zero concept change, different responses, so C1a fails on the library; the two placebo routes disagree. Unit bootstrap with its own generator (seed 42 + 54), percentile interval.",
+  "library_component_R4_alone_noise_free": 1.193890230522265,
+  "generating_concept_term": 1.1170197305757723,
+  "controls": [
+   "R1_valid",
+   "R4_model_state"
+  ],
+  "both_pass_screens": true,
+  "same_footprint_exactly": true,
+  "same_concept_change": 0.0,
+  "route_sum_R1_noise_free": 1.1170197305757723,
+  "route_sum_R4_noise_free": 1.193890230522265,
+  "route_sum_R4_minus_R1_noise_free": 0.07687049994649352,
+  "route_sum_R4_minus_R1_noisy": 0.06676110711957114,
+  "route_sum_R4_minus_R1_noisy_ci95": [
+   0.0399475598136431,
+   0.09399860708156446
+  ],
+  "n_boot": 20000,
+  "boot_seed": 96,
+  "excludes_zero": true,
+  "disagrees_at_margin_0p5": false
+ },
+ "runtime_sec": 0.8
 }
