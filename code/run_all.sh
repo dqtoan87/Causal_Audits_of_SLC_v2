@@ -77,6 +77,7 @@ SCRIPTS=(
   c82_image_set_checks
   c83_batch_extremes
   c84_label_provenance
+  c85_artifact_band_calibration
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage

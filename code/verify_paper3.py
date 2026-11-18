@@ -1656,7 +1656,7 @@ if os.path.exists(_mf):
     _bad = [ln.split()[1] for ln in open(_mf) if ln.strip() and
             _hl3.sha256(open(os.path.join(BASE, ln.split()[1]), "rb").read()).hexdigest() != ln.split()[0]]
     _scr = sorted(set(re.findall(r"code/(c\d+)_", open(_mf).read())))
-    check("post hoc manifest: every listed hash matches; scripts c63 to c84", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c84 22",
+    check("post hoc manifest: every listed hash matches; scripts c63 to c85", "%d %s-%s %d" % (len(_bad), _scr[0], _scr[-1], len(_scr)), "0 c63-c85 23",
           text="@supp:`code/make_posthoc_manifest.py` writes `results/posthoc_manifest.sha256`")
 _e3 = os.path.join(BASE, "log", "e2e_posthoc3_fresh_copy_run.txt")
 if os.path.exists(_e3):
@@ -1957,6 +1957,32 @@ check("verifier described as reading results and both texts; exit 1 on mismatch,
       "%s %s %s" % ("The verifier reads only the result files" in TEXT["supp"],
                     "with status 2, running no check, if either text is missing" in TEXT["supp"],
                     "and so does the runner if any analysis or check fails" in TEXT["paper"]), "False True True")
+
+# ---- independent read of v3_25: artifact-band calibration (c85), Corollary 1, bounded width, relaxed null ----
+d = load("c85_artifact_band_calibration")
+if d:
+    check("c85 reproduces c56 (crit 3.12, frontier 0.0422)", "%.2f %.4f %.2g" % (d["original_crit"], d["original_frontier"], abs(d["original_crit"] - d["c56_crit"]) < 1e-3),
+          "3.12 0.0422 1", text="@supp:it reproduces the critical value 3.12 and the frontier 0.0422")
+    check("c85 joint coverage 85% two-sided, 97.3% magnitude lower ends, marginal >= 97.6%",
+          "%.0f %.1f %.1f" % (100 * d["joint_coverage_two_sided"], 100 * d["joint_coverage_mag_lower"], math.floor(1000 * d["min_marginal_coverage"]) / 10),
+          "85 97.3 97.6", text=["the band covers jointly in only 85% of cohorts", "these hold jointly in 97.3%",
+                                "@supp:each component's own interval covered in at least 97.6%"])
+    check("c85 kappa 1.24 (rounded up), widened frontier 0.030 (rounded down), 17 cells at 0.05",
+          "%.2f %.3f %d" % (math.ceil(100 * d["kappa_two_sided_95"]) / 100, math.floor(1000 * d["frontier_kappa_two_sided"]) / 1000, d["exceed_at_0p05_kappa_two_sided"]),
+          "1.24 0.030 17", text=["a factor of 1.24, the band puts the frontier at 0.030 and keeps 17 cells above 0.05"])
+    check("c85 2,000 outer x 20,000 inner", "%d %d" % (d["outer"], d["inner"]), "2000 20000", text="@supp:on 2,000 cohorts resampled from that population")
+else:
+    rows.append(("MISSING", "c85_artifact_band_calibration", "-", "-"))
+check("Corollary 1 carries C0 and the incidence condition; S15 width includes 0; relaxed null named",
+      "%s %s %s %s" % ("Assume (i) to (iii), C0, this library" in TEXT["paper"], "taken together with 0" in TEXT["supp"],
+                       "On the conjunction's own null" in TEXT["paper"] or "the case in which the conjunction holds exactly" in TEXT["supp"],
+                       "controls no error rate by design" in TEXT["paper"]), "True True False False")
+
+_t8p = os.path.join(BASE, "log", "e2e_posthoc8_fresh_copy_run.txt")
+if os.path.exists(_t8p):
+    _t8 = open(_t8p).read(); _m8 = re.search(r"files written: (\d+), differing: (\d+)", _t8)
+    check("eighth fresh-directory run: c85, 2 files equal", "%s %s %d" % (_m8.group(1), _m8.group(2), len(re.findall(r"rc=0", _t8))), "2 0 1",
+          text="@supp:the record is `log/e2e_posthoc8_fresh_copy_run.txt`")
 
 # ================================================================ report
 w = max(len(r[1]) for r in rows)

@@ -439,7 +439,7 @@ ok        batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max d
 ok        batch context: ERM and Inv highest contrast disagree under every protocol; Slim cells move                                                got causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2
 ok        near-natural: ERM/Inv 16 images, 13 patients, +4.06 and +4.27, undecided; only Slim c@2 disagrees (all 48, both runs)                     got 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2 paper 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2
 ok        near-natural: threshold equals c77 q95; 30-image rule: none (second), Slim both contrast doses (first)                                    got 11.38 none | slim|contrast@0,slim|contrast@2 paper 11.38 none | slim|contrast@0,slim|contrast@2
-ok        post hoc manifest: every listed hash matches; scripts c63 to c84                                                                          got 0 c63-c84 22           paper 0 c63-c84 22
+ok        post hoc manifest: every listed hash matches; scripts c63 to c85                                                                          got 0 c63-c85 23           paper 0 c63-c85 23
 ok        third fresh-directory run: c75 to c77, 3 files equal                                                                                      got 3 0 3                  paper 3 0 3
 ok        fourth fresh-directory run: c78 and c79, 2 files equal; 56 files in all                                                                   got 2 0 2                  paper 2 0 2
 ok        fifth fresh-directory run: c54, c80 and c81, 5 files equal                                                                                got 5 0 3                  paper 5 0 3
@@ -476,7 +476,7 @@ ok        batch extremes: Slim cells per protocol                               
 ok        library: 88 edits in one batch per image; duplicate labels return identical responses on 83 images                                        got 88 True 83 0.0         paper 88 True 83 0.0
 ok        route test: 24 edited versions per batch in both runs                                                                                     got 1                      paper 1
 ok        plan commit given by its full SHA                                                                                                         got 1                      paper 1
-ok        abstract at most 250 words                                                                                                                got 244                    paper <= 250
+ok        abstract at most 250 words                                                                                                                got 246                    paper <= 250
 ok        no 'registered outcome' wording; T1 is Q-almost sure only                                                                                 got 0                      paper 0
 ok        R4 alone: library component +1.194 on R0, generating term 1.117                                                                           got +1.194 1.117           paper +1.194 1.117
 ok        Part D: both controls pass the screens, route gap 0.077 on R0, 0.067 [0.039, 0.094] with noise (outward)                                  got True 0.077 0.067 0.039 0.094 paper True 0.077 0.067 0.039 0.094
@@ -503,5 +503,11 @@ ok        reproduction scope: verifier needs paper/, cross-pipeline needs the un
 ok        C1a constrains only duplicate operators on this library; diagnostic (T) neither tests nor rejects C1a (Table 2, III-C, IV-B, S6)          got True True True True    paper True True True True
 ok        bounded interval (10) = identified set with latent labels unrestricted, outer bound under a labeling                                      got True True True         paper True True True
 ok        verifier described as reading results and both texts; exit 1 on mismatch, 2 on missing text; runner non-zero                              got False True True        paper False True True
+ok        c85 reproduces c56 (crit 3.12, frontier 0.0422)                                                                                           got 3.12 0.0422 1          paper 3.12 0.0422 1
+ok        c85 joint coverage 85% two-sided, 97.3% magnitude lower ends, marginal >= 97.6%                                                           got 85 97.3 97.6           paper 85 97.3 97.6
+ok        c85 kappa 1.24 (rounded up), widened frontier 0.030 (rounded down), 17 cells at 0.05                                                      got 1.24 0.030 17          paper 1.24 0.030 17
+ok        c85 2,000 outer x 20,000 inner                                                                                                            got 2000 20000             paper 2000 20000
+ok        Corollary 1 carries C0 and the incidence condition; S15 width includes 0; relaxed null named                                              got True True False False  paper True True False False
+ok        eighth fresh-directory run: c85, 2 files equal                                                                                            got 2 0 1                  paper 2 0 1
 ==========================================================================================================================================================================================
-503 checks, 503 ok, 0 not ok
+509 checks, 509 ok, 0 not ok
