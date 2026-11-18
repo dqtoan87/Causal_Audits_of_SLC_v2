@@ -9,11 +9,16 @@ number edited in the paper without a matching result (or the reverse) is caught.
 
 Tables 4 (main text) and S29 (supplement) are parsed from the markdown and compared cell by cell.
 
-Reads only this tree's results/, the two manuscripts, and two read-only external sources when they
-are present: the training log of the audited checkpoints and the ISIC-2024 metadata file.
-Exit status is non-zero if any check fails.
+Reads this tree's results/, the manuscript and the supplement (paper3.md and supplementary3.md, by
+default from paper/), and two read-only external sources when they are present: the training log of
+the audited checkpoints and the ISIC-2024 metadata file.
 
-Usage:  python code/verify_paper3.py            (prints one line per check and a summary)
+Exit status: 0 if every check passes, 1 if any check fails, 2 if the manuscript or the supplement is
+missing (then no check is run).
+
+Usage:  python code/verify_paper3.py [--paper-dir DIR]
+        DIR (or the environment variable PAPER_DIR) holds paper3.md and supplementary3.md; default paper/.
+        ISIC_META may point at the ISIC-2024 train-metadata.csv.
 """
 from __future__ import annotations
 
@@ -28,13 +33,22 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.dirname(HERE)
 RES = os.path.join(BASE, "results")
-PAPER = os.path.join(BASE, "paper", "paper3.md")
-SUPP = os.path.join(BASE, "paper", "supplementary3.md")
+PAPER_DIR = os.environ.get("PAPER_DIR", os.path.join(BASE, "paper"))
+if "--paper-dir" in sys.argv:
+    PAPER_DIR = sys.argv[sys.argv.index("--paper-dir") + 1]
+PAPER = os.path.join(PAPER_DIR, "paper3.md")
+SUPP = os.path.join(PAPER_DIR, "supplementary3.md")
 TRAIN_LOG = os.path.join(os.path.dirname(BASE), "logs", "c29_frozen.log")
 TRAIN_LOG_B3INV = os.path.join(BASE, "log", "c29_b3inv_retrain.log")
-ISIC_META = "/mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv"
+ISIC_META = os.environ.get("ISIC_META", "/mnt/data2/Toan/Causal_ML/data/data_ISIC2024/train-metadata.csv")
 B = 13.815509557963773
 
+_missing = [p for p in (PAPER, SUPP) if not os.path.isfile(p)]
+if _missing:
+    sys.stderr.write("verify_paper3: manuscript text not found: %s\n"
+                     "Place paper3.md and supplementary3.md in paper/, or pass --paper-dir DIR. No check was run.\n"
+                     % ", ".join(_missing))
+    sys.exit(2)
 TEXT = {"paper": open(PAPER, encoding="utf-8").read(), "supp": open(SUPP, encoding="utf-8").read()}
 rows = []
 
@@ -1400,7 +1414,7 @@ if os.path.exists(ISIC_META):
     check("Fig. 2 images are CC0, attribution ACEMID MIA", ",".join(sorted(set(_lic.values()) and {"%s|%s" % v for v in _lic.values()})),
           "CC-0|ACEMID MIA", text=["released under CC0 (attribution: ACEMID MIA)", "The two images of Fig. 2 are released under CC0"])
     check("ISIC-2024 per-image licenses are CC0, CC BY or CC BY-NC", ",".join(sorted(_all)), "CC-0,CC-BY,CC-BY-NC", text="CC0, CC BY or CC BY-NC")
-check("Fig. 2 file present", os.path.exists(os.path.join(BASE, "paper", "figures", "p3_fig_edits.png")), True, text="figures/p3_fig_edits.png")
+check("Fig. 2 file present", os.path.exists(os.path.join(PAPER_DIR, "figures", "p3_fig_edits.png")), True, text="figures/p3_fig_edits.png")
 
 # ================================================================ magnitude decides the cell at equal tolerances
 _c30 = load("c30_disjoint_audit")
@@ -1468,7 +1482,7 @@ if _em:
     check("exact match (main text): two and one cells with all 48, three and four under the 30-image rule",
           "%d %d %d %d" % (S1_["all"]["summary"]["routes disagree"], S2_["all"]["summary"]["routes disagree"], S1_["min30"]["summary"]["routes disagree"],
                            S2_["min30"]["summary"]["routes disagree"]), "2 1 3 4",
-          text="two cells are flagged in the first run and one in the second with all 48 differences, and three and four under the plan's 30-image rule")
+          text="@supp:under the 30-image rule, four in the second run and three in the first; with all 48 differences, one in the second and two in the first")
     check("exact match, all 48: one cell disagrees in the second run, two in the first",
           "%d %d" % (S2_["all"]["summary"]["routes disagree"], S1_["all"]["summary"]["routes disagree"]), "1 2",
           text="@supp:with all 48 differences, one in the second and two in the first")
@@ -1775,7 +1789,7 @@ if _bx:
     P_ = _bx["pairs"]; bc = P_["stack_bf16_vs_single_bf16"]; bf = P_["stack_fp32_vs_single_fp32"]; pr = P_["stack_bf16_vs_stack_fp32"]
     check("batch extremes: eval mode, no batch-statistics layers; plan protocol reproduces stored scores",
           "%s %.1e" % (all(len(v) == 0 for v in _bx["eval_mode_or_batch_statistics_issues"].values()), max(_bx["check_stack_bf16_vs_stored_max_abs_prob"].values())),
-          "True 0.0e+00", text=["where the log-odds are a small difference of very large numbers (Supplementary Section S19)", "@supp:evaluation mode, and none has a layer that uses batch statistics there"])
+          "True 0.0e+00", text=["@supp:The plan's protocol reproduces the stored scores exactly", "@supp:evaluation mode, and none has a layer that uses batch statistics there"])
     check("batch extremes: 57 moves > 0.5, 86% on features > 10x (median 524x); 9.7% of scores; others 0.3%, max 4.9",
           "%d %.0f %.0f %.1f %.1f %.1f" % (bc["n_above_0.5"], 100 * bc["share_large_moves_feature_norm_over_10x"], bc["median_feature_norm_ratio_large_moves"],
                                            100 * bc["share_all_scores_feature_norm_over_10x"], 100 * bc["share_above_0.5_among_feature_norm_at_most_10x"],
@@ -1799,7 +1813,7 @@ if _bx:
     check("batch extremes: Table S40 cells (3/6/3/4); ERM and Inv highest contrast under all four",
           " | ".join("%d %s" % (len(cy[v]["disagreeing_cells"]), all(c in cy[v]["disagreeing_cells"] for c in ("erm|contrast@2", "causal|contrast@2")))
                      for v in ("stack_bf16", "stack_fp32", "single_bf16", "single_fp32")), "3 True | 6 True | 3 True | 4 True",
-          text=["In the second run, ERM and Inv at the highest contrast dose are flagged under all four combinations of batch context and precision",
+          text=["@supp:ERM and Inv at the highest contrast dose disagree under every one",
                 "@supp:| plan's batch | fp32 | 6 | disagree | disagree | all four targets |", "@supp:| one image | fp32 | 4 | disagree | disagree | lowest variegation, highest contrast |"])
     slim = {v: sorted(c.split("|")[1] for c in cy[v]["disagreeing_cells"] if c.startswith("slim")) for v in cy}
     check("batch extremes: Slim cells per protocol", str(slim),
@@ -1926,13 +1940,23 @@ check("label proxy never called histopathological; V-E states no verified count"
       "%s %s %s" % ("read as histopathological" in TEXT["supp"] or "histopathological diagnosis by this proxy" in TEXT["supp"],
                     "no verified count of such labels exists" in TEXT["paper"], "diagnosis-specificity proxy" in TEXT["paper"]), "False True True")
 check("reproduction scope: verifier needs paper/, cross-pipeline needs the unreleased reimplementation; no 'only external dependency'",
-      "%s %s %s %s" % ("covered every analysis script," in TEXT["paper"], "The verifier reads the manuscript and supplement, which the repository does not hold" in TEXT["paper"],
+      "%s %s %s %s" % ("covered every analysis script," in TEXT["paper"], "The verifier also reads the manuscript and supplement, which the repository does not hold" in TEXT["paper"],
                        "for this comparison only the stored results can be checked" in TEXT["paper"], "The only external dependency" in TEXT["supp"]),
       "False True True False")
 check("C1a constrains only duplicate operators on this library; diagnostic (T) neither tests nor rejects C1a (Table 2, III-C, IV-B, S6)",
       "%s %s %s %s" % ("C1a imposes no equality beyond duplicate operators" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["paper"],
                        "On this library C1a constrains only duplicate operators" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["supp"]),
       "True True True True")
+
+# ---- review_v3_24_3: bounded set over latent labelings; verifier/runner exit status described consistently ----
+check("bounded interval (10) = identified set with latent labels unrestricted, outer bound under a labeling",
+      "%s %s %s" % ("with the other edits' changes left unrestricted, (10) is the bounded identified set" in TEXT["paper"],
+                    "the bounded identified set when no latent labeling is assumed" in TEXT["paper"],
+                    "over all admissible labelings the bounded identified set is the single-edge interval" in TEXT["supp"]), "True True True")
+check("verifier described as reading results and both texts; exit 1 on mismatch, 2 on missing text; runner non-zero",
+      "%s %s %s" % ("The verifier reads only the result files" in TEXT["supp"],
+                    "with status 2, running no check, if either text is missing" in TEXT["supp"],
+                    "and so does the runner if any analysis or check fails" in TEXT["paper"]), "False True True")
 
 # ================================================================ report
 w = max(len(r[1]) for r in rows)

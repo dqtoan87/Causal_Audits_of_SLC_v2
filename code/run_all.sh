@@ -133,5 +133,17 @@ done
 
 # compare what was produced against the numbers the manuscript states
 "$PY" "$HERE/verify_paper3.py" > "$LOG/verify_paper3.log" 2>&1
-echo "verification (paper3): see log/verify_paper3.log" >> "$MASTER"
+vrc=$?
+case $vrc in
+    0) echo "verification (paper3): passed, see log/verify_paper3.log" ;;
+    2) echo "verification (paper3): NOT RUN, paper3.md or supplementary3.md missing in paper/ (see log/verify_paper3.log)" ;;
+    *) echo "verification (paper3): FAILED rc=$vrc, see log/verify_paper3.log" ;;
+esac >> "$MASTER"
 echo "=== all done $(date -Is) ===" >> "$MASTER"
+
+# non-zero exit if any analysis failed or the verification did not pass
+status=0
+[ "$fail" -gt 0 ] && status=1
+[ "$vrc" -ne 0 ] && status=1
+echo "exit status $status" >> "$MASTER"
+exit $status

@@ -501,5 +501,7 @@ ok        Assumption (i) no longer equates a designated concept-neutral edit wit
 ok        label proxy never called histopathological; V-E states no verified count                                                                  got False True True        paper False True True
 ok        reproduction scope: verifier needs paper/, cross-pipeline needs the unreleased reimplementation; no 'only external dependency'            got False True True False  paper False True True False
 ok        C1a constrains only duplicate operators on this library; diagnostic (T) neither tests nor rejects C1a (Table 2, III-C, IV-B, S6)          got True True True True    paper True True True True
+ok        bounded interval (10) = identified set with latent labels unrestricted, outer bound under a labeling                                      got True True True         paper True True True
+ok        verifier described as reading results and both texts; exit 1 on mismatch, 2 on missing text; runner non-zero                              got False True True        paper False True True
 ==========================================================================================================================================================================================
-501 checks, 501 ok, 0 not ok
+503 checks, 503 ok, 0 not ok
