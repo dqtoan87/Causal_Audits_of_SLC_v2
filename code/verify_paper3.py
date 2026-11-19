@@ -303,7 +303,7 @@ if d:
     check("benign redraw: frontier min 0.0279 (rounded down)", math.floor(d["frontier_min"] * 1e4) / 1e4, 0.0279, 1e-9, text="minimum of 0.0279", where="supp")
     check("benign redraw: every tolerance below 0.027 in every draw", d["frontier_min"], 0.027, floor=True, text="every tolerance below 0.027 in every draw", where="supp")
     check("benign redraw: frontier central range 0.032 to 0.066 (lower end rounded down)", (math.floor(d["frontier_2.5_97.5"][0] * 1e3) / 1e3, d["frontier_2.5_97.5"][1]), (0.032, 0.066), 5e-4, text="0.032 to 0.066", where=["paper", "supp"])
-    check("benign redraw: all 18 exceed 0.05 jointly in 38% of draws", 100 * d["share_draws_all_18_exceed"], 38.2, 0.05, text="jointly in 38% of draws")
+    check("benign redraw: all 18 exceed 0.05 jointly in 38% of draws", 100 * d["share_draws_all_18_exceed"], 38.2, 0.05, text="@supp:All 18 cells exceeded 0.05 jointly in 38% of draws")
     check("benign redraw: frame 4,150 benign from 198 patients", (d["n_benign_frame"], d["n_benign_frame_patients"]), (4150, 198), 0, text="4,150 benign images from 198 patients", where="supp")
     check("benign redraw: 500 draws", d["draws"], 500, text="@supp:redrew the 100 benign images 500 times")
 import math as _m
@@ -364,14 +364,14 @@ if d:
     _a1 = sorted(c for c, v in _d1["primary"]["cells"].items() if v["class"] == "routes agree")
     check("both runs: ERM highest contrast and Slim highest variegation disagree in both",
           ",".join(sorted(set(_f1) & set(dis))), "erm|contrast@2,slim|color_var@2",
-          text="the first run's two highest-dose flags remain")
+          text="@supp:the first run's two highest-dose flags remain")
     check("first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed", ",".join(_f1) + " | " + ",".join(_a1),
           "erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0".replace(
               "erm|contrast@2,slim|color_var@2,slim|contrast@0", ",".join(sorted(["erm|contrast@2", "slim|color_var@2", "slim|contrast@0"]))),
           text="The two lowest-dose cells of the epoch-1 Inv model agree")
     _n1 = [_d1["primary"]["targets"][t]["n_images"] for t in TT]
     check("both runs: 73 to 77 images per target, then 44 to 47", "%d-%d / %d-%d" % (min(_n1), max(_n1), min(x[0] for x in nT), max(x[0] for x in nT)),
-          "73-77 / 44-47", text="73 to 77 per target in the first run, 44 to 47 in the second")
+          "73-77 / 44-47", text="44 to 47 per target instead of 73 to 77")
     add = [d["secondary_all_g1"]["targets"][t]["n_images"] - pr["targets"][t]["n_images"] for t in TT]
     check("route test: dropping the floor adds 30 or 31 images per target", (min(add), max(add)), (30, 31), 0,
           text="adds 30 or 31 images per target", where=["paper", "supp"])
@@ -623,7 +623,7 @@ if d:
     _iv = d["components"]["b3-Inv/ben/mag"]["sim36"]
     check("frontier cell: EfficientNet-B3 Inv benign, simultaneous magnitude interval [0.042, 0.139]",
           "%s %.3f %.3f" % (_mk[1], math.floor(_iv[0] * 1000) / 1000, _iv[1]), "b3-Inv/ben/mag 0.042 0.139",
-          text=["the EfficientNet-B3 Inv model on benign images reaches down to 0.042", "@supp:Its simultaneous magnitude interval is [0.042, 0.139]"])
+          text=["@supp:Its simultaneous magnitude interval is [0.042, 0.139]"])
     check("36 band signed: 11 exceed / 1 within / 6 indet",
           "%d/%d/%d" % (d["signed_counts_36"]["exceeds"], d["signed_counts_36"]["within"], d["signed_counts_36"]["indet."]),
           "11/1/6", text="exceeds in 11 cells, is within tolerance in 1 and is indeterminate in 6", where="supp")
@@ -1195,13 +1195,13 @@ if _rs and _e1 and _e2:
     ok2 = ok2 and all(q2[k]["seed_exceeds"] == 20 and q2[k]["lopo_in_cell_exceeds"] == q2[k]["lopo_in_cell_n"]
                       for k in ("erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16"))
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
-          text=["@supp:the flags for ERM and Inv at the highest contrast dose survive every check of Table S37", "ERM at the highest contrast dose stays flagged under all of them in both runs"])
+          text=["@supp:the flags for ERM and Inv at the highest contrast dose survive every check of Table S37", "leaves ERM at the highest contrast dose flagged in both runs"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
           text=["They hold on the clipped scale for a fixed inference protocol", "the plan's nominal band flagged route sums as differing beyond a 0.5-logit margin in three cells",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
     counts = [sum(v == "routes disagree" for v in x["cells"].values()) for x in allv1 + allv2]
     counts += [_e1["secondary_all_g1"]["summary"]["routes disagree"], _e2["secondary_all_g1"]["summary"]["routes disagree"]]
-    check("variants: two to six cells disagree", (min(counts), max(counts)), (2, 6), 0, text="two to six cells are flagged")
+    check("variants: two to six cells disagree", (min(counts), max(counts)), (2, 6), 0, text="@supp:across all variants of both runs two to six cells are flagged")
 
 # ================================================================ floor sets (c68) and the cache manifest
 _fs = load("c68_floor_sets")
@@ -1283,7 +1283,7 @@ if _cl:
     _cons = load("c62_construction")
     _g2 = ["%d" % round(100 * _cons["summary"][t][c]["share_g2_independent"]) for t in ("contrast@2", "color_var@2") for c in ("rad4", "rad16")]
     check("G2 of the disagreeing scale pairs: 13 and 23% (contrast), 35 and 38% (variegation)", "/".join(_g2), "13/23/35/38",
-          text="rad4 and rad16 pass it on only 13 and 23% of the images at the highest contrast dose, and on 35 and 38% at the highest variegation dose")
+          text="@supp:rad4 and rad16 pass it on only 13 and 23% of the images at the highest contrast dose, and on 35 and 38% at the highest variegation dose")
 
 # ================================================================ every variant in one table (c73) and the bounded-deviation reading
 _rt = load("c73_route_robustness_table")
@@ -1610,13 +1610,13 @@ if _fs:
     check("independent features: low doses 0.52 to 0.95, high doses 1.30 to 1.63; radial 45 to 65%, hue 78 to 84%, radial low 0%",
           "%.2f-%.2f %.2f-%.2f %.0f-%.0f %.0f-%.0f %.0f" % (min(lo_sh), max(lo_sh), min(hi_sh), max(hi_sh), min(rad_hi), max(rad_hi), min(hue_hi), max(hue_hi), max(rad_lo)),
           "0.52-0.95 1.30-1.63 45-65 78-84 0",
-          text=["places them 1.30 to 1.63 times the median distance between neighboring natural images",
+          text=["@supp:1.30 to 1.63 times",
                 "@supp:the controls move an image by 0.52 to 0.95 times the median natural distance",
                 "@supp:beyond the 95th percentile on 45 to 65% of images for the radial controls and 78 to 84% for the hue controls"])
     check("independent features: the concept edit moves 0.92 and 0.98, beyond q95 on 0 and 9%",
           "%.2f %.2f %.0f %.0f" % (tg["contrast@2"]["edit"]["shift_median_over_nn"], tg["color_var@2"]["edit"]["shift_median_over_nn"],
                                    100 * tg["contrast@2"]["edit"]["share_beyond_q95"], 100 * tg["color_var@2"]["edit"]["share_beyond_q95"]),
-          "0.92 0.98 0 9", text=["against 0.92 and 0.98 for the concept edit", "@supp:beyond the 95th percentile on 0 and 9% of images"])
+          "0.92 0.98 0 9", text=["@supp:0.92 and 0.98 times", "@supp:beyond the 95th percentile on 0 and 9% of images"])
 
 # ================================================================ batch context (c78) and near-natural images (c79)
 _bc = load("c78_batch_context")
@@ -1714,7 +1714,7 @@ if _nc:
           "%.2f %.2f %s %.2f %s %s" % (f1["kappa_95"], f2["kappa_95"], ",".join(c for c, v in f1["calibrated_cells"].items() if v == "routes disagree"),
                                       math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] * 100) / 100,
                                       sum(v == "routes disagree" for v in f2["calibrated_cells"].values()), "%d/%d/%d" % tuple(f1["calibrated_summary"][k] for k in ("routes disagree", "routes agree", "indeterminate"))),
-          "1.42 1.47 erm|contrast@2 0.78 0 1/2/9", text=["Widened by the factors that restore 95% joint coverage, 1.42 and 1.47", "with a lower bound of 0.78 logit", "@supp:one disagreeing, two agreeing and nine indeterminate cells"])
+          "1.42 1.47 erm|contrast@2 0.78 0 1/2/9", text=["@supp:1.42 in the first run and 1.47 in the second", "@supp:0.78", "@supp:one disagreeing, two agreeing and nine indeterminate cells"])
     check("c80: recalibrated ERM bound gives eps_R above 0.39", math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] / 2 * 100) / 100, 0.39, 1e-9,
           text="@supp:$\\varepsilon_R$ would still have to exceed 0.39")
     check("c80: first-run Slim lower bounds 0.39 and -0.12 (rounded down)",
@@ -1725,7 +1725,7 @@ if _nc:
     check("c80: power, median v80 2 and 4 logits; ERM decisive 4; epoch-1 Inv 1",
           "%g %g %s %s" % (f1["v80_median"], f2["v80_median"], [v for v in f1["v80_grid"] if f1["power"]["erm|contrast@2|D_rad4-rad16"][str(v)] >= 0.8][0],
                            sorted(set(f1["v80_by_model"]["causal"]))), "2 4 4.0 [1.0]",
-          text=["reaches a median of 2 logits in the first run and 4 in the second", "@supp:for the decisive ERM difference of the first run it takes 4 logits"])
+          text=["@supp:median of 2", "@supp:for the decisive ERM difference of the first run it takes 4 logits"])
     check("c80: outer critical values median 3.29 and 3.31", "%.2f %.2f" % (f1["crit_outer_median"], f2["crit_outer_median"]), "3.29 3.31", text="@supp:median of 3.29 and 3.31")
 # ================================================================ image sets and protocols (c82), batch extremes (c83)
 _is = load("c82_image_set_checks")
@@ -1931,8 +1931,8 @@ check("histopathology is a diagnosis-field proxy (main, S8, Table S20, S16)",
                        "a diagnosis-specificity proxy (the confirmation method is not recorded)" in _S, "so the argument is conditional on how each label was confirmed" in _S),
       "True True True True")
 check("N not settleable under this audit's rules; not an impossibility result",
-      "%s %s" % ("Under the rules of this audit, N cannot be settled on real images" in _P,
-                 "This is not an impossibility result for future edit designs" in _P), "True True")
+      "%s %s" % ("Under its rules, N cannot be settled on real images" in _P,
+                 "this is not an impossibility result for future edit designs" in _P), "True True")
 
 check("Assumption (i) no longer equates a designated concept-neutral edit with Delta C = 0; recalibrated flag defined",
       "%s %s %s" % ("with $\\Delta C(e) = 0$ for a concept-neutral edit" in TEXT["paper"],
@@ -1968,7 +1968,7 @@ if d:
           "3.12 0.0422 1", text="@supp:it reproduces the critical value 3.12 and the frontier 0.0422")
     check("c85 joint coverage 85% two-sided, 97.3% magnitude lower ends, marginal >= 97.6%",
           "%.0f %.1f %.1f" % (100 * d["joint_coverage_two_sided"], 100 * d["joint_coverage_mag_lower"], math.floor(1000 * d["min_marginal_coverage"]) / 10),
-          "85 97.3 97.6", text=["the two-sided band covers jointly in only 85%", "hold jointly in 97.3% of cohorts, so the frontier is conservative under this check",
+          "85 97.3 97.6", text=["the two-sided band covers jointly in only 85%", "the 18 magnitude lower ends that carry it hold jointly in 97.3% of cohorts",
                                 "@supp:each component's own interval covered in at least 97.6%"])
     check("c85 kappa 1.24 (rounded up), widened frontier 0.030 (rounded down), 17 cells at 0.05",
           "%.2f %.3f %d" % (math.ceil(100 * d["kappa_two_sided_95"]) / 100, math.floor(1000 * d["frontier_kappa_two_sided"]) / 1000, d["exceed_at_0p05_kappa_two_sided"]),
@@ -2016,7 +2016,7 @@ if _ev1a and _ev2a:
     _i1 = _ev1a["primary"]["components"]["causal|contrast@2|D_rad4-rad16"]["est"]
     _i2 = _ev2a["primary"]["components"]["causal|contrast@2|D_rad4-rad16"]["est"]
     check("Inv scale pair at the highest contrast dose: +0.17 (first run), +6.62 (second run)", "%+.2f %+.2f" % (_i1, _i2), "+0.17 +6.62",
-          text="its scale pair at the highest contrast dose differs by +0.17 logit in the first run and by +6.62 in the second")
+          text="@supp:The Inv scale pair at the highest contrast dose differs by +0.17 logit in the first run and by +6.62 in the second")
 check("main-text copies of verified numbers (abstract, IV-A, IV-B, conclusion)", True, True, where="paper",
       text=["all 18 exceeded every tolerance below 0.042, for the realized overlays and benign draw",
             "the frontier's central range was 0.032 to 0.066",
@@ -2024,7 +2024,7 @@ check("main-text copies of verified numbers (abstract, IV-A, IV-B, conclusion)",
             "flagged route sums differing beyond 0.5 logit in three of twelve cells",
             "and all eighteen exceed jointly below 0.042.**",
             "On its marginal interval, every cell exceeds tolerance at the 0.05 operating point",
-            "the frontier's central 95% range is 0.032 to 0.066, and all 18 cells exceed 0.05 jointly in 38% of draws",
+            "the frontier's central 95% range is 0.032 to 0.066 (Supplementary Section S2)",
             "At a tolerance of 0.20, seven of the eighteen cells still exceed",
             "it moves the proxies by less than 0.1% but sits at a maximum absolute SMD of 1.40",
             "finds best length-two routes whose worst link is 9.6 to 13.3 times its tolerance",
@@ -2032,9 +2032,7 @@ check("main-text copies of verified numbers (abstract, IV-A, IV-B, conclusion)",
             "a known generating concept term of 1.117 logits",
             "with noise, within 0.8% and as +1.111",
             "the realized mismatch is at most $6.4 \\times 10^{-7}$ relative",
-            "ERM at the highest contrast dose differs by +4.63 [+1.91, +7.34] logits, Slim at the highest variegation dose by +5.27 [+1.83, +8.70], and Slim at the lowest contrast dose by +1.99 [+0.50, +3.47]",
-            "a single difference is detected with probability 0.8 only once its population value reaches a median of 2 logits",
-            "the decisive differences stay at +4.38 to +6.46 logits",
+            "ERM at the highest contrast dose by +4.63 [+1.91, +7.34] logits, Slim at the highest variegation dose by +5.27 [+1.83, +8.70], and Slim at the lowest contrast dose by +1.99 [+0.50, +3.47]",
             "every invariance tolerance below 0.042 probability units",
             "17 of 18 did so at 0.05"])
 
@@ -2046,8 +2044,7 @@ if _pre and _a30:
           text=["**every cell exceeds every tolerance below 0.042 probability units**",
                 "At the 0.05 operating point, 17 of the 18 cells exceed jointly",
                 "the 44 and 75 patients behind the malignant and benign rows. Tolerance 0.05.",
-                "Because the score floor keeps the images that all three models score at 0.1 or above",
-                "with a 0.5-logit margin that is a practical threshold, not an identification condition",
+                                "its 0.5-logit margin is a practical threshold, not an identification condition",
                 "that the library protocol scores at 0.1 or above",
                 "that all three EfficientNet-B3 models score at 0.1 or above. The corrected score",
                 "came within 0.1% of the concept edit on 13 and 15 of the 78 images at the high doses",
@@ -2110,8 +2107,8 @@ if _b1:
           "%d %.3f" % (sum(x == "routes disagree" for x in load("c67_route_sensitivity")["numerics_first_run"]["variants"]["fp32_stack"]["cells"].values()),
                        load("c67_route_sensitivity")["numerics_first_run"]["variants"]["fp32_stack"]["crit"]))
     check("main text: every variant applied to both runs; Table 5 robust scoped to the variants", True, True,
-          text=["Every variant was applied to both runs", "as mixed batches or as one image per batch",
-                "Robust means that the flag holds under each post hoc variant applied to its run"])
+          text=["@supp:Every variant was applied to both runs", "Varying one element of the analysis at a time",
+                "Robust means that the flag holds under each post hoc variant of the analysis, applied to its run one element at a time"])
 else:
     rows.append(("MISSING", "c86_batch_context_first_run", "-", "-"))
 check("Fig. 3: shaded corner is a necessary condition only", True, True,
@@ -2133,8 +2130,7 @@ if _f87:
     check("c87: within range +0.8 to +1.9 on 17 to 70 images; beyond +8.2 to +17.8 on 5 to 43; 6 of 7 within-range intervals above 0.5",
           "%.1f %.1f %d %d | %.1f %.1f %d %d | %d/%d" % (min(_w), max(_w), min(_wn), max(_wn), min(_b), max(_b), min(_bn), max(_bn), _above, len(_rows)),
           "0.8 1.9 17 70 | 8.2 17.8 5 43 | 6/7",
-          text=["On the other images they are +0.8 to +1.9 logits, and six of the seven marginal intervals stay above the margin",
-                "those differences are +8.2 to +17.8 logits", "5 to 43 per decisive difference",
+          text=["On the other images the differences are +0.8 to +1.9 logits",
                 "@supp:Beyond range, on 5 to 43 images, the differences are +8.2 to +17.8 logits",
                 "@supp:Within range, on 17 to 70 images, the differences are +0.8 to +1.9 logits"])
     _lab = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}; _tl = {"contrast@2": "contrast highest", "contrast@0": "contrast lowest", "color_var@2": "variegation highest"}
@@ -2153,7 +2149,7 @@ if _f87:
     _hi = [v for k, v in _sh.items() if "@2" in k]
     check("c87: beyond-range images carry 75 to 92% of each high-dose flag, half of the lowest-dose Slim flag",
           "%.0f %.0f %.2f" % (100 * min(_hi), 100 * max(_hi), _sh["slim|contrast@0|rad4-rad16"]), "75 92 0.50",
-          text=["These images carry 75 to 92% of the summed difference at the high doses and half of it at the lowest contrast dose",
+          text=["75 to 92% of their summed difference comes from images on which a control drives the pooled backbone feature beyond ten times",
                 "@supp:These images carry 75 to 92% of the summed difference of each high-dose flag, and half of it for the Slim flag"])
 else:
     rows.append(("MISSING", "c87_route_feature_strata", "-", "-"))
