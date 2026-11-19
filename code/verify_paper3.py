@@ -303,7 +303,7 @@ if d:
     check("benign redraw: frontier min 0.0279 (rounded down)", math.floor(d["frontier_min"] * 1e4) / 1e4, 0.0279, 1e-9, text="minimum of 0.0279", where="supp")
     check("benign redraw: every tolerance below 0.027 in every draw", d["frontier_min"], 0.027, floor=True, text="every tolerance below 0.027 in every draw", where="supp")
     check("benign redraw: frontier central range 0.032 to 0.066 (lower end rounded down)", (math.floor(d["frontier_2.5_97.5"][0] * 1e3) / 1e3, d["frontier_2.5_97.5"][1]), (0.032, 0.066), 5e-4, text="0.032 to 0.066", where=["paper", "supp"])
-    check("benign redraw: all 18 exceed 0.05 jointly in 38% of draws", 100 * d["share_draws_all_18_exceed"], 38.2, 0.05, text="@supp:All 18 cells exceeded 0.05 jointly in 38% of draws")
+    check("benign redraw: all 18 exceed 0.05 jointly in 38.2% of draws", 100 * d["share_draws_all_18_exceed"], 38.2, 0.05, text="@supp:At the 0.05 operating point all eighteen cells exceeded jointly in 38.2% of draws")
     check("benign redraw: frame 4,150 benign from 198 patients", (d["n_benign_frame"], d["n_benign_frame_patients"]), (4150, 198), 0, text="4,150 benign images from 198 patients", where="supp")
     check("benign redraw: 500 draws", d["draws"], 500, text="@supp:redrew the 100 benign images 500 times")
 import math as _m
@@ -326,10 +326,10 @@ if d:
     a4 = [con["summary"][t]["n_all_three_g1"] for t in TT]
     check("route test: all four controls pass G1 on 74 to 78 images", (min(a4), max(a4)), (74, 78), 0, text="74 to 78 of the 78 images")
     sx = sorted(v["est"] for k, v in comp.items() if v.get("decision_sim") == "exceeds" and ("D_rad4-rad16" in k or "D_hue4-hue16" in k))
-    check("route test: scale-pair disagreements 5.02 to 6.62 logits", (sx[0], sx[-1]), (5.02, 6.62), 5e-3, text="5.02 to 6.62 logits")
+    check("route test: scale-pair disagreements 5.02 to 6.62 logits", (sx[0], sx[-1]), (5.02, 6.62), 5e-3, text=["@supp:**+5.02 [+1.20, +8.83]**", "@supp:**+6.62 [+1.99, +11.25]**"])
     dis = sorted(c for c, v in pr["cells"].items() if v["class"] == "routes disagree")
     check("route test: three disagreeing cells in the second run", ",".join(dis), ",".join(sorted(["erm|contrast@2", "causal|contrast@2", "slim|color_var@2"])),
-          text="and Slim at the highest variegation dose, by 5.02 to 6.62 logits")
+          text="The second run flags ERM and Inv at the highest contrast dose and Slim at the highest variegation dose.")
     check("route test: 3 disagree / 0 agree / 9 indeterminate",
           "%d/%d/%d" % (pr["summary"]["routes disagree"], pr["summary"]["routes agree"], pr["summary"]["indeterminate"]), "3/0/9",
           text="Three cells disagree, none agrees and nine are indeterminate", where="supp")
@@ -368,10 +368,10 @@ if d:
     check("first run: Slim lowest contrast also disagreed, two epoch-1 Inv cells agreed", ",".join(_f1) + " | " + ",".join(_a1),
           "erm|contrast@2,slim|color_var@2,slim|contrast@0 | causal|color_var@0,causal|contrast@0".replace(
               "erm|contrast@2,slim|color_var@2,slim|contrast@0", ",".join(sorted(["erm|contrast@2", "slim|color_var@2", "slim|contrast@0"]))),
-          text="The two lowest-dose cells of the epoch-1 Inv model agree")
+          text="@supp:The two lowest-dose Inv cells agreed")
     _n1 = [_d1["primary"]["targets"][t]["n_images"] for t in TT]
     check("both runs: 73 to 77 images per target, then 44 to 47", "%d-%d / %d-%d" % (min(_n1), max(_n1), min(x[0] for x in nT), max(x[0] for x in nT)),
-          "73-77 / 44-47", text="44 to 47 per target instead of 73 to 77")
+          "73-77 / 44-47", text="analyzed 44 to 47 images per target instead of 73 to 77")
     add = [d["secondary_all_g1"]["targets"][t]["n_images"] - pr["targets"][t]["n_images"] for t in TT]
     check("route test: dropping the floor adds 30 or 31 images per target", (min(add), max(add)), (30, 31), 0,
           text="adds 30 or 31 images per target", where=["paper", "supp"])
@@ -1197,7 +1197,7 @@ if _rs and _e1 and _e2:
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
           text=["@supp:the flags for ERM and Inv at the highest contrast dose survive every check of Table S37", "leaves ERM at the highest contrast dose flagged in both runs"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
-          text=["They hold on the clipped scale for a fixed inference protocol", "the plan's nominal band flagged route sums as differing beyond a 0.5-logit margin in three cells",
+          text=["They hold on the clipped scale for a fixed inference protocol", "the plan's nominal band flagged route sums differing beyond 0.5 logit in three cells",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
     counts = [sum(v == "routes disagree" for v in x["cells"].values()) for x in allv1 + allv2]
     counts += [_e1["secondary_all_g1"]["summary"]["routes disagree"], _e2["secondary_all_g1"]["summary"]["routes disagree"]]
@@ -1931,12 +1931,12 @@ check("histopathology is a diagnosis-field proxy (main, S8, Table S20, S16)",
                        "a diagnosis-specificity proxy (the confirmation method is not recorded)" in _S, "so the argument is conditional on how each label was confirmed" in _S),
       "True True True True")
 check("N not settleable under this audit's rules; not an impossibility result",
-      "%s %s" % ("Under its rules, N cannot be settled on real images" in _P,
+      "%s %s" % ("Under its rules N cannot be settled, so any reported route sum would remain conditional on N" in _P,
                  "this is not an impossibility result for future edit designs" in _P), "True True")
 
 check("Assumption (i) no longer equates a designated concept-neutral edit with Delta C = 0; recalibrated flag defined",
       "%s %s %s" % ("with $\\Delta C(e) = 0$ for a concept-neutral edit" in TEXT["paper"],
-                    "designating it concept-neutral does not make it so" in TEXT["paper"], "a *recalibrated flag*" in TEXT["paper"]), "False True True")
+                    "designating it concept-neutral does not make it so" in TEXT["paper"], "one *recalibrated flag* in the first run" in TEXT["paper"]), "False True True")
 
 # ---- review_v3_23_3: label proxy wording, reproduction scope, C1a vs diagnostic (T) ----
 check("label proxy never called histopathological; V-E states no verified count",
@@ -1948,7 +1948,7 @@ check("reproduction scope: verifier needs paper/, cross-pipeline needs the unrel
       "False True True False")
 check("C1a constrains only duplicate operators on this library; diagnostic (T) neither tests nor rejects C1a (Table 2, III-C, IV-B, S6)",
       "%s %s %s %s" % ("C1a imposes no equality beyond duplicate operators" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["paper"],
-                       "On this library C1a constrains only duplicate operators" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["supp"]),
+                       "its only restriction on a finite library is this: two edits with the same footprint and the same concept change must respond alike" in TEXT["paper"], "The diagnostic therefore neither tests nor rejects C1a" in TEXT["supp"]),
       "True True True True")
 
 # ---- review_v3_24_3: bounded set over latent labelings; verifier/runner exit status described consistently ----
@@ -2027,7 +2027,6 @@ check("main-text copies of verified numbers (abstract, IV-A, IV-B, conclusion)",
             "the frontier's central 95% range is 0.032 to 0.066 (Supplementary Section S2)",
             "At a tolerance of 0.20, seven of the eighteen cells still exceed",
             "it moves the proxies by less than 0.1% but sits at a maximum absolute SMD of 1.40",
-            "finds best length-two routes whose worst link is 9.6 to 13.3 times its tolerance",
             "has $\\rho$ from 9.6 to 13.3 across targets",
             "a known generating concept term of 1.117 logits",
             "with noise, within 0.8% and as +1.111",
@@ -2044,7 +2043,7 @@ if _pre and _a30:
           text=["**every cell exceeds every tolerance below 0.042 probability units**",
                 "At the 0.05 operating point, 17 of the 18 cells exceed jointly",
                 "the 44 and 75 patients behind the malignant and benign rows. Tolerance 0.05.",
-                                "its 0.5-logit margin is a practical threshold, not an identification condition",
+                                "the 0.5-logit margin is a practical threshold, not an identification condition",
                 "that the library protocol scores at 0.1 or above",
                 "that all three EfficientNet-B3 models score at 0.1 or above. The corrected score",
                 "came within 0.1% of the concept edit on 13 and 15 of the 78 images at the high doses",
@@ -2188,6 +2187,21 @@ if os.path.exists(_t10p):
     _t10 = open(_t10p).read(); _m10 = re.search(r"files written: (\d+), differing: (\d+)", _t10)
     check("tenth fresh-directory run: c87 and c88, 2 files equal", "%s %s %d" % (_m10.group(1), _m10.group(2), len(re.findall(r"rc=0", _t10))), "2 0 2",
           text="@supp:the record is `log/e2e_posthoc10_fresh_copy_run.txt`")
+
+# ---- scope of the benign-redraw range; single statements of repeated results; cross-references ----
+_d60 = load("c60_design_coverage")
+check("benign-redraw range: main text and S2 say the overlay realization is another one, held fixed; S2 calls it percentiles",
+      "%s %s %s %s" % ("On a separate overlay realization, held fixed while the benign images were redrawn 500 times" in TEXT["paper"],
+                       "It is held fixed across all draws, so the analysis varies the benign draw alone" in TEXT["supp"],
+                       "These are empirical percentiles over the 500 draws, not a confidence interval" in TEXT["supp"],
+                       "on another overlay realization" in _ab), "True True True True")
+if _d60:
+    check("benign redraw: 500 draws", _d60["draws"], 500, 0)
+check("S2 and S19 state the 38.2% share and the shared-image comparison once each",
+      "%d %d %d" % (TEXT["supp"].count("38% of draws") + TEXT["supp"].count("38.2% of draws"),
+                    TEXT["supp"].count("On the images both runs analyze"),
+                    TEXT["supp"].count("On the 44 to 47 images per target that pass the floor under both Inv checkpoints")), "1 0 1")
+check("no cross-reference to a main-text bounded-deviation reading (it lives in S19)", "bounded-deviation reading of Section IV-B" in TEXT["supp"], False)
 
 # ================================================================ report
 w = max(len(r[1]) for r in rows)
