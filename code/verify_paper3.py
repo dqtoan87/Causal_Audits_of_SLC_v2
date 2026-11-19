@@ -505,8 +505,14 @@ if rb:
     out = ["%d" % sum(1 for k, v in cp.items() if k.startswith(m + "|") and (v["ci"][0] > 0.5 or v["ci"][1] < -0.5)) for m in ("erm", "slim", "causal")]
     ins = sum(1 for v in cp.values() if v["ci"][0] > -0.5 and v["ci"][1] < 0.5)
     check("cross pairs: 4, 5 and 2 outside, none inside", "/".join(out) + " %d" % ins, "4/5/2 0",
-          text="11 lie wholly outside the margin, 4 for ERM, 5 for Slim and 2 for Inv", where="supp")
+          text="11 of the 24 cross-pair intervals lie wholly outside the margin, 4 for ERM, 5 for Slim and 2 for Inv", where="supp")
 rb1 = load("c65_route_robustness")
+if rb1 and "cross_pairs" in rb1:
+    _cp1 = rb1["cross_pairs"]
+    _o1 = ["%d" % sum(1 for k, v in _cp1.items() if k.startswith(m + "|") and (v["ci"][0] > 0.5 or v["ci"][1] < -0.5)) for m in ("erm", "slim", "causal")]
+    _i1c = sum(1 for v in _cp1.values() if v["ci"][0] > -0.5 and v["ci"][1] < 0.5)
+    check("cross pairs, first run: 3, 5 and 0 outside, 6 inside", "/".join(_o1) + " %d" % _i1c, "3/5/0 6",
+          text="in the first run 8 lie outside, 3 for ERM and 5 for Slim, and 6 inside", where="supp")
 if rb1:
     s = rb1["decisive"]["slim|contrast@0|D_rad4-rad16"]
     check("first run: borderline lower bound 0.509 (rounded down)", math.floor(s["sim_lower_unrounded"] * 1e3) / 1e3, 0.509, 1e-9, text="lower bound of 0.509", where="supp")
@@ -614,7 +620,7 @@ if d:
               text="seven of the eight controls fail the independent CIELAB check G2 on most images")
 d = load("c56_simultaneous36")
 if d:
-    check("36-component critical value 3.12 (headline band)", d["crit_36"], 3.12, 5e-3, text="1.96 to 3.12")
+    check("36-component critical value 3.12 (headline band)", d["crit_36"], 3.12, 5e-3, text="3.12 standard errors, against 1.96")
     check("every cell exceeds every tolerance below 0.042 (36 components)", d["frontier_36"], 0.042, floor=True,
           text="every tolerance below 0.042 probability units")
     check("36-component frontier 0.0422 (supp)", d["frontier_36"], 0.0422, 5e-5, text="0.0422", where="supp")
@@ -701,7 +707,7 @@ if d:
     first = {m: next(e for e in ("hair_x1", "hair_x2", "hair_x3", "hair_light")
                      if d["models"][m][e]["all"]["verdict"] == "exceedance") for m in d["models"]}
     check("second cohort: both first exceed at 1.02%", str(sorted(set(first.values()))), "['hair_light']",
-          text="@supp:reject from 1.02%")
+          text="@supp:exceed from 1.02%")
 
 d = load("c13_fullpop")
 if d:
@@ -1020,8 +1026,8 @@ if _a and _b:
         _mdl, _sg = _k.split("/"); _bb, _mm = _mdl.split("-")
         for _i in (0, 1):
             _mx = max(_mx, abs(_v["ci_marginal"][_i] - _b["models"][_bb][_mm][_SG[_sg]]["ci"][_i]))
-    check("marginal endpoints of the two runs differ by at most 0.0043", _mx, 0.00435, ceil=True,
-          text="differ by at most 0.0043", where="supp")
+    check("marginal endpoints of the two runs differ by at most 0.0044 (upper bound rounded up)", _mx, 0.0044, ceil=True,
+          text="differ by at most 0.0044", where="supp")
 _c51 = load("c51_independent_rebuild")
 if _c51:
     _cg = _c51["disagreement_diagnosis"]["cross_grid"]
@@ -1440,11 +1446,14 @@ _b56, _b57, _b66 = load("c56_simultaneous36"), load("c57_stratified_band"), load
 if _b56 and _b57 and _b66:
     _bands = [_band_order({k: v["sim36"] for k, v in _b56["components"].items()}),
               _band_order({k: v["sim36"] for k, v in _b57["components"].items()}),
-              _band_order(_b66["band"]["full"]["sim36"]), _band_order(_b66["band"]["skin_only"]["sim36"])]
-    check("artifact: in every stored band the magnitude ends bound the signed ends in all 18 cells",
-          " ".join("%d/%d" % (b, a) for a, b in _bands), "18/18 18/18 18/18 18/18",
+              _band_order(_b66["band"]["full"]["sim36"]), _band_order(_b66["band"]["skin_only"]["sim36"]),
+              _band_order(_b66["band"]["lesion_only"]["sim36"])]
+    _s75 = open(os.path.join(RES, "c75_seed_band.json")).read() if os.path.exists(os.path.join(RES, "c75_seed_band.json")) else ""
+    check("artifact: in every stored band (full, stratified, skin-only, lesion-only, seven realizations) the magnitude ends bound the signed ends",
+          " ".join("%d/%d" % (b, a) for a, b in _bands) + " %d" % len(re.findall(r'"magnitude_bounds_signed": true', _s75)),
+          "18/18 18/18 18/18 18/18 18/18 7",
           text=["In every stored band the magnitude decides every cell",
-                "We checked it in the full, the stratified and the skin-only bands"], where=["paper", "supp"])
+                "We checked it in every band whose intervals are stored: the full, the stratified, the skin-only and the lesion-only band and the seven realization bands"], where=["paper", "supp"])
 _c57m = load("c57_stratified_band")
 if _c57m and _c30:
     check("marginal bound 0.0627 (plain) and 0.063 (stratified), rounded down",
@@ -1563,7 +1572,7 @@ if _xd:
     check("exact identity: 48/48 differences nonzero on bit-exact sets in both runs; smallest 0.012 and 0.008",
           "%d %d %d %d %.3f %.3f" % (e2["n_differences"], e2["n_nonzero_mean"], e1["n_differences"], e1["n_nonzero_mean"],
                                      e2["smallest_abs_mean"], e1["smallest_abs_mean"]), "48 48 48 48 0.012 0.008",
-          text=["the conjunction would make each mean difference exactly zero; none of the 48 is", "@supp:The smallest absolute mean difference is 0.012 logits in the second run and 0.008 in the first",
+          text=["the conjunction would make each mean difference exactly zero. None of the 48 is", "@supp:The smallest absolute mean difference is 0.012 logits in the second run and 0.008 in the first",
                 "@supp:All 48 differences are nonzero on their bit-exact sets in both runs"])
     check("exact identity: 40 and 30 above 0.5 logit; images 6 to 41 and 10 to 64",
           "%d %d %d-%d %d-%d" % (e2["n_abs_mean_above_margin"], e1["n_abs_mean_above_margin"], *e2["images_range"], *e1["images_range"]),
@@ -1709,7 +1718,7 @@ if _nc:
           "%s %s %s %s %s %s" % (pu(f1["fwer_margin_worst_found"]), pu(f2["fwer_margin_worst_found"]), pu(f1["fwer_margin_upper_bound"]), pu(f2["fwer_margin_upper_bound"]),
                                  pu(f1["fwer_margin_by_sign"]["against_estimate"]), pu(f2["fwer_margin_by_sign"]["against_estimate"])),
           "21.7 26.6 22.3 26.8 20.3 25.2", text=["@supp:reached 21.7 and 26.6%, against the upper bound of 22.3 and 26.8%", "@supp:On the opposite sides it was 20.3 and 25.2%",
-                                                  "@supp:The size of the plan's test over its whole null is therefore near 22 and 27%"])
+                                                  "@supp:The size of the plan's test over its whole null, within this location-shift family, is therefore near 22 and 27%"])
     check("c80: kappa 1.42 and 1.47; recalibrated: first run ERM c@2 only (LB 0.78), second run none",
           "%.2f %.2f %s %.2f %s %s" % (f1["kappa_95"], f2["kappa_95"], ",".join(c for c, v in f1["calibrated_cells"].items() if v == "routes disagree"),
                                       math.floor(f1["calibrated_lower_bounds_of_plan_exceeds"]["erm|contrast@2|D_rad4-rad16"] * 100) / 100,
@@ -1918,7 +1927,7 @@ _bad_rej = [t for t in ("cycle test rejects factorization", "a joint rejection f
                         "the rejections for ERM", "A disagreement rejects the null") if t in _P + _S]
 check("no unqualified cycle-test rejection wording left", len(_bad_rej), 0)
 check("four readings of the route test kept apart; no controlled-level rejection shown",
-      "%s %s" % (("a statement with no p-value" in _P and "nominal counts, and no rejection of the joint package at a controlled family-wise level is shown" in _P), "No rejection of the conjunction under $Q_R$ at a controlled level is shown" in _S), "True True")
+      "%s %s" % (("this reading has no p-value" in _P and "nominal counts, and no rejection of the joint package at a controlled family-wise level is shown" in _P), "No rejection of the conjunction under $Q_R$ at a controlled level is shown" in _S), "True True")
 check("h* relative to M and the library (abstract, Table 1, III-C, conclusion, S1)",
       "%s %s %s %s %s" % ("footprint-relative concept component" in _ab, "relative to the footprint $M$ and the library, net of the footprint term" in _P,
                           "We therefore read $h^\\ast$ as the concept component relative to $M$ and the library" in _P,
@@ -2015,8 +2024,10 @@ _ev1a, _ev2a = load("c62_evaluation"), load("c62_evaluation_inv_retrained")
 if _ev1a and _ev2a:
     _i1 = _ev1a["primary"]["components"]["causal|contrast@2|D_rad4-rad16"]["est"]
     _i2 = _ev2a["primary"]["components"]["causal|contrast@2|D_rad4-rad16"]["est"]
-    check("Inv scale pair at the highest contrast dose: +0.17 (first run), +6.62 (second run)", "%+.2f %+.2f" % (_i1, _i2), "+0.17 +6.62",
-          text="@supp:The Inv scale pair at the highest contrast dose differs by +0.17 logit in the first run and by +6.62 in the second")
+    _r73f = [r for r in (load("c73_route_robustness_table") or {}).get("second_run", {}).get("rows", []) if r.get("variant") == "floor on the first run's images"]
+    check("Inv scale pair at the highest contrast dose on the first run's images: +0.17 (epoch-1), +5.42 (retrained); +6.62 on the second run's set",
+          "%+.2f %+.2f %+.2f" % (_i1, _r73f[0]["entries"]["causal|contrast@2|D_rad4-rad16"][0] if _r73f else float("nan"), _i2), "+0.17 +5.42 +6.62",
+          text="@supp:the Inv scale pair at the highest contrast dose differs by +0.17 logit under the epoch-1 checkpoint and by +5.42 under the retrained one")
 check("main-text copies of verified numbers (abstract, IV-A, IV-B, conclusion)", True, True, where="paper",
       text=["all 18 exceeded every tolerance below 0.042, for the realized overlays and benign draw",
             "the frontier's central range was 0.032 to 0.066",
