@@ -78,6 +78,7 @@ SCRIPTS=(
   c83_batch_extremes
   c84_label_provenance
   c85_artifact_band_calibration
+  c86_batch_context_first_run
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage
@@ -137,7 +138,7 @@ done
 vrc=$?
 case $vrc in
     0) echo "verification (paper3): passed, see log/verify_paper3.log" ;;
-    2) echo "verification (paper3): NOT RUN, paper3.md or supplementary3.md missing in paper/ (see log/verify_paper3.log)" ;;
+    2) echo "verification (paper3): NOT RUN, paper3.md or supplementary3.md missing in paper/ or PAPER_DIR (see log/verify_paper3.log)" ;;
     *) echo "verification (paper3): FAILED rc=$vrc, see log/verify_paper3.log" ;;
 esac >> "$MASTER"
 echo "=== all done $(date -Is) ===" >> "$MASTER"

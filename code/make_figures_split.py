@@ -341,7 +341,7 @@ def p2_fig2_tradeoff():
     ax.axhline(0.15, color="#d62728", lw=1.1, ls="--")
     ax.add_patch(mpatches.Rectangle((1e-3, 1e-3), 0.10 - 1e-3, 0.15 - 1e-3,
                                     fc="#e8f4ea", ec="none", zorder=0))
-    ax.text(0.030, 0.115, "admissible region:\n(A1) and (A2) both met.\nEmpty for every target.",
+    ax.text(0.030, 0.115, "(A1) and the relative part\nof (A2) met: necessary,\nnot sufficient. Empty\nfor every target.",
             fontsize=SM, color="#2f6b3a", va="top", ha="left")
     ax.annotate("rotd: balanced, moves the concept", xy=(0.050, 1.02), xytext=(0.085, 0.36),
                 fontsize=SM, arrowprops=dict(arrowstyle="->", lw=0.8, color="0.35"))
@@ -355,7 +355,7 @@ def p2_fig2_tradeoff():
     fig.legend(*ax.get_legend_handles_labels(), loc="lower center", ncol=4, frameon=False,
                fontsize=SM, handletextpad=0.3, columnspacing=1.1, bbox_to_anchor=(0.53, 0.002))
     ax.text(0.093, 2.7, "(A1) tolerance", fontsize=SM, color="#1f77b4", rotation=90, va="top", ha="right")
-    ax.text(0.027, 0.165, "(A2) tolerance", fontsize=SM, color="#d62728", ha="left", va="bottom")
+    ax.text(0.027, 0.165, "(A2) relative tolerance", fontsize=SM, color="#d62728", ha="left", va="bottom")
     fig.subplots_adjust(left=0.115, right=0.985, top=0.975, bottom=0.185)
     return save(fig, "p2_fig2_tradeoff")
 
