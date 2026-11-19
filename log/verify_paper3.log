@@ -440,7 +440,7 @@ ok        batch context: fp32 median 0.081 and 5.2%; mixed 0.002 and 0.8%; max d
 ok        batch context: ERM and Inv highest contrast disagree under every protocol; Slim cells move                                                got causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2 paper causal|contrast@2,erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2,slim|contrast@0 | causal|contrast@2,erm|contrast@2,slim|color_var@0,slim|contrast@2 | causal|contrast@2,erm|contrast@2,slim|contrast@2
 ok        near-natural: ERM/Inv 16 images, 13 patients, +4.06 and +4.27, undecided; only Slim c@2 disagrees (all 48, both runs)                     got 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2 paper 16 13 +4.06 +4.27 indeterminate indeterminate | slim|contrast@2 | slim|contrast@2
 ok        near-natural: threshold equals c77 q95; 30-image rule: none (second), Slim both contrast doses (first)                                    got 11.38 none | slim|contrast@0,slim|contrast@2 paper 11.38 none | slim|contrast@0,slim|contrast@2
-ok        post hoc manifest: every listed hash matches; scripts c63 to c86                                                                          got 0 c63-c86 24           paper 0 c63-c86 24
+ok        post hoc manifest: every listed hash matches; scripts c63 to c88                                                                          got 0 c63-c88 26           paper 0 c63-c88 26
 ok        third fresh-directory run: c75 to c77, 3 files equal                                                                                      got 3 0 3                  paper 3 0 3
 ok        fourth fresh-directory run: c78 and c79, 2 files equal; 56 files in all                                                                   got 2 0 2                  paper 2 0 2
 ok        fifth fresh-directory run: c54, c80 and c81, 5 files equal                                                                                got 5 0 3                  paper 5 0 3
@@ -477,7 +477,7 @@ ok        batch extremes: Slim cells per protocol                               
 ok        library: 88 edits in one batch per image; duplicate labels return identical responses on 83 images                                        got 88 True 83 0.0         paper 88 True 83 0.0
 ok        route test: 24 edited versions per batch in both runs                                                                                     got 1                      paper 1
 ok        plan commit given by its full SHA                                                                                                         got 1                      paper 1
-ok        abstract at most 250 words                                                                                                                got 246                    paper <= 250
+ok        abstract at most 250 words                                                                                                                got 250                    paper <= 250
 ok        no 'registered outcome' wording; T1 is Q-almost sure only                                                                                 got 0                      paper 0
 ok        R4 alone: library component +1.194 on R0, generating term 1.117                                                                           got +1.194 1.117           paper +1.194 1.117
 ok        Part D: both controls pass the screens, route gap 0.077 on R0, 0.067 [0.039, 0.094] with noise (outward)                                  got True 0.077 0.067 0.039 0.094 paper True 0.077 0.067 0.039 0.094
@@ -527,5 +527,14 @@ ok        c86 and c67 agree on the first run in full precision (5 cells, crit 3.
 ok        main text: every variant applied to both runs; Table 5 robust scoped to the variants                                                      got 1                      paper 1
 ok        Fig. 3: shaded corner is a necessary condition only                                                                                       got 1                      paper 1
 ok        ninth fresh-directory run: c86, 1 file equal                                                                                              got 1 0 1                  paper 1 0 1
+ok        c87: within range +0.8 to +1.9 on 17 to 70 images; beyond +8.2 to +17.8 on 5 to 43; 6 of 7 within-range intervals above 0.5               got 0.8 1.9 17 70 | 8.2 17.8 5 43 | 6/7 paper 0.8 1.9 17 70 | 8.2 17.8 5 43 | 6/7
+ok        c87: Table S41 rows (outward-rounded marginal intervals)                                                                                  got 1                      paper 1
+ok        c87: beyond-range images carry 75 to 92% of each high-dose flag, half of the lowest-dose Slim flag                                        got 75 92 0.50             paper 75 92 0.50
+ok        c88: epoch-1 Inv artifact cells exceed in all three subgroups; AUROC 0.884                                                                got True | 0.159 [0.144, 0.174] 0.181 [0.156, 0.202] 0.140 [0.128, 0.153] | 0.884 paper True | 0.159 [0.144, 0.174] 0.181 [0.156, 0.202] 0.140 [0.128, 0.153] | 0.884
+ok        c88: checkpoint is the released epoch-1 file (SHA-256 begins 39de9dbc)                                                                    got 39de9dbc               paper 39de9dbc
+ok        c88 reproduces the pre-retraining c30 Inv cells (local backup)                                                                            got 0                      paper 0
+ok        notation: diagnostic (L), graphs \mathcal G, link tolerances delta; no old symbols left                                                   got False False False True paper False False False True
+ok        references: cited in order of first appearance, every listed one cited (57)                                                               got True True 57           paper True True 57
+ok        tenth fresh-directory run: c87 and c88, 2 files equal                                                                                     got 2 0 2                  paper 2 0 2
 ==========================================================================================================================================================================================
-527 checks, 527 ok, 0 not ok
+536 checks, 536 ok, 0 not ok

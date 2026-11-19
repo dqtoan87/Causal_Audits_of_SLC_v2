@@ -79,6 +79,8 @@ SCRIPTS=(
   c84_label_provenance
   c85_artifact_band_calibration
   c86_batch_context_first_run
+  c87_route_feature_strata
+  c88_artifact_inv_epoch1
   make_figures_split
   make_fig_edit_examples
   make_fig_shrinkage
