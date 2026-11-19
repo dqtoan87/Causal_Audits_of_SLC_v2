@@ -2053,7 +2053,7 @@ if _pre and _a30:
           "%.2f %.1f %.1f" % (_a30["margin_p"], _cr["score_floor"], _cr["margin_logit"]), "0.05 0.1 0.5", where="paper",
           text=["**every cell exceeds every tolerance below 0.042 probability units**",
                 "At the 0.05 operating point, 17 of the 18 cells exceed jointly",
-                "the 44 and 75 patients behind the malignant and benign rows. Tolerance 0.05.",
+                "at tolerance 0.05, with 95% patient-clustered percentile confidence intervals (CI) from 4,000 resamples of the 100 patients, or of the 44 and 75 patients behind the malignant and benign rows",
                                 "the 0.5-logit margin is a practical threshold, not an identification condition",
                 "that the library protocol scores at 0.1 or above",
                 "that all three EfficientNet-B3 models score at 0.1 or above. The corrected score",
@@ -2118,11 +2118,11 @@ if _b1:
                        load("c67_route_sensitivity")["numerics_first_run"]["variants"]["fp32_stack"]["crit"]))
     check("main text: every variant applied to both runs; Table 5 robust scoped to the variants", True, True,
           text=["@supp:Every variant was applied to both runs", "Varying one element of the analysis at a time",
-                "Robust means that the flag holds under each post hoc variant of the analysis, applied to its run one element at a time"])
+                "a flag is called robust when it holds under each post hoc variant of the analysis, applied to its run one element at a time"])
 else:
     rows.append(("MISSING", "c86_batch_context_first_run", "-", "-"))
 check("Fig. 3: shaded corner is a necessary condition only", True, True,
-      text="which is necessary but not sufficient for passing the screens")
+      text="is necessary but not sufficient for passing the screens")
 
 _t9p = os.path.join(BASE, "log", "e2e_posthoc9_fresh_copy_run.txt")
 if os.path.exists(_t9p):
