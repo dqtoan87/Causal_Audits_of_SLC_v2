@@ -487,10 +487,6 @@ if rb:
         _v1 = _rb1["cells"][_c]
         _l1 = _cls[_ev1x["primary"]["cells"][_c]["class"]]
         _l2 = _cls[_ev2["primary"]["cells"][_c]["class"]]
-        if _l1 == "disagree":
-            _l1 += ", robust" if _c in _rob1 else ", fragile"
-        if _l2 == "disagree":
-            _l2 += ", robust" if _c in _rob2 else ", fragile"
         # Table 5: first run with its margins, then the second run's verdict
         _txt = "%s (%.2f; %.2f) / %s |" % (_l1, _fl(_v1["disagrees_below_margin"]), _ce(_v1["agrees_above_margin"]), _l2)
         check("Table 5 cell %s" % _c, _txt in TEXT["paper"], True, text=_txt)
@@ -1201,7 +1197,7 @@ if _rs and _e1 and _e2:
     ok2 = ok2 and all(q2[k]["seed_exceeds"] == 20 and q2[k]["lopo_in_cell_exceeds"] == q2[k]["lopo_in_cell_n"]
                       for k in ("erm|contrast@2|D_rad4-rad16", "causal|contrast@2|D_rad4-rad16"))
     check("robust cells: ERM highest contrast in both runs, Inv highest contrast in the second, under every check", "%s %s" % (ok1, ok2), "True True",
-          text=["@supp:the flags for ERM and Inv at the highest contrast dose survive every check of Table S37", "ERM at the highest contrast dose is robust in both runs"])
+          text=["@supp:the flags for ERM and Inv at the highest contrast dose survive every check of Table S37", "ERM at the highest contrast dose stays flagged under each variant in both runs"])
     check("robust cells: claims are restricted to the clipped scale (main text and S19)", True, True,
           text=["They hold on the clipped scale for a fixed inference protocol", "the plan's nominal band flagged route sums differing beyond 0.5 logit in three cells",
                 "Every route-test decision is made on the clipped scale"], where=["paper", "supp"])
@@ -1309,7 +1305,7 @@ if _rt:
             and S1["seeds"][c + "|D_rad4-rad16"][1] == 20 and S1["leave_one_patient_out"][c + "|D_rad4-rad16"][1] == S1["leave_one_patient_out"][c + "|D_rad4-rad16"][2]]
     check("robust: c73 robust lists agree with an independent computation, and only ERM highest contrast is robust in both runs",
           "%s %s" % (sorted(S1["robust_cells"]) == sorted(rob1), ",".join(sorted(set(S1["robust_cells"]) & set(S2["robust_cells"])))),
-          "True erm|contrast@2", text="disagree, robust (1.91; 7.34) / disagree, robust")
+          "True erm|contrast@2", text="ERM at the highest contrast dose stays flagged under each variant in both runs, Slim at the highest variegation dose in the first run and Inv at the highest contrast dose in the second")
     check("robust: first run, ERM highest contrast and Slim highest variegation under every variant, bounds 1.21 and 0.63",
           "%s %.2f %.2f" % (",".join(rob1), m1["erm|contrast@2|D_rad4-rad16"], m1["slim|color_var@2|D_rad4-rad16"]), "erm|contrast@2,slim|color_var@2 1.21 0.63",
           text="Their smallest lower bounds, 1.21 and 0.63, both come from the images that passed the floor under both Inv checkpoints", where="supp")
@@ -1320,20 +1316,15 @@ if _rt:
           text="both come from the images that passed the floor under both Inv checkpoints", where="supp")
     check("robust: first-run Slim lowest contrast fails under 10 of 20 seeds", 20 - S1["seeds"]["slim|contrast@0|D_rad4-rad16"][1], 10,
           text="It fails under 10 of 20 other seeds", where="supp")
-    # Table 5: robust / fragile labels for both runs
+    # main text: which flags hold under every variant, and none labelled robust or fragile in Table 5
     _ev1 = load("c62_evaluation")["primary"]["cells"]
-    rows5 = {ln.split("|")[1].strip(): ln for ln in TEXT["paper"].splitlines() if ln.startswith("| contrast,") or ln.startswith("| color variegation,")}
-    tname = {"contrast@0": "contrast, lowest dose", "contrast@2": "contrast, highest dose", "color_var@0": "color variegation, lowest dose", "color_var@2": "color variegation, highest dose"}
-    bad = []
-    for c, v in _ev1.items():
-        if v["class"] != "routes disagree":
-            continue
-        m, t = c.split("|")
-        cell = rows5[tname[t]].split("|")[3 + ("erm", "slim", "causal").index(m)].strip()
-        want = "disagree, robust" if c in rob1 else "disagree, fragile"
-        if not cell.startswith(want + " ("):
-            bad.append(c)
-    check("Table 5: first-run robustness labels", ",".join(bad), "")
+    _fl1 = sorted(c for c, v in _ev1.items() if v["class"] == "routes disagree")
+    _rows5 = [ln for ln in TEXT["paper"].splitlines() if ln.startswith("| contrast,") or ln.startswith("| color variegation,")]
+    check("main text: flags holding under every variant (first run ERM and Slim highest; second run ERM and Inv highest); other first-run flag fails one; Table 5 unlabelled",
+          "%s | %s | %s | %s" % (",".join(sorted(S1["robust_cells"])), ",".join(sorted(S2["robust_cells"])), ",".join(sorted(set(_fl1) - set(S1["robust_cells"]))),
+                                 any(("robust" in ln or "fragile" in ln) for ln in _rows5)),
+          "erm|contrast@2,slim|color_var@2 | causal|contrast@2,erm|contrast@2 | slim|contrast@0 | False",
+          text="the Slim flag at the lowest contrast dose fails at least one")
     ev1 = load("c62_evaluation")["primary"]["components"]
     eps = [math.floor(ev1[k]["sim"][0] / 2 * 100) / 100 for k in ("erm|contrast@2|D_rad4-rad16", "slim|color_var@2|D_rad4-rad16")]
     check("bounded deviation (plan-locked run): robust cells need eps_R above 0.95 and 0.91", tuple(eps), (0.95, 0.91), 1e-9,
@@ -1838,9 +1829,9 @@ if _pc:
     check("library: 88 edits in one batch per image; duplicate labels return identical responses on 83 images",
           "%d %s %d %.1f" % (_lib["edits"], _lib["duplicates_identical"], min(x["n_images"] for x in _lib["duplicate_label_pairs"]),
                              max(x["max_abs_difference"] for x in _lib["duplicate_label_pairs"])), "88 True 83 0.0",
-          text=["scores each unedited image in one batch with all 88 library edits", "@supp:with a largest absolute difference of 0.0 logit for each of the three EfficientNet-B3 models on all 83 malignant audit images"])
+          text=["@supp:scores each malignant audit image in one batch with all 88 library edits", "@supp:with a largest absolute difference of 0.0 logit for each of the three EfficientNet-B3 models on all 83 malignant audit images"])
     check("route test: 24 edited versions per batch in both runs", sorted(set(v["edited_versions"] for v in _pc["route_test"].values())) == [24], True,
-          text="the route test scores each held-out image in one batch with its 24 edited versions")
+          text="@supp:scores each held-out image in one batch with its 24 edited versions")
 check("plan commit given by its full SHA", True, True, text=["@supp:40b6367b84fea2d1f11894484b11d2f0634d4306 (https://github.com/dqtoan87/Causal_Audits_of_SLC_v2/commit/40b6367b84fea2d1f11894484b11d2f0634d4306)"])
 _abs = TEXT["paper"].split("## Abstract")[1].split("**Index Terms")[0]
 check("abstract at most 250 words", len(_abs.split()), 250, ceil=True)
@@ -2116,8 +2107,9 @@ if _b1:
           "%d %.3f" % (sum(x == "routes disagree" for x in load("c67_route_sensitivity")["numerics_first_run"]["variants"]["fp32_stack"]["cells"].values()),
                        load("c67_route_sensitivity")["numerics_first_run"]["variants"]["fp32_stack"]["crit"]))
     check("main text: every variant applied to both runs; Table 5 robust scoped to the variants", True, True,
-          text=["@supp:Every variant was applied to both runs", "applied to its run one element at a time, from the bootstrap seed and one left-out patient to the clip level, the precision and the batch context",
-                "A flag is *robust* when it holds under each post hoc variant of the analysis"])
+          text=["@supp:Every variant was applied to both runs", "The post hoc variants change one element of the analysis at a time, from the bootstrap seed and one left-out patient to the clip level, the precision and the batch context",
+                "The variants do not include the versions of the libraries that decode the images",
+                "@supp:the robust and fragile labels of this section do not cover that change"])
 else:
     rows.append(("MISSING", "c86_batch_context_first_run", "-", "-"))
 check("Fig. 3: shaded corner is a necessary condition only", True, True,
@@ -2221,7 +2213,8 @@ if os.path.exists(_tovp):
           "+4.61 +5.46 +2.17 | ['erm|contrast@2', 'slim|color_var@2', 'slim|contrast@0', 'slim|contrast@2'] | indeterminate indeterminate True",
           text=["@supp:flag the same three cells, by +4.61, +5.46 and +2.17 logits, and one more, Slim at the highest contrast dose",
                 "@supp:`log/e2e_route_first_run_other_versions.txt`",
-                "fixed inference protocol, image decoding included"])
+                "fixed inference protocol, image decoding included",
+                "the first run keeps its three flags, adds one for Slim at the highest contrast dose, and turns both cells in which the Inv model's routes agree indeterminate"])
 else:
     rows.append(("MISSING", "other-versions record of the route test's first run", "-", "-"))
 
