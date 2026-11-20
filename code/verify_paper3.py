@@ -652,7 +652,7 @@ d = load("c50_overlay_seed")
 if d:
     sp = [v["spread_pct_of_seed42"] for v in d["cells"].values()]
     check("seven realizations move magnitudes 3.2 to 24.9%", rng(sp), (3.2, 24.9), 0.05,
-          text="3.2 to 24.9%")
+          text="The magnitude moves by 3.2 to 24.9% of its reported value", where="supp")
     check("no verdict changes across realizations", all(v["verdict_stable"] for v in d["cells"].values()), True)
     check("smallest lower bound across realizations 0.058",
           min(v["lower_bound_min"] for v in d["cells"].values()), 0.058, floor=True, text="@supp:0.0585, still 1.17 times the tolerance")
@@ -1544,7 +1544,7 @@ if _sb:
           "%.3f %.3f %s %.2f %.2f" % (math.floor(_sb["frontier_range"][0] * 1000) / 1000, round(_sb["frontier_range"][1], 3),
                                       "/".join(str(c) for c in sorted(set(_sb["exceed_counts"]))), min(v["crit_36"] for v in _ps), max(v["crit_36"] for v in _ps)),
           "0.041 0.056 17/18 3.08 3.12",
-          text=["the joint frontier recomputed for each lies between 0.041 and 0.056, with 17 or 18 cells exceeding 0.05 jointly",
+          text=["17 or 18 cells exceed 0.05 jointly on the band recomputed for each",
                 "@supp:The critical value runs from 3.08 to 3.12. The frontier runs from 0.041 to 0.056",
                 "@supp:17 cells exceed jointly in six realizations and all 18 in one"])
     check("seed band: argmin cells and magnitude order in every band",
@@ -1679,7 +1679,7 @@ if os.path.exists(_e5):
     _t5 = open(_e5).read()
     _m5 = re.search(r"files written: (\d+), differing: (\d+)", _t5)
     check("fifth fresh-directory run: c54, c80 and c81, 5 files equal", "%s %s %d" % (_m5.group(1), _m5.group(2), len(re.findall(r"rc=0", _t5))), "5 0 3",
-          text=["@supp:Their five result files matched the committed ones", "Each result file written there matched the committed one to a relative tolerance"])
+          text=["@supp:Their five result files matched the committed ones", "Every number in the result files written there matched the committed one to a relative tolerance"])
 else:
     check("fifth fresh-directory run record present", None, "present")
 _e6 = os.path.join(BASE, "log", "e2e_posthoc6_fresh_copy_run.txt")
@@ -2131,7 +2131,7 @@ if _f87:
     check("c87: within range +0.8 to +1.9 on 17 to 70 images; beyond +8.2 to +17.8 on 5 to 43; 6 of 7 within-range intervals above 0.5",
           "%.1f %.1f %d %d | %.1f %.1f %d %d | %d/%d" % (min(_w), max(_w), min(_wn), max(_wn), min(_b), max(_b), min(_bn), max(_bn), _above, len(_rows)),
           "0.8 1.9 17 70 | 8.2 17.8 5 43 | 6/7",
-          text=["on the other images the differences are +0.8 to +1.9 logits",
+          text=["@supp:Within range, on 17 to 70 images, the differences are +0.8 to +1.9 logits",
                 "@supp:Beyond range, on 5 to 43 images, the differences are +8.2 to +17.8 logits",
                 "@supp:Within range, on 17 to 70 images, the differences are +0.8 to +1.9 logits"])
     _lab = {"erm": "ERM", "slim": "Slim", "causal": "Inv"}; _tl = {"contrast@2": "contrast highest", "contrast@0": "contrast lowest", "color_var@2": "variegation highest"}
@@ -2196,9 +2196,12 @@ if os.path.exists(_t11p):
     _t11 = open(_t11p).read(); _m11 = re.search(r"files written: (\d+), differing: (\d+)", _t11)
     check("eleventh fresh-directory run: route test first run (c62 three phases, c63, c64, c65), 7 files, construction byte-identical",
           "%s %s %d %s" % (_m11.group(1), _m11.group(2), len(re.findall(r"rc=0", _t11)),
-                           "byte-identical to the committed file: True" in _t11 and "c63_route_scores.npz                 IDENTICAL" in _t11),
+                           "byte-identical to the committed file: True" in _t11 and "c63_route_scores.npz                 IDENTICAL" in _t11
+                           and "commit 3677951776b64f844d7c62278efdfd593355c3a9" in _t11 and len(re.findall(r"DIFFERENT \(1 leaves\)", _t11)) == 2),
           "7 0 6 True",
-          text=["@supp:the record is `log/e2e_posthoc11_fresh_copy_run.txt`", "this includes both runs of the route test"])
+          text=["@supp:the record is `log/e2e_posthoc11_fresh_copy_run.txt`", "this includes both runs of the route test",
+                "@supp:from an export of commit `3677951776b64f844d7c62278efdfd593355c3a9`",
+                "Two route-test files also differed in a recorded SHA-256 of another file"])
 else:
     rows.append(("MISSING", "eleventh fresh-directory run record", "-", "-"))
 _tovp = os.path.join(BASE, "log", "e2e_route_first_run_other_versions.txt")
